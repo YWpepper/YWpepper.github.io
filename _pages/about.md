@@ -13,9 +13,9 @@ Hi there! My name is Xing ([pronunciation](https://translate.google.co.uk/?sl=zh
 My research interests lie in the intersection of kernel methods and computational statistics. Specifically, I am exploring the applications of Kernelized Stein Discrepancy to address challenges in computational statistics, including areas such as distribution testing, particle-based inference and parameter estimation.
 
 ## Education 
-:🎓: PhD  in Modern Statistics and Statistical Machine Learning, 2027-2030, <span class="grey">Unknown just for plan </span> \
-:🎓: MASt in Transportation Major, 2024-2027, <span class="grey">University of Jiling</span> \
-:🎓: BSc  in Computer Science and Technology, 2020-2024, <span class="grey">University of Shantou</span>
+🎓: PhD  in Modern Statistics and Statistical Machine Learning, 2027-2030, <span class="grey">Unknown just for plan </span> \
+🎓: MASt in Transportation Major, 2024-2027, <span class="grey">University of Jiling</span> \
+🎓: BE  in Computer Science and Technology, 2020-2024, <span class="grey">University of Shantou</span>
 
 ## Resources
 [Here](https://github.com/XingLLiu/ImperialCollegePosterTemplate) is an **unofficial** LaTex poster template for maths/stats projects with a Imperial College theme. See the links therein for references.
