@@ -8,14 +8,14 @@ redirect_from:
   - /main.html
 ---
 
-Hi there! My name is Xing ([pronunciation](https://translate.google.co.uk/?sl=zh-CN&tl=en&text=%E8%A1%8C&op=translate); similar to "H'sing"). I am a PhD student in Statistics at Imperial College London. I joined the [EPSRC CDT in Modern Statistics and Statistical Machine Learning at Imperial and Oxford](https://statml.io/) in 2020, where I have been advised by Professor [Axel Gandy](https://wwwf.imperial.ac.uk/~agandy/) and Dr [Andrew Duncan](http://wwwf.imperial.ac.uk/~aduncan/). 
+Hi there! My name is Wen([pronunciation](https://translate.google.co.uk/?sl=zh-CN&tl=en&text=%E8%A1%8C&op=translate); which meas culture,knowledge and gentle in Chinese. "). I am a PhD student in Statistics at Imperial College London. I joined the [EPSRC CDT in Modern Statistics and Statistical Machine Learning at Imperial and Oxford](https://statml.io/) in 2020, where I have been advised by Professor [Axel Gandy](https://wwwf.imperial.ac.uk/~agandy/) and Dr [Andrew Duncan](http://wwwf.imperial.ac.uk/~aduncan/). 
 
 My research interests lie in the intersection of kernel methods and computational statistics. Specifically, I am exploring the applications of Kernelized Stein Discrepancy to address challenges in computational statistics, including areas such as distribution testing, particle-based inference and parameter estimation.
 
 ## Education 
 🎓: PhD  in Modern Statistics and Statistical Machine Learning, 2027-2030, <span class="grey">Unknown just for plan </span> \
-🎓: MASt in Transportation Major, 2024-2027, <span class="grey">University of Jiling</span> \
-🎓: BE  in Computer Science and Technology, 2020-2024, <span class="grey">University of Shantou</span>
+🎓: M.E in Transportation Major, 2024-2027, <span class="grey">University of Jiling</span> \
+🎓: B.CS  in Computer Science and Technology, 2020-2024, <span class="grey">University of Shantou</span>
 
 ## Resources
 [Here](https://github.com/XingLLiu/ImperialCollegePosterTemplate) is an **unofficial** LaTex poster template for maths/stats projects with a Imperial College theme. See the links therein for references.
