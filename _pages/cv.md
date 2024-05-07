@@ -11,6 +11,9 @@ redirect_from:
 
 [Click to View My Up-to-date Curriculum Vitae [PDF]](https://mrsandeshbhat.github.io/files/CV.pdf)
 
+[CV.pdf]
+<iframe src="../files/CV_wen.pdf" height="600" width="800"></iframe> 
+
 
 Education
 ======
