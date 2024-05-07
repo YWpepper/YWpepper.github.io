@@ -1,6 +1,6 @@
 ---
 <!-- layout: archive -->
-title: "Sandesh Bhat"
+title: "wen Yan"
 permalink: /cv/
 author_profile: true
 redirect_from:
@@ -9,9 +9,9 @@ redirect_from:
 
 Education
 ======
-* B.E. in Mechanical Engineering, Mumbai University, India, 2016
-* M.S. in Mechanical and Aerospace Engineering, Arizona State University, U.S.A., 2017
-* Ph.D in Systems Engineering, Arizona State University, U.S.A., 2021 (expected)
+* B.S. in Computer Science and Computing,Shantou University, GuangDong, 2024
+* M.S. in Traffic Information Engineering and Control, Jilin University,JiLin., 2027 (expected)
+
 
 Work experience
 ======
@@ -23,7 +23,8 @@ Work experience
   
 
 * 🏫 [Institute of Automation, Chinese Academy of Sciences](https://people.ucas.edu.cn/~pzq) (2024-02 , 2024-05)
-  * Duties included: This task aims to build a low-sample small target armored vehicle recognition algorithm model based on remote sensing images, using the YOLO model. The work content includes data collection and preprocessing, research on YOLO model principles, model training and tuning, model evaluation and performance analysis, model improvement and optimization, and result analysis and summary.
+  * Duties included: 
+  This task aims to build a low-sample small target armored vehicle recognition algorithm model based on remote sensing images, using the YOLO model. The work content includes data collection and preprocessing, research on YOLO model principles, model training and tuning, model evaluation and performance analysis, model improvement and optimization, and result analysis and summary.
   
   
 Skills
@@ -35,7 +36,7 @@ Skills
 * Limited Matlab Programming
 * Operation of various Manipulator Arms (Baxter Dual-Arm Robot, UR5, Dobot Magician and self-built arm)
 
-Publications
+<!-- Publications
 ======
   <ul>{% for post in site.publications %}
     {% include archive-single-cv.html %}
@@ -45,7 +46,7 @@ Service and leadership
 ======
 * Engineering Assembly member (Graduate and Professional Student Association) (August 2019 - May 2020)
 * Student Body President (Mechanical Engineering Students Association) (August 2015 - May 2016)
-* Treasurer (Mechanical Engineering Students Association) (August 2014 - May 2015)
+* Treasurer (Mechanical Engineering Students Association) (August 2014 - May 2015) -->
 
 
 
