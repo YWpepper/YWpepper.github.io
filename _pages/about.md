@@ -10,16 +10,13 @@ redirect_from:
 
 Hi there! My name is Wen. I am currently enrolled as a Master's student in the Department of Traffic Information Engineering and Control at Jilin University. Under the guidance of Professor [Lili Zheng](https://jt.jlu.edu.cn/info/1118/4060.htm), I am actively pursuing my research and academic interests in this field. 
 
-My research interests revolve around the construction of spatio-temporal networks in traffic flow analysis 𐄳. I am particularly focused on investigating the intricate dynamics and patterns within these networks. By employing scientific theories, cutting-edge methodologies, and advanced data analysis techniques, I aim to gain a comprehensive understanding of the complex interactions and behaviors exhibited by traffic flows.
+My research interests revolve around the construction of spatio-temporal networks in traffic flow analysis. I am particularly focused on investigating the intricate dynamics and patterns within these networks. By employing scientific theories, cutting-edge methodologies, and advanced data analysis techniques, I aim to gain a comprehensive understanding of the complex interactions and behaviors exhibited by traffic flows.
 
 
 ## Education 
----
-🎓 MScin Traffic Information Engineering and Control, 2024-2027, <span class="grey">Jilin University</span>
+🎓 MScin : Traffic Information Engineering and Control, 2024-2027, <span class="grey">Jilin University</span>
 
-🎓 BSc in Computer Science and Computing, 2020-2024, <span class="grey">Shantou University</span>
-
-
+🎓 BSc : in Computer Science and Computing, 2020-2024, <span class="grey">Shantou University</span>
 
 
 ### Email
