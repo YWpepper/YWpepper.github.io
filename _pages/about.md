@@ -15,9 +15,10 @@ My research interests revolve around the construction of spatio-temporal network
 
 ## Education 
 ---
-🎓 BSc in Computer Science and Computing, 2024-2027, <span class="grey">Shantou University</span>
+🎓 MScin Traffic Information Engineering and Control, 2024-2027, <span class="grey">Jilin University</span>
 
-🎓 MScin Traffic Information Engineering and Control, 2020-2024, <span class="grey">Jilin University</span>
+🎓 BSc in Computer Science and Computing, 2020-2024, <span class="grey">Shantou University</span>
+
 
 
 
