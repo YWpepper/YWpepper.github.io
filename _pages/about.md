@@ -8,10 +8,8 @@ redirect_from:
   - /about.html
 ---
 
+Hi there! My name is Wen ([pronunciation](https://translate.google.co.uk/?sl=zh-CN&tl=en&text=%E6%96%87&op=translate)). I am currently enrolled as a Master's student in the Department of Traffic Information Engineering and Control at Jilin University. Under the guidance of Professor [Lili Zheng](https://jt.jlu.edu.cn/info/1118/4060.htm), I am actively pursuing my research and academic interests in this field. 
 
-I am a Ph.D. candidate in [Systems Engineering](https://poly.engineering.asu.edu/engineering/phd-systems-engineering/), [Ira A. Fulton School of Engineering](https://engineering.asu.edu/), Arizona State University. I research in the field of Robotics for Rehabilitation Application. I am advised by [Dr. Sangram Redkar](https://isearch.asu.edu/profile/1114748) and [Dr. Thomas Sugar](https://isearch.asu.edu/profile/227786) in the [Robotics, Bionics, Dynamical Systems & Controls Group](). I received my Master of Science (MS) degree in [Mechanical Engineering](https://semte.engineering.asu.edu/mechanical-graduate/) from the [Ira A. Fulton School of Engineering](https://engineering.asu.edu/), Arizona State University and my Bachelor of Engineering (BE) Degree in Mechanical Engineering from the [University of Mumbai](http://mu.ac.in/).
-
-<img align="middle" src="https://mrsandeshbhat.github.io/files/sandesh.jpg?raw=true" alt="Photo" style="width: 700px; border-radius: 10px; padding: 8px 8px 8px 8px"/> 
-
-
+My research interests revolve around the construction of spatio-temporal networks in traffic flow analysis. I am particularly focused on investigating the intricate dynamics and patterns within these networks. By employing scientific theories, cutting-edge methodologies, and advanced data analysis techniques, I aim to gain a comprehensive understanding of the complex interactions and behaviors exhibited by traffic flows.
+## 
 
