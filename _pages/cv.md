@@ -54,8 +54,8 @@ Service and leadership
 Download
 ======
 {% include base_path %}
-
+<!-- 
 [Click to View My Up-to-date Curriculum Vitae [PDF]](https://ywpepper.github.io/files/CV.pdf)
 
 [CV.pdf]
-<iframe src="../files/CV.pdf" height="600" width="800"></iframe> 
+<iframe src="../files/CV.pdf" height="600" width="800"></iframe>  -->
