@@ -1,6 +1,6 @@
 ---
 <!-- layout: archive -->
-title: "wen Yan"
+#title: "wen Yan"
 permalink: /cv/
 author_profile: true
 redirect_from:

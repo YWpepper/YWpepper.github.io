@@ -9,19 +9,32 @@ source "https://rubygems.org"
 # This will help ensure the proper Jekyll version is running.
 # Happy Jekylling!
 
-gem "github-pages", group: :jekyll_plugins
+# gem "github-pages", group: :jekyll_plugins
 
 # If you want to use Jekyll native, uncomment the line below.
 # To upgrade, run `bundle update`.
 
 # gem "jekyll"
 
-gem "wdm", "~> 0.1.0" if Gem.win_platform?
+# gem 'nokogiri', '~> 1.17'
+#
+#
+# # If you have any plugins, put them here!
+# group :jekyll_plugins do
+#   gem "jekyll-archives"
+#   gem "jekyll-feed"
+#   gem 'jekyll-sitemap'
+#   gem 'hawkins'
+# end
 
-# If you have any plugins, put them here!
-group :jekyll_plugins do
-  # gem "jekyll-archives"
-  gem "jekyll-feed"
-  gem 'jekyll-sitemap'
-  gem 'hawkins'
-end
+
+source "https://rubygems.org"
+gem 'tzinfo'
+gem 'tzinfo-data'
+gem 'jekyll-paginate'
+gem 'jekyll-sitemap'
+gem 'jekyll-gist'
+gem 'jekyll-feed'
+gem 'jekyll-redirect-from'
+gem 'jekyll', '~> 4.4.1'
+# ... 其他依赖 ...
