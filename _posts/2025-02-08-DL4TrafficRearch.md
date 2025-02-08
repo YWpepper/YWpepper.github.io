@@ -7,12 +7,10 @@ tags:
   - Papper
 ---
 
-# DL4Traffic
+## DL4Traffic
 **Advertisement**: We would like to cordially invite you to submit a paper to our special issue on "Graph Neural Network for Traffic Forecasting" for **Information Fusion (SCI-indexed, Impact Factor: 17.564)**.
 * Special issue website: [https://www.sciencedirect.com/journal/information-fusion/about/call-for-papers#graph-neural-network-for-traffic-forecasting](https://www.sciencedirect.com/journal/information-fusion/about/call-for-papers#graph-neural-network-for-traffic-forecasting)
 * Deadline for manuscript submissions: **1 December 2023**.
-
----
 
 
 **Advertisement**: We would like to cordially invite you to submit a paper to our Topical Collection on "Deep Neural Networks for Traffic Forecasting" for **Neural Computing and Applications (SCI-indexed, Impact Factor: 6.0)**.
@@ -264,8 +262,5 @@ For a narrow collection of graph neural network for traffic forecasting, you may
 * WWW - [2023](https://github.com/YWpepper/YWpepper.github.io/blob/master/_posts/2023/Conferences/WWW.md)  [2022](https://github.com/YWpepper/YWpepper.github.io/blob/master/_posts/2022/Conferences/WWW.md)  [2021](https://github.com/YWpepper/YWpepper.github.io/blob/master/_posts/2021/Conferences/WWW.md) [2020](https://github.com/YWpepper/YWpepper.github.io/blob/master/_posts/2020/Conferences/WWW.md)  [2019](https://github.com/YWpepper/YWpepper.github.io/blob/master/_posts/2019/Conferences/WWW.md)
 * Other Conferences - [2021](https://github.com/YWpepper/YWpepper.github.io/blob/master/_posts/2021/Conferences/Other_Conferences.md)  [2020](https://github.com/YWpepper/YWpepper.github.io/blob/master/_posts/2020/Conferences/Other_Conferences.md)  [2019](https://github.com/YWpepper/YWpepper.github.io/blob/master/_posts/2019/Conferences/Other_Conferences.md)
 
-
-
----
 
 ---
