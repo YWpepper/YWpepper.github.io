@@ -1,7 +1,7 @@
 ---
 title: 'DL4TrafficRearch'
 date: 2025-02-08
-permalink: https://github.com/YWpepper/YWpepper.github.io/blob/master/_posts/DL4TrafficRearch/
+permalink: /posts/2025/02/DL4TrafficRearch/
 tags:
   - Rearch
   - Papper
@@ -27,6 +27,7 @@ If you find this repository helpful, you may consider cite our relevant work:
 For a narrow collection of graph neural network for traffic forecasting, you may check: [GNN4Traffic](https://github.com/jwwthu/GNN4Traffic)
 
 ## Journals
+<!-- 我实在是太聪明了，这里的link跳转我用了仓库的直接路径，这样就好看点啦！！！爱死自己了 -->
 * ACM Computing Surveys - [2021](https://github.com/YWpepper/YWpepper.github.io/blob/master/_posts/2021/Journals/CSUR.md)
 * ACM Transactions on Intelligent Systems and Technology - [2022](https://github.com/YWpepper/YWpepper.github.io/blob/master/_posts/2022/Journals/TIST.md)  [2021](https://github.com/YWpepper/YWpepper.github.io/blob/master/_posts/2021/Journals/TIST.md)
 * ACM Transactions on Internet Technology - [2021](https://github.com/YWpepper/YWpepper.github.io/blob/master/_posts/2021/Journals/TOIT.md)
