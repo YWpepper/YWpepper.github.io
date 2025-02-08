@@ -1,9 +1,8 @@
-<<<<<<< HEAD:_posts/Gitub + Jekyll + windows指南.md
 ---
 title: 'Gitub + Jekyll + windows指南'
 lang: zh-CN
 date: 2025-02-07
-permalink: /posts/2025/02/Gitub + Jekyll + windows指南/
+permalink: /posts/2025/02/Gitub-Jekyll-windows/
 tags:
   - cool posts
   - category1
