@@ -1,5 +1,5 @@
 ---
-title: 'DL4TrafficRearch'
+title: 'DL4-Traffic-Rearch'
 date: 2025-02-08
 lang: zh-CN
 permalink: /posts/2025/02/DL4TrafficRearch/
@@ -31,7 +31,7 @@ If you find this repository helpful, you may consider cite our relevant work:
 
 For a narrow collection of graph neural network for traffic forecasting, you may check: [GNN4Traffic](https://github.com/jwwthu/GNN4Traffic)
 
-## Journals
+**Journals**
 <!-- 我实在是太聪明了，这里的link跳转我用了仓库的直接路径，这样就好看点啦！！！爱死自己了 -->
 * ACM Computing Surveys - [2021](https://github.com/YWpepper/YWpepper.github.io/blob/master/_posts/2021/Journals/CSUR.md)
 * ACM Transactions on Intelligent Systems and Technology - [2022](https://github.com/YWpepper/YWpepper.github.io/blob/master/_posts/2022/Journals/TIST.md)  [2021](https://github.com/YWpepper/YWpepper.github.io/blob/master/_posts/2021/Journals/TIST.md)
@@ -209,7 +209,7 @@ For a narrow collection of graph neural network for traffic forecasting, you may
 * World Wide Web - [2022](https://github.com/YWpepper/YWpepper.github.io/blob/master/_posts/2022/Journals/WWW.md)  [2021](https://github.com/YWpepper/YWpepper.github.io/blob/master/_posts/2021/Journals/WWW.md)  [2020](https://github.com/YWpepper/YWpepper.github.io/blob/master/_posts/2020/Journals/WWW.md)
 
 
-## Conferences
+**Conferences**
 * AAAI - [2023](https://github.com/YWpepper/YWpepper.github.io/blob/master/_posts/2023/Conferences/AAAI.md)  [2022](https://github.com/YWpepper/YWpepper.github.io/blob/master/_posts/2022/Conferences/AAAI.md)  [2021](https://github.com/YWpepper/YWpepper.github.io/blob/master/_posts/2021/Conferences/AAAI.md)  [2020](https://github.com/YWpepper/YWpepper.github.io/blob/master/_posts/2020/Conferences/AAAI.md)  [2019](https://github.com/YWpepper/YWpepper.github.io/blob/master/_posts/2019/Conferences/AAAI.md)
 * APNOMS - [2022](https://github.com/YWpepper/YWpepper.github.io/blob/master/_posts/2022/Conferences/APNOMS.md)
 * Big Data - [2022](https://github.com/YWpepper/YWpepper.github.io/blob/master/_posts/2022/Conferences/BigData.md)  [2020](https://github.com/YWpepper/YWpepper.github.io/blob/master/_posts/2020/Conferences/BigData.md)  [2019](https://github.com/YWpepper/YWpepper.github.io/blob/master/_posts/2019/Conferences/BigData.md)
