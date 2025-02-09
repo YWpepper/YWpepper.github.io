@@ -1,11 +1,14 @@
 ---
 title: 'DL4TrafficRearch'
 date: 2025-02-08
+lang: zh-CN
 permalink: /posts/2025/02/DL4TrafficRearch/
 tags:
   - Rearch
   - Papper
 ---
+
+
 <!-- 
 ## DL4Traffic
 **Advertisement**: We would like to cordially invite you to submit a paper to our special issue on "Graph Neural Network for Traffic Forecasting" for **Information Fusion (SCI-indexed, Impact Factor: 17.564)**.
@@ -16,8 +19,10 @@ tags:
 * Topical Collection website: [https://www.springer.com/journal/521/updates/26215426](https://www.springer.com/journal/521/updates/26215426)
 * Deadline for manuscript submissions: **1 April 2024**. -->
 
-This is the repository for the collection of Deep Learning for Traffic Prediction Problems.
 
+
+
+**1.This is the repository for the collection of Deep Learning for Traffic Prediction Problems.**
 If you find this repository helpful, you may consider cite our relevant work:
 * Jiang W, Luo J. <b>Graph Neural Network for Traffic Forecasting: A Survey[J]</b>. Expert Systems with Applications, 2022. [Link](https://arxiv.org/abs/2101.11174)
 * Jiang W, Luo J. <b>Big Data for Traffic Estimation and Prediction: A Survey of Data and Tools[J]</b>. Applied System Innovation. 2022; 5(1):23. [Link](https://www.mdpi.com/2571-5577/5/1/23)
