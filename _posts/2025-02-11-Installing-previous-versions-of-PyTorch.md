@@ -1,5 +1,5 @@
 ---
-title: 'Installing previous versions of PyTorch'
+title: 'Installing previous versions of PyTorch 安装版本建议'
 lang: zh-CN
 date: 2025-02-11
 permalink: /posts/2025/02/Installing previous versions of PyTorch/
