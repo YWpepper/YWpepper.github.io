@@ -7,6 +7,7 @@ tags:
   - Papper
 ---
 
+为了将传感器数据进行可视化所以需要该代码
 # Scatter Plots on Mapbox with \`plotly\` Express in Python & How to Embed Them
 
  [100DaysOfCode](https://isabella-b.com/category/100daysofcode/), [python](https://isabella-b.com/category/python/), [tutorial](https://isabella-b.com/category/tutorial/), [mapbox](https://isabella-b.com/category/mapbox/), [plotly](https://isabella-b.com/category/plotly/)
@@ -91,3 +92,4 @@ Now you can use the `<iframe>` to embed your interactive `plotly` visualization 
 
 
 
+---
