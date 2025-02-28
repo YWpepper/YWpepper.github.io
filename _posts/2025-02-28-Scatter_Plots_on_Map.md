@@ -6,17 +6,16 @@ tags:
   - Rearch
   - Papper
 ---
-
-## Scatter Plots on Mapbox with \`plotly\` Express in Python & How to Embed Them
 经纬度信息可视化,为了将传感器数据进行可视化所以需要该代码
+Scatter Plots on Mapbox with \`plotly\` Express in Python & How to Embed Them
+
  [100DaysOfCode](https://isabella-b.com/category/100daysofcode/), [python](https://isabella-b.com/category/python/), [tutorial](https://isabella-b.com/category/tutorial/), [mapbox](https://isabella-b.com/category/mapbox/), [plotly](https://isabella-b.com/category/plotly/)
 
 [code](https://github.com/isabellabenabaye/los-angeles-police-killings/blob/master/LA-police-killings-map.ipynb) [source](https://github.com/datadesk/los-angeles-police-killings-data)[](https://twitter.com/_isabellamb/status/1272769156941668352?s=20)[](https://dev.to/isabellabenabaye/scatter-plots-on-mapbox-with-plotly-express-in-python-how-to-embed-them-1l8m)
-
   <Center>
   <img src='/images/blog/02/map.jpg' style='zoom:50%'>
   </Center>
-
+  
 Last week I was exploring the Los Angeles Times’ [database](https://github.com/datadesk/los-angeles-police-killings-data) of police killings in L.A. County, trying to learn more about the Black and Latino communities that have been disproportionately affected by police violence based on data since 2000. I made a simple graphic about it that you can find in my [blog post](https://isabella-b.com/blog/los-angeles-police-killings).
 
 I also used that data to practice some EDA and data visualization in python. The data includes the latitude and longitude of where each person killed by police died, so one of the things I tried was mapping them with Mapbox and `plotly` Express. This map shows the places of death of the people killed who were Black.
