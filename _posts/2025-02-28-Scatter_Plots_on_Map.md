@@ -1,5 +1,5 @@
 ---
-title: '经纬度信息可视化Scatter_Plots_on_Map'
+title: 'Scatter_Plots_on_Map'
 date: 2025-02-28
 permalink: /posts/2025/02/Scatter_Plots_on_Map/
 tags:
@@ -7,9 +7,8 @@ tags:
   - Papper
 ---
 
-为了将传感器数据进行可视化所以需要该代码
-# Scatter Plots on Mapbox with \`plotly\` Express in Python & How to Embed Them
-
+## Scatter Plots on Mapbox with \`plotly\` Express in Python & How to Embed Them
+经纬度信息可视化,为了将传感器数据进行可视化所以需要该代码
  [100DaysOfCode](https://isabella-b.com/category/100daysofcode/), [python](https://isabella-b.com/category/python/), [tutorial](https://isabella-b.com/category/tutorial/), [mapbox](https://isabella-b.com/category/mapbox/), [plotly](https://isabella-b.com/category/plotly/)
 
 [code](https://github.com/isabellabenabaye/los-angeles-police-killings/blob/master/LA-police-killings-map.ipynb) [source](https://github.com/datadesk/los-angeles-police-killings-data)[](https://twitter.com/_isabellamb/status/1272769156941668352?s=20)[](https://dev.to/isabellabenabaye/scatter-plots-on-mapbox-with-plotly-express-in-python-how-to-embed-them-1l8m)
