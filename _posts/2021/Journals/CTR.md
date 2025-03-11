@@ -1,1 +1,0 @@
-* Liu Y, Lyu C, Zhang Y, et al. <b>DeepTSP: Deep traffic state prediction model based on large-scale empirical data[J]</b>. Communications in Transportation Research, 2021, 1: 100012. [Link](https://www.sciencedirect.com/science/article/pii/S2772424721000123)

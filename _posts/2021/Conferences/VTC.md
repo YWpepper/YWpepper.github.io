@@ -1,1 +1,0 @@
-* Hu S, Yu Z, Zhou D, et al. <b>STOG: A Traffic Prediction Scheme Based on Spatio-Temporal Optimized Graph Neural Networks[C]</b>//2021 IEEE 94th Vehicular Technology Conference (VTC2021-Fall). IEEE, 2021: 1-5. [Link](https://ieeexplore.ieee.org/abstract/document/9625430/)

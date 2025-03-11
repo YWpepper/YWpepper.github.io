@@ -1,8 +1,0 @@
-* Xiang Y, Chen J, Yu W, et al. <b>A Two-Phase Approach for Predicting Highway Passenger Volume[J]</b>. Applied Sciences, 2021, 11(14): 6248. [Link](https://www.mdpi.com/1178638)
-* Abideen Z U, Sun H, Yang Z, et al. <b>Deep Wide Spatial-Temporal Based Transformer Networks Modeling for the Next Destination According to the Taxi Driver Behavior Prediction[J]</b>. Applied Sciences, 2021, 11(1): 17. [Link](https://www.mdpi.com/2076-3417/11/1/17)
-* Naji H A H, Xue Q, Zhu H, et al. <b>Forecasting Taxi Demands Using Generative Adversarial Networks with Multi-Source Data[J]</b>. Applied Sciences, 2021, 11(20): 9675. [Link](https://www.mdpi.com/1316524)
-* Jeong M H, Lee T Y, Jeon S B, et al. <b>Highway Speed Prediction Using Gated Recurrent Unit Neural Networks[J]</b>. Applied Sciences, 2021, 11(7): 3059. [Link](https://www.mdpi.com/1052638)
-* Hsieh H P, Lin F, Jiang J, et al. <b>Inferring Long-Term Demand of Newly Established Stations for Expansion Areas in Bike Sharing System[J]</b>. Applied Sciences, 2021, 11(15): 6748. [Link](https://www.mdpi.com/2076-3417/11/15/6748)
-* Feng B, Xu J, Zhang Y, et al. <b>Multi-Step Traffic Speed Prediction Based on Ensemble Learning on an Urban Road Network[J]</b>. Applied Sciences, 2021, 11(10): 4423. [Link](https://www.mdpi.com/1107594)
-* Wang P, Liu X, Wang Y, et al. <b>Short-Term Traffic State Prediction Based on Mobile Edge Computing in V2X Communication[J]</b>. Applied Sciences, 2021, 11(23): 11530. [Link](https://www.mdpi.com/1391318)
-* Yan J, Li H, Bai Y, et al. <b>Spatial—Temporal Traffic Flow Data Restoration and Prediction Method Based on the Tensor Decomposition[J]</b>. Applied Sciences, 2021, 11(19): 9220. [Link](https://www.mdpi.com/2076-3417/11/19/9220)

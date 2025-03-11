@@ -1,1 +1,0 @@
-* Zhao L, Wang Q, Jin B, et al. <b>Short-Term Traffic Flow Intensity Prediction Based on CHS-LSTM[J]</b>. Arabian Journal for Science and Engineering, 2020, 45(12): 10845-10857. [Link](https://link.springer.com/article/10.1007/s13369-020-04862-3)

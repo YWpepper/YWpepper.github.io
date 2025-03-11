@@ -1,1 +1,0 @@
-* Zhixing C, ZHENG G. <b>A Bidirectional Context-Aware and Multi-Scale Fusion Hybrid Network for Short-Term Traffic Flow Prediction[J]</b>. Promet-Traffic&Transportation, 2022, 34(3): 407-420. [Link](http://traffic.fpz.hr/index.php/PROMTT/article/view/3957)
