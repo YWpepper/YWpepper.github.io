@@ -1,24 +1,15 @@
 ---
-title: 'Scientific research drawings'
+title: 'how_to_do_ScientificResearchDrawings'
 lang: zh-CN
 date: 2025-02-09
-permalink: /posts/2025/02/Scientific-research-drawings/
+permalink: /posts/2025/02/how_to_do_ScientificResearchDrawings/
 tags:
   - Server
   - Windows
 ---
+这里主要存储一些latex的语法工具链接。
 
-[//]: # ()
-[//]: # (![]&#40;https://i0.hdslb.com/bfs/vip/99f54078df2412394140aa5df4422bc0a1ca3d3e.png@120w_68h.webp&#41;)
-
-[//]: # (_本文参考链接：https://zhuanlan.zhihu.com/p/603088040_)
-
-[//]: # ()
-[//]: # ()
-[//]: # (_作者：中国海洋大学高峰老师_)
-
-
-**1、Latex模板**
+### 1、Latex模板
 
 **（1）LaTeX多个图表排版的例子**
 

@@ -1,16 +1,18 @@
 ---
-title: 'Gitub + Jekyll + windows指南'
+title: 'how_to_make_GitubwithJekyll_in_windows'
 lang: zh-CN
 date: 2025-02-07
-permalink: /posts/2025/02/Gitub-Jekyll-windows/
+permalink: /posts/2025/02/how_to_make_GitubwithJekyll_in_windows/
 tags:
   - Server
   - Windows
 ---
 
-**前言：** 当初学习这方面的知识主要是因为涉及到gitubPage上的学术网站（个人学术页面），发现gitub可以自动渲染出来，但是在**本地想要渲染就需要自己搭建开发环境**，经过这次学习对于**不同开发语言需要的环境编译器**能有更深的认识，因为所有的编译都是需要一个编译库，我们需要在官网下载对应的编译库，同时由于现在已经一键配置了PATH的开发环境，所以可以在终端直接使用ruby语言，ruby和python也比较类似，小众和大流的区别。
+如何在gitubPage上的学术网站（个人学术页面）。
 
 ## Ruby+Jekylls
+
+**前言：** 当初学习这方面的知识主要是因为涉及到gitubPage上的学术网站（个人学术页面），发现gitub可以自动渲染出来，但是在**本地想要渲染就需要自己搭建开发环境**，经过这次学习对于**不同开发语言需要的环境编译器**能有更深的认识，因为所有的编译都是需要一个编译库，我们需要在官网下载对应的编译库，同时由于现在已经一键配置了PATH的开发环境，所以可以在终端直接使用ruby语言，ruby和python也比较类似，小众和大流的区别。
 
 Ruby类似脚本语言，而Jekyll，作为Ruby的明星项目之一，是一款静态网站生成器，它允许用户使用纯文本格式编写内容，并通过模板引擎生成结构化的静态网站。两者结合，为开发者提供了一种高效、灵活的网站构建方式。
 

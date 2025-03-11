@@ -6,10 +6,11 @@ permalink: /posts/2025/02/dailyResource/
 tags:
   - daily
 ---
+这篇博客介绍了一些日常收集整理资料。
 
-**美剧**
+---
 
-Home Watch TV Show  Hacks - Season 1 - [Episode 1](https://cineb.rs/watch-tv/watch-hacks-free-69823.4805626)
+
 
 **Markdown中常用的快捷键**
 
@@ -58,3 +59,8 @@ Ctrl f： 搜索
 Ctrl h： 替换
 
 ---
+
+
+**美剧**
+
+Home Watch TV Show  Hacks - Season 1 - [Episode 1](https://cineb.rs/watch-tv/watch-hacks-free-69823.4805626)

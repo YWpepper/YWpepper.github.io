@@ -1,12 +1,14 @@
 ---
-title: 'Scatter_Plots_on_Map'
+title: 'how_to_ScatterPlots_onMap'
 date: 2025-02-28
-permalink: /posts/2025/02/Scatter_Plots_on_Map/
+permalink: /posts/2025/02/how_to_ScatterPlots_onMap/
 tags:
   - Rearch
   - Papper
 ---
-经纬度信息可视化,为了将传感器数据进行可视化所以需要该代码
+在处理传感器数据时，经纬度信息的可视化是一个重要的环节。通过可视化，我们可以直观地了解传感器采集的数据分布和空间关系，从而更方便地分析和利用这些数据。为了实现这一目标，我们需要编写相应的代码，将经纬度信息以图形化的方式呈现出来。
+---
+
 Scatter Plots on Mapbox with \`plotly\` Express in Python & How to Embed Them
 
  [100DaysOfCode](https://isabella-b.com/category/100daysofcode/), [python](https://isabella-b.com/category/python/), [tutorial](https://isabella-b.com/category/tutorial/), [mapbox](https://isabella-b.com/category/mapbox/), [plotly](https://isabella-b.com/category/plotly/)

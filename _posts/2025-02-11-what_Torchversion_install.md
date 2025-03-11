@@ -1,12 +1,14 @@
 ---
-title: 'Installing previous versions of PyTorch 安装版本建议'
+title: 'what_Torchversion_install'
 lang: zh-CN
 date: 2025-02-11
-permalink: /posts/2025/02/Installing previous versions of PyTorch/
+permalink: /posts/2025/02/what_Torchversion_install/
 tags:
   - daily
 ---
+这篇博客介绍了如何安装和使用 PyTorch 最新版本，同时提供了旧版本的安装指南，帮助用户根据需求快速开始机器学习开发。
 
+---
 We’d prefer you install the [latest version](https://pytorch.org/get-started/locally), but old binaries and installation instructions are provided below for your convenience.
 
 ## Commands for Versions >= 1.0.0[](https://pytorch.org/get-started/previous-versions/#commands-for-versions--100)
