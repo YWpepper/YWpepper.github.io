@@ -8,7 +8,7 @@ tags:
   - Windows
 ---
 
-如何在gitubPage上的学术网站（个人学术页面）。
+这篇博客介绍了如何在gitubPage上的学术网站（个人学术页面）。
 
 ## Ruby+Jekylls
 
@@ -61,6 +61,7 @@ Ruby类似脚本语言，而Jekyll，作为Ruby的明星项目之一，是一款
   1. 下载Ruby [官网link](https://rubyinstaller.org/) [下载link](https://rubyinstaller.org/downloads/) DevKit 是一个为 Windows 平台提供编译功能的工具集
 
      这是我下载的版本 \
+
     <Center>
     <img src='/images/blog/01/1.png' style='zoom:50%'>
     </Center>
@@ -147,7 +148,7 @@ Ruby类似脚本语言，而Jekyll，作为Ruby的明星项目之一，是一款
     </Center>
 
 修改后的配置文件:
-  
+
 ``` plain&#x20;text
     source "https://rubygems.org"
     gem 'tzinfo'
@@ -159,7 +160,7 @@ Ruby类似脚本语言，而Jekyll，作为Ruby的明星项目之一，是一款
     gem 'jekyll-redirect-from'
     gem 'jekyll', '~> 4.4.1'
     # ... 其他依赖 ...
-  ```
+```
 
 
 ### Tipss&#x20;

@@ -15,41 +15,43 @@ tags:
 
 2. 打开 华为路由的ip：` http://192.168.3.1/` 这个应该每个人都一样，输入的密码就是wifi密码
 
-   ![](https://virginia-pepper.oss-cn-guangzhou.aliyuncs.com/img/blog/202503111029348.png)
+   <img src="https://virginia-pepper.oss-cn-guangzhou.aliyuncs.com/img/blog/202503111029348.png" style="zoom:23%;" />
 
    3. 查看自己的终端信息：此处展示的只是有线连接，其实可以看到wifi连接的设备
 
-![image-20250311102945687](https://virginia-pepper.oss-cn-guangzhou.aliyuncs.com/img/blog/202503111029748.png)
+<img src="https://virginia-pepper.oss-cn-guangzhou.aliyuncs.com/img/blog/202503111029748.png" alt="image-20250311102945687" style="zoom:40%;" />
 
 
 
 4. 在这里可以设置端口转发服务，我的理解是，把路由器下设备1的端口1，暴露出来作为路由器本身的端口2来访问，因为设备1无法在学校wifi下检索到，但是路由器归属学校wifi管理。我也不是很懂这里有端口映射和端口触发，反正我是全部配置了一下。
 
-   ![image-20250311103113189](https://virginia-pepper.oss-cn-guangzhou.aliyuncs.com/img/blog/202503111031263.png)
+   <img src="https://virginia-pepper.oss-cn-guangzhou.aliyuncs.com/img/blog/202503111031263.png" alt="image-20250311103113189" style="zoom:40%;" />
 
-<img src="https://virginia-pepper.oss-cn-guangzhou.aliyuncs.com/img/blog/202503111031402.png" alt="image-20250311103124337" style="zoom:60%;" />
+<img src="https://virginia-pepper.oss-cn-guangzhou.aliyuncs.com/img/blog/202503111031402.png" alt="image-20250311103124337" style="zoom:40%;" />
 
 
 
 5. 详细编辑信息如下（ `注意打开自己电脑的3389端口或者22端口，主要是ubuntu需要在防火墙打开这个端口，不然一直报错都不知道是什么原因` ） 
 
-   ![image-20250311103153133](https://virginia-pepper.oss-cn-guangzhou.aliyuncs.com/img/blog/202503111031182.png)
+   <img src="https://virginia-pepper.oss-cn-guangzhou.aliyuncs.com/img/blog/202503111031182.png" alt="image-20250311103153133" style="zoom:40%;" />
 
 
 
 1. ## vscode里面远程仓库环境
 
-1. 需要注意远程用户的读写权利，不然尽管远程了都没办法写入文件。
+2. 需要注意远程用户的读写权利，不然尽管远程了都没办法写入文件。
+
 2. Vscode 下载插件remote-ssh服务，然后需要先将远程环境的信息写入config文件中：
    1. 在 SSH 配置文件 (~/.ssh/config) 中添加端口信息
-      -   这里需要注意就是config文件，不是config.txt也不是config文件夹，直接用`touch config` 或者` vim config` 。 其中下面的hostname是电脑ip，user是登陆名字，这里注意权限问题就好。因为我是局域网暴露了路由器下的用户端口，所以需要额外指定为路由器的端口，比如8001、8002。
+      - 这里需要注意就是config文件，不是config.txt也不是config文件夹，直接用`touch config` 或者` vim config` 。 其中下面的hostname是电脑ip，user是登陆名字，这里注意权限问题就好。因为我是局域网暴露了路由器下的用户端口，所以需要额外指定为路由器的端口，比如8001、8002。
 
-      - ```Shell
+        ```shell
         Host 59.xx.xx.xx
                 HostName 59.xx.xx.xxx
                 User root
-                Port xxxx
-        ~                       
+                Port xxxx                    
         ```
+      
+        
 
-![image](https://virginia-pepper.oss-cn-guangzhou.aliyuncs.com/img/blog/202503111032822.png)
+<img src="https://virginia-pepper.oss-cn-guangzhou.aliyuncs.com/img/blog/202503111032822.png" alt="image" style="zoom:50%;" />

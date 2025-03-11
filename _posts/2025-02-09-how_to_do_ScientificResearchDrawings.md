@@ -7,7 +7,9 @@ tags:
   - Server
   - Windows
 ---
-这里主要存储一些latex的语法工具链接。
+这篇博客主要存储一些latex的语法工具链接。
+
+
 
 ### 1、Latex模板
 

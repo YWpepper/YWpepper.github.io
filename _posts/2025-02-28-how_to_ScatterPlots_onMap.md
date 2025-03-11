@@ -6,11 +6,12 @@ tags:
   - Rearch
   - Papper
 ---
-在处理传感器数据时，经纬度信息的可视化是一个重要的环节。通过可视化，我们可以直观地了解传感器采集的数据分布和空间关系，从而更方便地分析和利用这些数据。为了实现这一目标，我们需要编写相应的代码，将经纬度信息以图形化的方式呈现出来。
+
+这篇博客撰写了编写相应的代码，将经纬度信息以图形化的方式呈现出来。
+
 ---
 
 Scatter Plots on Mapbox with \`plotly\` Express in Python & How to Embed Them
-
  [100DaysOfCode](https://isabella-b.com/category/100daysofcode/), [python](https://isabella-b.com/category/python/), [tutorial](https://isabella-b.com/category/tutorial/), [mapbox](https://isabella-b.com/category/mapbox/), [plotly](https://isabella-b.com/category/plotly/)
 
 [code](https://github.com/isabellabenabaye/los-angeles-police-killings/blob/master/LA-police-killings-map.ipynb) [source](https://github.com/datadesk/los-angeles-police-killings-data)[](https://twitter.com/_isabellamb/status/1272769156941668352?s=20)[](https://dev.to/isabellabenabaye/scatter-plots-on-mapbox-with-plotly-express-in-python-how-to-embed-them-1l8m)
