@@ -1,8 +1,8 @@
 ---
-title: 'graphlearning'
+title: 'how_to_learn_graph'
 lang: zh-CN
 date: 2025-03-07
-permalink: /posts/2025/03/graphlearning/
+permalink: /posts/2025/03/how_to_learn_graph/
 tags:
   - graph
   - booksresourse

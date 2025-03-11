@@ -1,8 +1,8 @@
 ---
-title: 'ssh&remote'
+title: 'how_to_use_remoteSSH'
 lang: zh-CN
 date: 2025-03-11
-permalink: /posts/2025/03/remoteSSH/
+permalink: /posts/2025/03/how_to_use_remoteSSH/
 tags:
   - ssh
   - sever
