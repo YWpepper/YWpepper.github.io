@@ -27,10 +27,10 @@ tags:
 
 <img src="https://virginia-pepper.oss-cn-guangzhou.aliyuncs.com/img/blog/202503111100390.png" alt="image-20250311110041320" style="zoom:70%;" />
 
-![image-20250311112152533](https://virginia-pepper.oss-cn-guangzhou.aliyuncs.com/img/blog/202503111121620.png)
+<img src="https://virginia-pepper.oss-cn-guangzhou.aliyuncs.com/img/blog/202503111121620.png" alt="image-20250311112152533" style="zoom:33%;" />
 
-![image-20250311112749580](https://virginia-pepper.oss-cn-guangzhou.aliyuncs.com/img/blog/202503111127775.png)
+<img src="https://virginia-pepper.oss-cn-guangzhou.aliyuncs.com/img/blog/202503111127775.png" alt="image-20250311112749580" style="zoom: 33%;" />
 
-![image-20250311113238628](https://virginia-pepper.oss-cn-guangzhou.aliyuncs.com/img/blog/202503111132809.png)
+<img src="https://virginia-pepper.oss-cn-guangzhou.aliyuncs.com/img/blog/202503111132809.png" alt="image-20250311113238628" style="zoom: 33%;" />
 
-![image-20250311113617888](https://virginia-pepper.oss-cn-guangzhou.aliyuncs.com/img/blog/202503111136080.png)
+<img src="https://virginia-pepper.oss-cn-guangzhou.aliyuncs.com/img/blog/202503111136080.png" alt="image-20250311113617888" style="zoom:50%;" />
