@@ -19,27 +19,30 @@ tags:
 
    3. 查看自己的终端信息：此处展示的只是有线连接，其实可以看到wifi连接的设备
 
-<img src="https://virginia-pepper.oss-cn-guangzhou.aliyuncs.com/img/blog/202503111029748.png" alt="image-20250311102945687" style="zoom:40%;" />
+<img src="https://virginia-pepper.oss-cn-guangzhou.aliyuncs.com/img/blog/202503111029748.png" alt="image-20250311102945687" style="zoom:30%;" />
 
 
 
 4. 在这里可以设置端口转发服务，我的理解是，把路由器下设备1的端口1，暴露出来作为路由器本身的端口2来访问，因为设备1无法在学校wifi下检索到，但是路由器归属学校wifi管理。我也不是很懂这里有端口映射和端口触发，反正我是全部配置了一下。
 
-   <img src="https://virginia-pepper.oss-cn-guangzhou.aliyuncs.com/img/blog/202503111031263.png" alt="image-20250311103113189" style="zoom:40%;" />
-
-<img src="https://virginia-pepper.oss-cn-guangzhou.aliyuncs.com/img/blog/202503111031402.png" alt="image-20250311103124337" style="zoom:40%;" />
-
-
+   
+   
+   <p align="center">
+     <img src="https://virginia-pepper.oss-cn-guangzhou.aliyuncs.com/img/blog/202503111031263.png" alt="image-20250311103113189" alt="Image 1" width="400" style="display: inline-block; margin-right: 10px;">
+     <img src="https://virginia-pepper.oss-cn-guangzhou.aliyuncs.com/img/blog/202503111031402.png" alt="image-20250311103124337"  alt="Image 2" width="500" style="display: inline-block;">
+   </p>
+   
+   
 
 5. 详细编辑信息如下（ `注意打开自己电脑的3389端口或者22端口，主要是ubuntu需要在防火墙打开这个端口，不然一直报错都不知道是什么原因` ） 
 
-   <img src="https://virginia-pepper.oss-cn-guangzhou.aliyuncs.com/img/blog/202503111031182.png" alt="image-20250311103153133" style="zoom:40%;" />
+   <img src="https://virginia-pepper.oss-cn-guangzhou.aliyuncs.com/img/blog/202503111031182.png" alt="image-20250311103153133" style="zoom:20%;" />
 
 
 
-1. ## vscode里面远程仓库环境
+## 2. vscode里面远程仓库环境
 
-2. 需要注意远程用户的读写权利，不然尽管远程了都没办法写入文件。
+1. 需要注意远程用户的读写权利，不然尽管远程了都没办法写入文件。
 
 2. Vscode 下载插件remote-ssh服务，然后需要先将远程环境的信息写入config文件中：
    1. 在 SSH 配置文件 (~/.ssh/config) 中添加端口信息
@@ -52,6 +55,4 @@ tags:
                 Port xxxx                    
         ```
 
-
-
-<img src="https://virginia-pepper.oss-cn-guangzhou.aliyuncs.com/img/blog/202503111032822.png" alt="image" style="zoom:50%;" />
+<img src="https://virginia-pepper.oss-cn-guangzhou.aliyuncs.com/img/blog/202503111032822.png" alt="image" style="display: block; margin: 0 auto; zoom:30%;" />
