@@ -32,14 +32,18 @@ tags:
 4. 在这里可以设置端口转发服务，我的理解是，把路由器下设备1的端口1，暴露出来作为路由器本身的端口2来访问，因为设备1无法在学校wifi下检索到，但是路由器归属学校wifi管理。我也不是很懂这里有端口映射和端口触发，反正我是全部配置了一下。
 
    
-   
+
    <p align="center">
      <img src="https://virginia-pepper.oss-cn-guangzhou.aliyuncs.com/img/blog/202503111031263.png" alt="image-20250311103113189" alt="Image 1" width="400" style="display: inline-block; margin-right: 10px;">
      <img src="https://virginia-pepper.oss-cn-guangzhou.aliyuncs.com/img/blog/202503111031402.png" alt="image-20250311103124337"  alt="Image 2" width="500" style="display: inline-block;">
    </p>
    
+
+5. 详细编辑信息如下
+
+   （ `注意打开自己电脑的3389端口或者22端口，主要是ubuntu需要在防火墙打开这个端口，不然一直报错都不知道是什么原因` ） 
+
    
-5. 详细编辑信息如下（ `注意打开自己电脑的3389端口或者22端口，主要是ubuntu需要在防火墙打开这个端口，不然一直报错都不知道是什么原因` ） 
 
    <img src="https://virginia-pepper.oss-cn-guangzhou.aliyuncs.com/img/blog/202503111031182.png" alt="image-20250311103153133" style="zoom:20%;" />
 
@@ -54,7 +58,7 @@ tags:
       此处访问192.168.xxx即可
 
      <p align="center">
-       <img src="/Users/alice/Library/Application Support/typora-user-images/image-20250312212434262.png" alt="image-20250312212434262" style="zoom: 25%;" />
+     <img src="https://virginia-pepper.oss-cn-guangzhou.aliyuncs.com/img/blog/202503122135974.png" alt="image-20250312213516786" style="zoom:35%;" />
      </p>
 
    - 方法2: 如果我在图书馆，即我只是在学校的大wifi下面，我还是需要在路由器上面映射端口6006出来
@@ -64,7 +68,7 @@ tags:
      <p align="center">
        	<img src="https://virginia-pepper.oss-cn-guangzhou.aliyuncs.com/img/blog/202503122128505.png" alt="image-20250312212834388" style="zoom: 25%;" />
      </p>
-
+     
      
 
 ## 2. vscode里面远程仓库环境
