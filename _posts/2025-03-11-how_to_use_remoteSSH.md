@@ -12,14 +12,20 @@ tags:
 ## 1. 配置路由器的端口转发服务
 
 1. 首先ubuntu和路由器有一个局域的连接，路由器是大的，ubuntu电脑插到路由器上面，大的路由器会分配一个小的ip给到ubuntu，一般开头都是`192.168.xx.xx`,如果我在实验室里，因为全部都是在路由器的局域网下面，所以可以通过`192.168`来访问，但是由于学校又是一个再大一点的局域网，下面包裹着我的路由器，所以我在图书馆访问的时候就要访问路由器的`58.xx`开头的那个ip。
-
 2. 打开 华为路由的ip：` http://192.168.3.1/` 这个应该每个人都一样，输入的密码就是wifi密码
 
-   <img src="https://virginia-pepper.oss-cn-guangzhou.aliyuncs.com/img/blog/202503111029348.png" style="zoom:23%;" />
+<p align="center">
+  <img src="https://virginia-pepper.oss-cn-guangzhou.aliyuncs.com/img/blog/202503111029348.png" style="zoom:23%;" />
+</p>
+
+
+
 
    3. 查看自己的终端信息：此处展示的只是有线连接，其实可以看到wifi连接的设备
 
-<img src="https://virginia-pepper.oss-cn-guangzhou.aliyuncs.com/img/blog/202503111029748.png" alt="image-20250311102945687" style="zoom:30%;" />
+      <p align="center">
+      	<img src="https://virginia-pepper.oss-cn-guangzhou.aliyuncs.com/img/blog/202503111029748.png" alt="image-20250311102945687" style="zoom:30%;" />
+      </p>
 
 
 
@@ -33,12 +39,33 @@ tags:
    </p>
    
    
-
 5. 详细编辑信息如下（ `注意打开自己电脑的3389端口或者22端口，主要是ubuntu需要在防火墙打开这个端口，不然一直报错都不知道是什么原因` ） 
 
    <img src="https://virginia-pepper.oss-cn-guangzhou.aliyuncs.com/img/blog/202503111031182.png" alt="image-20250311103153133" style="zoom:20%;" />
 
+### 1.1 有趣的端口开放
 
+- 模型训练的时候为了查看tensorboard的可视化效果，由于ubuntu打开的是localhost:6006
+
+   - 方法1 ： 如果只是同一个路由器的wifi下面，我可以直接使用命令行： 
+
+     ​	 `tensorboard --logdir libcity/ --host 0.0.0.0`
+
+      此处访问192.168.xxx即可
+
+     <p align="center">
+       <img src="/Users/alice/Library/Application Support/typora-user-images/image-20250312212434262.png" alt="image-20250312212434262" style="zoom: 25%;" />
+     </p>
+
+   - 方法2: 如果我在图书馆，即我只是在学校的大wifi下面，我还是需要在路由器上面映射端口6006出来
+
+     此处我就可以访问 59.xxx开头的ip进行访问啦！
+
+     <p align="center">
+       	<img src="https://virginia-pepper.oss-cn-guangzhou.aliyuncs.com/img/blog/202503122128505.png" alt="image-20250312212834388" style="zoom: 25%;" />
+     </p>
+
+     
 
 ## 2. vscode里面远程仓库环境
 
