@@ -50,7 +50,7 @@ custom_channels:
 ```
 或者在指定安装源：
 ```
-pip install ray fastdtw tslearn   -i http://mirrors.aliyun.com/pypi/simple/ --trusted-host mirrors.aliyun.com
+pip install ray fastdtw tslearn torch_geometric  tqdm -i http://mirrors.aliyun.com/pypi/simple/ --trusted-host mirrors.aliyun.com
 pip install  "ray[tune]"  -i http://pypi.doubanio.com/simple/ --trusted-host pypi.doubanio.com
 ```
 
