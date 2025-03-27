@@ -48,7 +48,11 @@ custom_channels:
   menpo: https://mirrors.tuna.tsinghua.edu.cn/anaconda/cloud
   simpleitk: https://mirrors.tuna.tsinghua.edu.cn/anaconda/cloud
 ```
-
+或者在指定安装源：
+```
+pip install ray fastdtw tslearn   -i http://mirrors.aliyun.com/pypi/simple/ --trusted-host mirrors.aliyun.com
+pip install  "ray[tune]"  -i http://pypi.doubanio.com/simple/ --trusted-host pypi.doubanio.com
+```
 
 ## Commands for Versions >= 1.0.0[](https://pytorch.org/get-started/previous-versions/#commands-for-versions--100)
 
