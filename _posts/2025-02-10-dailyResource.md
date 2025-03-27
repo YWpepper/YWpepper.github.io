@@ -94,10 +94,9 @@ tmux attach -t python_session
 
 
 
-#### 3. markdown
-
-**Markdown中常用的快捷键**
-
+#### markdown
+- Markdown中常用的快捷键
+```
 Ctrl 0 到 Ctrl 6： 普通文本、一级文本~六级文本
 
 Ctrl B： 加粗；加粗测试
@@ -120,7 +119,7 @@ Shift Ctrl I： 插入图片；
 
 Shift Ctrl M： 公式块；
 
-- [ ]： 任务列表(可勾选的序列)注意每一个符号之间都有空格
+[ ]： 任务列表(可勾选的序列)注意每一个符号之间都有空格
 
 <sup> 内容 </sup>： 上标；上标测试
 
@@ -141,10 +140,8 @@ Ctrl end： 跳转到文章结尾
 Ctrl f： 搜索
 
 Ctrl h： 替换
+```
 
----
 
-
-**美剧**
-
+- 美剧
 Home Watch TV Show  Hacks - Season 1 - [Episode 1](https://cineb.rs/watch-tv/watch-hacks-free-69823.4805626)
