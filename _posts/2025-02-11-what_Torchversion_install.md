@@ -11,6 +11,45 @@ tags:
 ---
 We’d prefer you install the [latest version](https://pytorch.org/get-started/locally), but old binaries and installation instructions are provided below for your convenience.
 
+记得给conda换源，终端脚本：
+```shell 
+# 生成.condarc配置文件（如果不存在）
+conda config --set show_channel_urls yes
+
+# 添加清华镜像源
+conda config --add channels https://mirrors.tuna.tsinghua.edu.cn/anaconda/pkgs/main/
+conda config --add channels https://mirrors.tuna.tsinghua.edu.cn/anaconda/pkgs/free/
+conda config --add channels https://mirrors.tuna.tsinghua.edu.cn/anaconda/cloud/conda-forge/
+conda config --add channels https://mirrors.tuna.tsinghua.edu.cn/anaconda/cloud/pytorch/
+
+# 设置搜索时显示通道地址
+conda config --set show_channel_urls yes
+
+# 清除索引缓存
+conda clean -i
+```
+
+手动操作：
+```
+nano ~/.condarc
+# 粘贴
+channels:
+  - defaults
+show_channel_urls: true
+default_channels:
+  - https://mirrors.tuna.tsinghua.edu.cn/anaconda/pkgs/main
+  - https://mirrors.tuna.tsinghua.edu.cn/anaconda/pkgs/r
+  - https://mirrors.tuna.tsinghua.edu.cn/anaconda/pkgs/msys2
+custom_channels:
+  conda-forge: https://mirrors.tuna.tsinghua.edu.cn/anaconda/cloud
+  pytorch: https://mirrors.tuna.tsinghua.edu.cn/anaconda/cloud
+  msys2: https://mirrors.tuna.tsinghua.edu.cn/anaconda/cloud
+  bioconda: https://mirrors.tuna.tsinghua.edu.cn/anaconda/cloud
+  menpo: https://mirrors.tuna.tsinghua.edu.cn/anaconda/cloud
+  simpleitk: https://mirrors.tuna.tsinghua.edu.cn/anaconda/cloud
+```
+
+
 ## Commands for Versions >= 1.0.0[](https://pytorch.org/get-started/previous-versions/#commands-for-versions--100)
 
 ### v2.5.1[](https://pytorch.org/get-started/previous-versions/#v251)
