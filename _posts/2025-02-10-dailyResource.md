@@ -12,6 +12,17 @@ tags:
 
 
 
+**google colab**
+时刻触发脚本
+```
+function ConnectButton(){
+    console.log("Connect pushed");
+    document.querySelector("#top-toolbar > colab-connect-button").shadowRoot.querySelector("#connect").click()
+}
+setInterval(ConnectButton,60000);
+```
+
+
 **Markdown中常用的快捷键**
 
 Ctrl 0 到 Ctrl 6： 普通文本、一级文本~六级文本
