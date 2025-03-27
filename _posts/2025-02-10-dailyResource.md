@@ -10,8 +10,6 @@ tags:
 
 ---
 
-
-
 **google colab**
 时刻触发脚本
 
@@ -25,51 +23,41 @@ setInterval(ConnectButton,60000);
 
 
 #### 2. 后台进程管理方案
-
-1. 使用nohup持久运行
+- 使用nohup持久运行
 `nohup python -u run_script.py > script.log 2>&1 &`
 
-参数说明
-
+- 参数说明
 ```
-nohup：忽略挂断信号
--u（Python参数）：禁用输出缓冲
-> script.log：标准输出重定向
-2>&1：错误输出合并
-&：后台运行
+  nohup：忽略挂断信号
+  -u（Python参数）：禁用输出缓冲
+  > script.log：标准输出重定向
+  2>&1：错误输出合并
+  &：后台运行
 ```
 
-2. 验证进程状态
-
+- 验证进程状态
 ```
-#查看进程列表
+查看进程列表
 ps aux | grep "python run_script.py"
-#实时监控日志
+实时监控日志
 tail -f script.log
 ```
 
-
-3. 终止进程
-   
+- 终止进程 
 ```
 #优雅终止
 pkill -f "python run_script.py"
 #强制终止（无响应时）
 kill -9 1708
 ```
+- 高级管理方案（生产环境推荐）
+使用systemd服务 创建服务文件：
+`sudo nano /etc/systemd/model.service`
 
-4. 高级管理方案（生产环境推荐）
-4.1 使用systemd服务
-创建服务文件：
-```
-sudo nano /etc/systemd/model.service
-```
-
-服务内容：
+- 服务内容：
 ```
 [Unit]
 Description=Model Training Service
-
 [Service]
 User=root
 WorkingDirectory=/root/PDFormer
@@ -77,31 +65,30 @@ ExecStart=/root/miniconda3/envs/base/bin/python run_script.py
 Restart=always
 StandardOutput=file:/var/log/model.log
 StandardError=file:/var/log/model_error.log
-
 [Install]
 WantedBy=multi-user.target
 ```
 
-启用服务：
+- 启用服务：
 ```
 sudo systemctl daemon-reload
 sudo systemctl enable model
 sudo systemctl start model
 ```
 
-4.2 使用tmux会话管理
+- 使用tmux会话管理
 ```
-#安装tmux
+安装tmux
 sudo apt install tmux -y
-#创建会话
+创建会话
 tmux new -s model_train
-# 在会话中运行
+在会话中运行
 python run_script.py
-#分离会话：
+分离会话：
 Ctrl+B → D
-#重连会话：
+重连会话：
 tmux attach -t model_train
-#要打开现有的tmux会话"python_session"，请使用以下命令：
+要打开现有的tmux会话"python_session"，请使用以下命令：
 tmux attach -t python_session
 ```
 
