@@ -44,7 +44,6 @@ nohup：忽略挂断信号
 ```
 #查看进程列表
 ps aux | grep "python run_script.py"
-
 #实时监控日志
 tail -f script.log
 ```
@@ -55,7 +54,6 @@ tail -f script.log
 ```
 #优雅终止
 pkill -f "python run_script.py"
-
 #强制终止（无响应时）
 kill -9 1708
 ```
@@ -63,12 +61,11 @@ kill -9 1708
 4. 高级管理方案（生产环境推荐）
 4.1 使用systemd服务
 创建服务文件：
-
 ```
 sudo nano /etc/systemd/model.service
 ```
-服务内容：
 
+服务内容：
 ```
 [Unit]
 Description=Model Training Service
