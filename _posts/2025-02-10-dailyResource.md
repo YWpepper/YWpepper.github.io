@@ -125,3 +125,16 @@ tmux attach -t python_session
 
 - 美剧
 Home Watch TV Show  Hacks - Season 1 - [Episode 1](https://cineb.rs/watch-tv/watch-hacks-free-69823.4805626)
+- 书籍
+```
+http://38.147.170.240:5959/c1/baidupan/222222/%E5%85%B6%E5%AE%83/EPUB
+本站网址
+http://103.74.192.62:1234
+http://103.74.192.62
+主站http://www.https.ng
+http://38.147.170.240 http://38.147.170.240:5959
+http://45.145.228.151
+http://45.145.228.171
+http://193.134.211.102:1234 http://193.134.211.108:1234
+前面不要加httpS，是http
+```
