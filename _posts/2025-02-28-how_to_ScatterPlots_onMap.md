@@ -11,6 +11,24 @@ tags:
 
 ---
 
+- 使用英文版本的中国地图
+  ```python
+    fig.update_layout(
+        mapbox={
+            'style': "carto-positron",  # 使用国际版OSM配置
+            'zoom': 10,
+            'center': {'lon': 116.25, 'lat': 40.12},
+            'accesstoken': None
+        },
+        width=1200,
+        height=800,
+        margin={"r":0, "t":40, "l":0, "b":0},
+        title="China Traffic Prediction Error Heatmap (English Labels)"
+    )
+```
+
+
+
 Scatter Plots on Mapbox with \`plotly\` Express in Python & How to Embed Them
  [100DaysOfCode](https://isabella-b.com/category/100daysofcode/), [python](https://isabella-b.com/category/python/), [tutorial](https://isabella-b.com/category/tutorial/), [mapbox](https://isabella-b.com/category/mapbox/), [plotly](https://isabella-b.com/category/plotly/)
 
