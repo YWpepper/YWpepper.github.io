@@ -12,9 +12,34 @@ tags:
 
 ##### 常见的日常积累小技巧
 
-- mac 电脑外接显示屏
+1. mac 电脑外接显示屏
   对于屏幕分辨率的问题，其中较好的一个仓库软件叫做betterdisaplay，可以用来调整刷新赫兹以及分辨率，但是要注意下载符合mac的系统版本的软件；
 `https://github.com/waydabber/BetterDisplay/releases?page=6`
+
+2. 绘图的时候图例位置参数设置
+```python
+    # 紧凑型图例
+    handles, labels = plt.gca().get_legend_handles_labels()
+    plt.legend(handles[:35], labels[:35], loc='upper right', 
+              ncol=2, columnspacing=0.8, handletextpad=0.5)
+    
+    # 自动检测最佳位置
+    # plt.legend(
+    #     loc='best',
+    #     bbox_to_anchor=(1, 0.5),  # 右侧垂直居中
+    #     borderaxespad=0.5,
+    #     framealpha=0.9
+    # )
+    
+    # plt.legend(
+    # loc='upper center',
+    # bbox_to_anchor=(0.5, -0.15),  # 向下偏移15%
+    # ncol=2,
+    # frameon=True,
+    # shadow=True,
+    # fancybox=True
+    # )
+```
 
 
 
