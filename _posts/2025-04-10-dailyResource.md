@@ -15,8 +15,9 @@ tags:
 1. mac 电脑外接显示屏
   对于屏幕分辨率的问题，其中较好的一个仓库软件叫做betterdisaplay，可以用来调整刷新赫兹以及分辨率，但是要注意下载符合mac的系统版本的软件；
 `https://github.com/waydabber/BetterDisplay/releases?page=6`
+2. adobe ps ：https://www.cnblogs.com/FRIM/p/18130753
 
-2. 绘图的时候图例位置参数设置
+3. 绘图的时候图例位置参数设置
 ```python
     # 紧凑型图例
     handles, labels = plt.gca().get_legend_handles_labels()
