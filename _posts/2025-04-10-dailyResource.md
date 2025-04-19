@@ -207,6 +207,7 @@ NO GUARANTEE is made that this table is complete or accurate (please raise an is
 | paper | venue | published date | # other datsets | METR-LA | PeMS-BAY | PeMS-D7(M) | PeMS-D7(L) | PeMS-04 | PeMS-08 | LOOP | SZ-taxi | Los-loop | PeMS-03 | PeMS-07 | PeMS-I-405 | PeMS-04(S) | TOTAL open |
 |:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|-|:-:|
 |  |  | TOTAL |  | 38 | 28 | 6 | 3 | 3 | 3 | 3 | 2 | 2 | 1 | 1 | 1 | 1 | 95 |
+| STwava | ICDE | 2023 |   | 1 | 1 |  |  | 1 | 1 |  |  |  |  |  |  |  | 4 |
 | G-SWaN | IoTDI | 9 May 23 |   | 1 | 1 |  |  | 1 | 1 |  |  |  |  |  |  |  | 4 |
 | SCPT | ArXiv | 9 May 23 | 1 | 1 | 1 | 1 |  |  |  |  |  |  |  |  |  |  | 4 |
 | MP-WaveNet | ArXiv | 9 May 23 |  1 | 1 |  |  |  |  |  |  |  |  |  |  |  |  | 2 |
