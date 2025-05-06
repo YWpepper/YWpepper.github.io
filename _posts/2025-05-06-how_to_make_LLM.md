@@ -1,8 +1,8 @@
 ---
-title: LLM
+title: how_to_make_LLM
 lang: zh-CN
 date: 2025-05-06
-permalink: /posts/2025/05/LLM/
+permalink: /posts/2025/05/how_to_make_LLM/
 tags:
   - LLM
 ---
