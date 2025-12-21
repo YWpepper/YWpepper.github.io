@@ -12,4 +12,6 @@ permalink: /about/
 ![Badge](https://hitscounter.dev/api/hit?url=https%3A%2F%2Fywpepper.github.io&label=访客数&icon=github&color=%23198754&style=flat)
 
 ### 访客地理分布
-<script type="text/javascript" id="mapmyvisitors" src="//mapmyvisitors.com/map.js?d=ZdYEb93vGAnXGasUvQE3cCtGSKactCgr4lVWFOTixh4&cl=ffffff&w=a"></script>
+<div style="width: 350px; margin: 0 auto;">
+  <script type="text/javascript" id="mapmyvisitors" src="//mapmyvisitors.com/map.js?d=ZdYEb93vGAnXGasUvQE3cCtGSKactCgr4lVWFOTixh4&cl=ffffff&w=a"></script>
+</div>
