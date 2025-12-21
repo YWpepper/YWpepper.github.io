@@ -3,7 +3,6 @@ title: "what_books_IRead"
 lang: zh-CN
 date: 2022-04-10
 author: pepper
-pinned: true
 toc: true
 tags:
   - daily
