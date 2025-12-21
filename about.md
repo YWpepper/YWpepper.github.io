@@ -9,4 +9,7 @@ permalink: /about/
 ---
 
 ### 访客统计
-![Badge](https://hitscounter.dev/api/hit?url=https%3A%2F%2Fywpepper.github.io&label=&icon=github&color=%23198754&message=&style=flat&tz=UTC)
+![Badge](https://hitscounter.dev/api/hit?url=https%3A%2F%2Fywpepper.github.io&label=访客数&icon=github&color=%23198754&style=flat)
+
+### 访客地理分布
+<script type="text/javascript" id="mapmyvisitors" src="//mapmyvisitors.com/map.js?d=ZdYEb93vGAnXGasUvQE3cCtGSKactCgr4lVWFOTixh4&cl=ffffff&w=a"></script>
