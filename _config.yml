@@ -1,14 +1,13 @@
 #
 # 这个文档包含了本博客的设定信息，你可以编辑它来个性化自己的博客，
-#
 
 # 你的博客名称，请用你想要的博客名替换“LOFFER”，以下修改都可类似处理
 # 注意，“name: LOFFER”，冒号后面的空格不可以省略。
 # 井号后面的文字是说明文档，不会被程序读取。
 
 # 描述/签名
-name: pepper
-description: pepper的博客
+name: Pepper
+description: 一个老虎大展笔头的地方
 
 # 输入你的网站域名（如果你没有添加自己的域名，而是直接用GitHub pages分配的域名的话可以省略）
 url: 
@@ -16,18 +15,18 @@ url:
 # 添加你的博客的二级域名，一般来说是你的repository名
 # 如果你的博客的URL是：(http://yourusername.github.io/repository-name)
 # 那么就写成 "/repository-name"
-baseurl: /YWpepper
+baseurl:
 
 
-#
+#v
 # 下面的设定都是可选的
-#
+#blob:https://www.yuque.com/9fde3dcf-57a4-410d-9a2f-165ed2eb75de
 
 # 你的博客logo图片URL，建议尺寸不超过300px × 300px
-avatar: https://raw.githubusercontent.com/FromEndWorld/LOFFER/master/images/logo.png
+avatar: https://images.weserv.nl/?url=cdn.nlark.com/yuque/0/2025/png/40742019/1766300112246-d1fc30f4-d036-46b5-98b0-073628c06a88.png?x-oss-process=image%2Fformat%2Cwebp
 
 # 你的favicon（出现在浏览器tab上）图片URL，建议使用较小(64px × 64px)的图片
-favicon: https://raw.githubusercontent.com/FromEndWorld/LOFFER/master/images/favicon.png
+favicon: https://images.weserv.nl/?url=cdn.nlark.com/yuque/0/2025/png/40742019/1766300112246-d1fc30f4-d036-46b5-98b0-073628c06a88.png?x-oss-process=image%2Fformat%2Cwebp
 
 
 # 菜单中的按钮
@@ -48,50 +47,51 @@ paginate: 8
 excerpt_separator: <!-- more -->
 
 # 你的社交网络链接，它们会作为图标出现在你的网站页脚中，可选填写
-footer-links: 
-  weibo:  #请输入你的微博个性域名 https://www.weibo.com/<thispart>
+footer-links:
+  weibo:  # 请输入你的微博个性域名 https://www.weibo.com/<thispart>
   behance: # https://www.behance.net/<>
   dribbble: # https://dribbble.com/<>
-  email: #youremailaddress@mail.com
-  facebook: #https://www.facebook.com/<>
-  flickr: #https://www.flickr.com/<>
-  github: YWpepper/HomeNotebook #https://github.com/<>
-  instagram: #https://instagram.com/<>
-  linkedin: #https://www.linkedin.com/in/<>
-  pinterest: #https://www.pinterest.com/<>
-  rss: #随便填点啥RSS就能用了
+  email: # youremailaddress@mail.com
+  facebook: # https://www.facebook.com/<>
+  flickr: # https://www.flickr.com/<>
+  github:  # https://github.com/<>
+  instagram: # https://instagram.com/<>
+  linkedin: # https://www.linkedin.com/in/<>
+  pinterest: # https://www.pinterest.com/<>
+  rss: # 随便填点啥RSS就能用了
   stackoverflow: # http://stackoverflow.com/<>
   tumblr: # https://<username>.tumblr.com
-  twitter: # https://www.twitter.com/<your_twitter_username> 
+  twitter: # https://www.twitter.com/<your_twitter_username>
   youtube: # channel/<your_long_string> or user/<user-name>
 
 # 站点页脚的文字
-footer-text: Copyright (c) 2025 来自中世界
+footer-text: Copyright © 2025 ywpepper. All Rights Reserved.
 
 #
 # 评论，注意，请不要同时添加多种不同的评论区
 #
 
 # 输入Disqus shortname，即可添加评论区，请查阅文档，设置自己的disqus站点，不要继续使用我的站点loffer
-disqus: pepper #shortname
+disqus: #shortname
 
 # 输入Gitalk相关设定，即可添加评论区，具体请看教程
 gitalk:
-  clientID: 
-  clientSecret: 
-  repo: 
-  owner: 
-  proxy:
+  clientID:
+  clientSecret:
+  repo:
+  owner:
 
 # 输入Google Analytics web tracking code
 google_analytics:
 
 utteranc:
-  repo: # Your github repo path, also see: https://utteranc.es
+  repo: ywpepper/ywpepper.github.io # Your github repo path, also see: https://utteranc.es
+  issue-term: title
+  label: comment
+  theme: github-dark
+  crossorigin: anonymous
 
-#
-# !! 以下所有设置都不需要更改 !!
-#
+
 
 permalink: /:title/
 paginate_path: /page:num/
@@ -108,16 +108,45 @@ kramdown:
   syntax_highlighter_opts:
     # Use existing pygments syntax highlighting css
     css_class: 'highlight'
+  # Enable math support
+  math_engine: mathjax
+  math_engine_opts:
+    preview: true
+    preview_as_code: true
+  # Parse block-level and span-level math
+  parse_block_html: true
+  parse_span_html: true
 
 # Set the Sass partials directory, as we're using @imports
 sass:
   style: :expanded # You might prefer to minify using :compressed
+
+# Include .tex files as part of the site
+include:
+  - _posts/*.tex
+
+# Markdown extensions - allow .tex files to be processed
+markdown_ext: "markdown,mkdown,mkdn,mkd,md,tex"
 
 # Use the following plug-ins
 plugins:
   - jekyll-sitemap # Create a sitemap using the official Jekyll sitemap gem
   - jekyll-feed # Create an Atom feed using the official Jekyll feed gem
   - jekyll-paginate
+  - jekyll-pandoc  # Pandoc support for LaTeX
+
+# Pandoc configuration
+pandoc:
+  extensions:
+    - normalize
+    - smart
+    - mathjax
+    - csl: _styles/apa.csl
+  outputs:
+    html5:
+      - input: tex
+      - output: html5
+      - extra_args: ['--mathjax', '--no-highlight']
 
 # Exclude these files from your production _site
 exclude:
@@ -126,4 +155,3 @@ exclude:
   - LICENSE
   - README.md
   - CNAME
-
