@@ -14,8 +14,55 @@ tags:
 这篇博客介绍了如何在gitubPage上的学术网站（个人学术页面）。
 <!-- more -->
 
-## Ruby+Jekylls
+## github页面注意事项
 
+**1. 创建了一个地图统计**
+开源项目的地址为: [地址](https://mapmyvisitors.com/profile)
+创建过程：
+    A. 如果你更喜欢静态的、简约的平面地图，可以使用 ClustrMaps：
+    B. 前往 ClustrMaps 官网。
+    C.输入你的博客地址 https://ywpepper.github.io。
+    D.它会生成一段类似 `<script...>` 的代码。
+    E. 将该代码直接粘贴在 about.md 的最下方。
+
+**2. 创建一个访客统计**
+    A. 方案一：使用 HITS (样式简洁，支持多种配色) 
+    这是目前 GitHub 开源项目中最常用的访问量统计插件。
+
+    B. 代码模板： 将以下代码复制到你的 about.md 最下方：
+
+    ```JS
+    ![Hits](https://hits.seeyoufarm.com/api/count/incr/badge.svg?url=https%3A%2F%2Fgithub.com%2FYWpepper%2FHomeNotebook&count_bg=%2379C83D&title_bg=%23555555&icon=&icon_color=%23E7E7E7&title=hits&edge_flat=false)
+    ```
+    
+    `url=:` 后面接你仓库的地址（需要经过 URL 编码，上面代码中已经帮你替换为你的仓库名）。
+
+    `count_bg=:` 右侧数字框的颜色。
+
+    `title_bg=:` 左侧标题框的颜色。
+
+
+## 如何部署
+1. 在 GitHub 上创建一个新的仓库，命名为 `yourusername.github.io`，其中 `yourusername` 是你的 GitHub 用户名。
+<img src="https://images.weserv.nl/?url=cdn.nlark.com/yuque/0/2025/png/40742019/1766303759895-68854205-4e4c-4026-882c-375e0c6946ee.png?x-oss-process=image%2Fformat%2Cwebp" width="80%" alt="FinRpt Framework Diagram"/>
+
+1. 克隆该仓库到本地计算机。
+2. 修改右侧website的配置文件 `_config.yml`，根据你的需求进行调整。
+3. 将你的 Jekyll 网站文件添加到仓库中。
+<img src="https://images.weserv.nl/?url=cdn.nlark.com/yuque/0/2025/png/40742019/1766303789252-529bc406-9fe5-49bb-8395-b8fee6195f77.png?x-oss-process=image%2Fformat%2Cwebp" width="80%" alt="FinRpt Framework Diagram"/>
+
+4. 更重要的是那个conig文件
+    ```yaml
+    utteranc:
+    repo: ywpepper/ywpepper.github.io # 替换为你的 GitHub 仓库名
+    issue-term: title
+    label: comment
+    theme: github-dark
+    crossorigin: anonymous
+    ```
+
+
+## Ruby+Jekylls
 **前言：** 当初学习这方面的知识主要是因为涉及到gitubPage上的学术网站（个人学术页面），发现gitub可以自动渲染出来，但是在**本地想要渲染就需要自己搭建开发环境**，经过这次学习对于**不同开发语言需要的环境编译器**能有更深的认识，因为所有的编译都是需要一个编译库，我们需要在官网下载对应的编译库，同时由于现在已经一键配置了PATH的开发环境，所以可以在终端直接使用ruby语言，ruby和python也比较类似，小众和大流的区别。
 
 Ruby类似脚本语言，而Jekyll，作为Ruby的明星项目之一，是一款静态网站生成器，它允许用户使用纯文本格式编写内容，并通过模板引擎生成结构化的静态网站。两者结合，为开发者提供了一种高效、灵活的网站构建方式。
