@@ -174,17 +174,19 @@ ps： 参考[知乎指南1](https://zhuanlan.zhihu.com/p/663712983)
 
 ### 报错案例
 1. 403 = Forbidden（服务器拒绝访问）
+
 ```bash
 -> [HttpSkipResponseCommand.cc:239] errorCode=22 响应状态不成功。状态=403
 
 Access to dataset UDVideoQA/Urban_Dynamics_VideoQA_dataset is restricted and you are not in the authorized list. Visit https://huggingface.co/datasets/UDVideoQA/Urban_Dynamics_VideoQA_dataset to ask for access.
 ```
+
 说明：元数据已经成功获取 ✅ 正在下载大文件 `.tar`，但是镜像服务器拒绝访问这个文件 ❌
 解决办法：
-  1. 不要用镜像，直接用官方：`unset HF_ENDPOINT`
-  2. token 错误，注意此处在官网上创建的时候，要使用write模式，不要其他模式。
+  a. 不要用镜像，直接用官方：`unset HF_ENDPOINT`
+  b. 防止一次性下载太大的文件，使用`--include "Set/*"`命令
+  c. token 错误，注意此处在官网上创建的时候，要使用write模式，不要其他模式。
      <img src="https://images.weserv.nl/?url=cdn.nlark.com/yuque/0/2026/png/40742019/1772183252606-ef2e6d24-039a-4fb6-9982-9c2378e74a17.png" width="100%" alt="huggingface-token"/>
-  3. 防止一次性下载太大的文件，使用`--include "Set/*"`命令
 
 
 ---
