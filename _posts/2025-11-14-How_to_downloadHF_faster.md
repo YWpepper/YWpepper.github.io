@@ -13,7 +13,7 @@ pinned: false
 
 ### 专用多线程下载器 hfd
 
-**`hfd` 是基于 curl 和 aria2 实现的专用于huggingface 下载的命令行脚本：** [hfd.sh](https://link.zhihu.com/?target=https%3A//padeoe.com/file/hfd/hfd.sh)（[Gitst链接](https://link.zhihu.com/?target=https%3A//gist.github.com/padeoe/697678ab8e528b85a2a7bddafea1fa4f)）。hfd 相比 `huggingface-cli` ，鲁棒性更好，此外多线程控制力度也更细，可以设置下载线程数、并行文件数。缺点是目前**仅适用于 Linux 和 Mac OS**。
+**`hfd` 是基于 curl 和 aria2 实现的专用于huggingface 下载的命令行脚本：** [hfd.sh](https://zhuanlan.zhihu.com/p/721778923)（[Gitst链接](https://link.zhihu.com/?target=https%3A//gist.github.com/padeoe/697678ab8e528b85a2a7bddafea1fa4f)）。hfd 相比 `huggingface-cli` ，鲁棒性更好，此外多线程控制力度也更细，可以设置下载线程数、并行文件数。缺点是目前**仅适用于 Linux 和 Mac OS**。
 
 其原理:
   - Step1：通过Hugging Face API获取模型/数据集仓库对应的所有文件 url；
@@ -25,9 +25,32 @@ pinned: false
   export HF_ENDPOINT="https://hf-mirror.com"
   ```
 
+下载hfd文件
+
+```bash
+wget https://hf-mirror.com/hfd/hfd.sh
+chmod +x hfd.sh
+```
+
+```bash
+curl -O https://hf-mirror.com/hfd/hfd.sh
+chmod +x hfd.sh
+```
+
 **基本命令：**
   ```bash
+  ##下载指定模型
   ./hfd.sh gpt2
+  ##下载指定数据集
+  ./hfd.sh UDVideoQA/Urban_Dynamics_VideoQA_dataset
+  ## 如果下载失败，可以明确指定类型
+  ./hfd.sh -d datasets UDVideoQA/Urban_Dynamics_VideoQA_dataset
+  ## 如果是私有数据集，登陆后下载
+  huggingface-cli login
+  ## 下载到指定目录
+  ./hfd.sh -d datasets UDVideoQA/Urban_Dynamics_VideoQA_dataset -o ./my_data
+  ## 只下载某个子文件夹（如果数据很大）
+  ./hfd.sh -d datasets UDVideoQA/Urban_Dynamics_VideoQA_dataset --include "videos/*"
   ```
 
 如果没有安装 aria2，则可以改用 wget：
