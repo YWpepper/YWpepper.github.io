@@ -173,7 +173,9 @@ hfd gpt2 -x 8 -j 3  # 每个文件 8 个线程，同时下载 3 个文件
 ps： 参考[知乎指南1](https://zhuanlan.zhihu.com/p/663712983)
 
 ### 报错案例
-1. 403 = Forbidden（服务器拒绝访问）
+#### 403 token权限
+
+403 = Forbidden（服务器拒绝访问）
 
 ```bash
 -> [HttpSkipResponseCommand.cc:239] errorCode=22 响应状态不成功。状态=403
@@ -187,6 +189,76 @@ Access to dataset UDVideoQA/Urban_Dynamics_VideoQA_dataset is restricted and you
   b. 防止一次性下载太大的文件，使用`--include "Set/*"`命令
   c. token 错误，注意此处在官网上创建的时候，要使用write模式，不要其他模式。
      <img src="https://images.weserv.nl/?url=cdn.nlark.com/yuque/0/2026/png/40742019/1772183252606-ef2e6d24-039a-4fb6-9982-9c2378e74a17.png" width="100%" alt="huggingface-token"/>
+
+
+#### 443 取消代理
+
+443 报错可能是因为之前配置了代理，然后现在过期不可用了。
+
+在命令行查看是否设置代理：
+
+```bash
+env | grep -i proxy
+```
+
+可能的输出：
+
+```bash
+http_proxy=http://127.0.0.1:7890
+https_proxy=http://127.0.0.1:7890
+all_proxy=socks5://127.0.0.1:7891
+```
+
+使用以下命令取消：
+
+```bash
+unset http_proxy                                 
+unset https_proxy
+unset all_proxy
+```
+
+取消代理之后仍然可能报对应端口的错误，然后`Git clone failed.`这有可能是因为你的 Git 之前配置了代理。
+
+查看配置（如果是当前项目配置，去掉 --global）：
+
+```bash
+git config --global --list
+```
+
+可能的输出：
+
+```bash
+http.proxy=http://127.0.0.1:7890
+https.proxy=http://127.0.0.1:7890
+```
+
+如果存在代理，对应取消：
+
+```bash
+git config --global --unset http.proxy
+git config --global --unset https.proxy
+```
+
+现在应该可以正常下载。
+
+### 重新设置代理
+
+如果你想重新设置代理，下面也给出对应的命令，假设 HTTP/HTTPS 端口号为 7890， SOCKS5 为 7891。
+
+-   终端代理：
+
+```text
+export http_proxy=http://127.0.0.1:7890
+export https_proxy=http://127.0.0.1:7890
+export all_proxy=socks5://127.0.0.1:7891
+```
+
+-   Git 代理：
+
+```text
+git config --global http.proxy http://127.0.0.1:7890
+git config --global https.proxy http://127.0.0.1:7890
+```
 
 
 ---
