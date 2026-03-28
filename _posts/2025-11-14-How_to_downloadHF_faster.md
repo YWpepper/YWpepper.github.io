@@ -145,7 +145,7 @@ hfd gpt2 -x 8 -j 3  # 每个文件 8 个线程，同时下载 3 个文件
     ```
 
 2. 方法2 ：使用 `huggingface-cli login`
-
+    首先安装好环境 `pip install -U huggingface_hub`
     如果你的 `./hfd.sh` 脚本底层是调用 `huggingface_hub` 库，那么你可以先在终端中执行登录命令，让系统记住你的凭证：
 
     登录： 在终端中运行以下命令：
