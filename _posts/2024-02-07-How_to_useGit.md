@@ -1,53 +1,88 @@
----
-title: 'How_to_useGit'
+***
+
+title: 'How\_to\_useGit'
 lang: zh-CN
 date: 2024-02-07
 author: pepper
-# permalink: /posts/2024/02/how_to_use_ubuntu/
+
+# permalink: /posts/2024/02/how\_to\_use\_ubuntu/
+
 toc: true
 pinned: false
 tags:
-  - Server
-  - Command
----
 
+- Server
+- Command
+
+***
+
+# 个人常用指令
+
+### 回退到指定提交版本
+
+**步骤1：查看提交历史**
+```bash
+git log --oneline
+```
+- 该命令会以简洁的方式显示提交历史，包含提交哈希值和提交信息
+- 找到你想要回退到的目标提交的哈希值（如：c3c1e06）
+
+**步骤2：执行回退操作**
+```bash
+git reset --hard c3c1e06
+```
+- `--hard` 参数：彻底回退，重置工作区、暂存区和HEAD指针到指定提交
+- `c3c1e06`：你想要回退到的目标提交的哈希值
+
+**步骤3：推送到远程仓库**
+```bash
+git push -f origin master
+```
+- `-f` 或 `--force`：强制推送，因为本地分支历史已被修改
+- `origin`：远程仓库名
+- `master`：分支名
+
+**注意事项**：
+- 强制推送会覆盖远程仓库的历史记录，可能影响其他协作者
+- 回退操作前建议备份重要代码
+- 回退成功后，本地分支会比远程分支落后n个提交，需要强制推送才能同步
+
+<br />
 
 # Git note[¶](https://lightblues.github.io/techNotes/code/CS/git-note/#git-note "Permanent link")
 
--   图解 [https://marklodato.github.io/visual-git-guide/index-zh-cn.html](https://marklodato.github.io/visual-git-guide/index-zh-cn.html) 利用图示讲解了 `checkout, reset, merge, cherry-pick, rebase` 等指令到底做了什么，可惜没有涉及到远程仓库的命令。Cheatsheet 性质的 👍
--   Git Pro ebook: [http://iissnan.com/progit/](http://iissnan.com/progit/) 写得非常详细，图示也很赞
-    
-    -   看了其中的远程分支和 [分支的rebase](http://iissnan.com/progit/html/zh/ch3_6.html) 章节，才算懂了 rebase 的使用。
--   来自廖雪峰的 [Git教程](https://www.liaoxuefeng.com/wiki/896043488029600)；
-    
--   另外，官方还有个中文的文档，写得很细 [https://git-scm.com/book/zh/v2](https://git-scm.com/book/zh/v2)
--   廖雪峰老师推荐的一张 [Cheatsheet](https://gitee.com/liaoxuefeng/learn-java/raw/master/teach/git-cheatsheet.pdf)；
--   再推荐一篇进阶的文章 [你可能不知道的 Git](https://blog.daraw.cn/2019/12/21/you-dont-know-git/)；
+- 图解 <https://marklodato.github.io/visual-git-guide/index-zh-cn.html> 利用图示讲解了 `checkout, reset, merge, cherry-pick, rebase` 等指令到底做了什么，可惜没有涉及到远程仓库的命令。Cheatsheet 性质的 👍
+- Git Pro ebook: <http://iissnan.com/progit/> 写得非常详细，图示也很赞
+  - 看了其中的远程分支和 [分支的rebase](http://iissnan.com/progit/html/zh/ch3_6.html) 章节，才算懂了 rebase 的使用。
+- 来自廖雪峰的 [Git教程](https://www.liaoxuefeng.com/wiki/896043488029600)；
+- 另外，官方还有个中文的文档，写得很细 <https://git-scm.com/book/zh/v2>
+- 廖雪峰老师推荐的一张 [Cheatsheet](https://gitee.com/liaoxuefeng/learn-java/raw/master/teach/git-cheatsheet.pdf)；
+- 再推荐一篇进阶的文章 [你可能不知道的 Git](https://blog.daraw.cn/2019/12/21/you-dont-know-git/)；
 
 [Oh Shit, Git!?!](https://ohshitgit.com/zh)
 
-![](https://lightblues.github.io/techNotes/code/CS/media/git-note/16348994455801.jpg)
+!\[]\(https\://lightblues.github.io/techNotes/code/CS/media/git-note/16348994455801.jpg null)
 
--   Workspace：工作区
--   Index / Stage：暂存区
--   Repository：仓库区（或本地仓库）
--   Remote：远程仓库
+- Workspace：工作区
+- Index / Stage：暂存区
+- Repository：仓库区（或本地仓库）
+- Remote：远程仓库
 
 工作流程
 
-1.  将远程仓库克隆为本地仓库 git clone ssh://git@git.sankuai.com/dapp/poi\_search\_rerank.git
-2.  在本地创建和远程分支对应的分支 git checkout -b <本地分支名> origin/<远程分支名>，本地和远程分支的名称最好一致
-3.  在本地分支完成任务后，可以试图用git push <远程主机名> <本地分支名>推送自己的修改
-4.  如果推送失败，则表明远程分支比本地更新，需要先用git pull试图合并；
-5.  如果pull失败并提示“no tracking information”，则说明本地分支和远程分支的链接关系没有创建，用命令git branch –set-upstream-to=<远程主机名>/<远程分支名> <本地分支名>创建链接
-6.  如果合并有冲突，则解决冲突，并在本地提交（add => commit）
-7.  没有冲突或者解决掉冲突后，再用git push <远程主机名> <本地分支名>推送就能成功
-8.  提交到远程仓库以后，就可以发出 Pull Request 到staging分支，然后请求别人进行代码review，确认可以合并到staging
-    1.  操作之前务必获取staging/master最新代码（pull 或者 fetch+merge）
+1. 将远程仓库克隆为本地仓库 git clone ssh://git\@git.sankuai.com/dapp/poi\_search\_rerank.git
+2. 在本地创建和远程分支对应的分支 git checkout -b <本地分支名> origin/<远程分支名>，本地和远程分支的名称最好一致
+3. 在本地分支完成任务后，可以试图用git push <远程主机名> <本地分支名>推送自己的修改
+4. 如果推送失败，则表明远程分支比本地更新，需要先用git pull试图合并；
+5. 如果pull失败并提示“no tracking information”，则说明本地分支和远程分支的链接关系没有创建，用命令git branch –set-upstream-to=<远程主机名>/<远程分支名> <本地分支名>创建链接
+6. 如果合并有冲突，则解决冲突，并在本地提交（add => commit）
+7. 没有冲突或者解决掉冲突后，再用git push <远程主机名> <本地分支名>推送就能成功
+8. 提交到远程仓库以后，就可以发出 Pull Request 到staging分支，然后请求别人进行代码review，确认可以合并到staging
+   1. 操作之前务必获取staging/master最新代码（pull 或者 fetch+merge）
 
 ## 常用语法[¶](https://lightblues.github.io/techNotes/code/CS/git-note/#_1 "Permanent link")
 
-```markdown
+````markdown
 ######### Status, Add, Commit, Remove, Diff, Log, Checkout, Reset ##########
 
 - 查看状态：
@@ -169,7 +204,7 @@ tags:
     git merge <branch-name>  # 合并分支
     git merge --no-ff -m "comment"  # 禁用 Fast forward 模式，生成新的 commit
     ```
-```
+````
 
 ## 具体应用[¶](https://lightblues.github.io/techNotes/code/CS/git-note/#_2 "Permanent link")
 
@@ -178,15 +213,14 @@ tags:
 撤销修改的操作可以根据文件是否已被 `add` 到暂存区来选择不同的命令：
 
 - 未 `add` 的文件：
-    ```bash
-    git restore <file>...
-    ```
-
+  ```bash
+  git restore <file>...
+  ```
 - 已 `add` 的文件：
-    ```bash
-    git restore --staged <file>...
-    git restore <file>
-    ```
+  ```bash
+  git restore --staged <file>...
+  git restore <file>
+  ```
 
 ### 代码回滚：git reset、git checkout 和 git revert[¶](https://lightblues.github.io/techNotes/code/CS/git-note/#git-resetgit-checkoutgit-revert "Permanent link")
 
@@ -201,6 +235,7 @@ tags:
 - `--hard`：修改 `HEAD`、`index` 和 `workspace`。
 
 示例：
+
 ```bash
 # 修改 HEAD 和 index
 git checkout hotfix
@@ -218,6 +253,7 @@ git reset HEAD filename  # 默认是 --mixed，修改 HEAD 和 index，不修改
 - `git checkout -- file` 中的 `--` 很重要，没有 `--` 会变成“切换到另一个分支”的命令。
 
 示例：
+
 ```bash
 # 修改 workspace 去匹配某次 commit
 git checkout HEAD
@@ -236,6 +272,7 @@ git checkout -- file
 例如：我们提交了三个版本（版本一、版本二、版本三），发现版本二有问题（如：存在 bug），想要撤销版本二的修改，但又不想影响版本三的提交。此时可以使用 `git revert` 来反做版本二，生成一个新的版本四。版本四会保留版本三的内容，但撤销版本二的修改。
 
 示例：
+
 ```bash
 git checkout hotfix
 git revert HEAD^^
@@ -301,6 +338,7 @@ git rm -r --cached .
 # 所有文件（删除本地文件）
 git rm -r --f .
 ```
+
 > 以下内容来自廖雪峰教程
 
 ## 版本库[¶](https://lightblues.github.io/techNotes/code/CS/git-note/#_8 "Permanent link")
@@ -432,9 +470,9 @@ Git分支十分强大，在团队开发中应该充分应用。
 
 在实际开发中，我们应该按照几个基本原则进行分支管理：
 
--   首先，`master`分支应该是非常稳定的，也就是仅用来发布新版本，平时不能在上面干活；
--   那在哪干活呢？干活都在`dev`分支上，也就是说，`dev`分支是不稳定的，到某个时候，比如1.0版本发布时，再把`dev`分支合并到`master`上，在`master`分支发布1.0版本；
--   你和你的小伙伴们每个人都在`dev`分支上干活，每个人都有自己的分支，时不时地往`dev`分支上合并就可以了。
+- 首先，`master`分支应该是非常稳定的，也就是仅用来发布新版本，平时不能在上面干活；
+- 那在哪干活呢？干活都在`dev`分支上，也就是说，`dev`分支是不稳定的，到某个时候，比如1.0版本发布时，再把`dev`分支合并到`master`上，在`master`分支发布1.0版本；
+- 你和你的小伙伴们每个人都在`dev`分支上干活，每个人都有自己的分支，时不时地往`dev`分支上合并就可以了。
 
 ### Bug 分支[¶](https://lightblues.github.io/techNotes/code/CS/git-note/#bug "Permanent link")
 
@@ -452,33 +490,31 @@ Git分支十分强大，在团队开发中应该充分应用。
 
 ### 多人协作[¶](https://lightblues.github.io/techNotes/code/CS/git-note/#_22 "Permanent link")
 
--   查看远程库信息，使用`git remote -v`；
--   本地新建的分支如果不推送到远程，对其他人就是不可见的；
--   从本地推送分支，使用`git push origin branch-name`，如果推送失败，先用`git pull`抓取远程的新提交；
--   在本地创建和远程分支对应的分支，使用`git checkout -b branch-name origin/branch-name`，本地和远程分支的名称最好一致；
--   建立本地分支和远程分支的关联，使用`git branch --set-upstream branch-name origin/branch-name`；
--   从远程抓取分支，使用`git pull`，如果有冲突，要先处理冲突。
+- 查看远程库信息，使用`git remote -v`；
+- 本地新建的分支如果不推送到远程，对其他人就是不可见的；
+- 从本地推送分支，使用`git push origin branch-name`，如果推送失败，先用`git pull`抓取远程的新提交；
+- 在本地创建和远程分支对应的分支，使用`git checkout -b branch-name origin/branch-name`，本地和远程分支的名称最好一致；
+- 建立本地分支和远程分支的关联，使用`git branch --set-upstream branch-name origin/branch-name`；
+- 从远程抓取分支，使用`git pull`，如果有冲突，要先处理冲突。
 
 因此，多人协作的工作模式通常是这样：
 
-1.  首先，可以试图用`git push origin <branch-name>`推送自己的修改；
-2.  如果推送失败，则因为远程分支比你的本地更新，需要先用`git pull`试图合并；
-3.  如果合并有冲突，则解决冲突，并在本地提交；
-4.  没有冲突或者解决掉冲突后，再用`git push origin <branch-name>`推送就能成功！
+1. 首先，可以试图用`git push origin <branch-name>`推送自己的修改；
+2. 如果推送失败，则因为远程分支比你的本地更新，需要先用`git pull`试图合并；
+3. 如果合并有冲突，则解决冲突，并在本地提交；
+4. 没有冲突或者解决掉冲突后，再用`git push origin <branch-name>`推送就能成功！
 
 如果`git pull`提示`no tracking information`，则说明本地分支和远程分支的链接关系没有创建，用命令`git branch --set-upstream-to <branch-name> origin/<branch-name>`。
 
 ## 标签管理[¶](https://lightblues.github.io/techNotes/code/CS/git-note/#_23 "Permanent link")
 
--   命令`git tag <tagname>`用于新建一个标签，默认为`HEAD`，也可以指定一个commit id；
--   命令`git tag -a <tagname> -m "blablabla..."`可以指定标签信息；
--   命令`git tag`可以查看所有标签。
-    
--   命令`git push origin <tagname>`可以推送一个本地标签；
-    
--   命令`git push origin --tags`可以推送全部未推送过的本地标签；
--   命令`git tag -d <tagname>`可以删除一个本地标签；
--   命令`git push origin :refs/tags/<tagname>`可以删除一个远程标签。
+- 命令`git tag <tagname>`用于新建一个标签，默认为`HEAD`，也可以指定一个commit id；
+- 命令`git tag -a <tagname> -m "blablabla..."`可以指定标签信息；
+- 命令`git tag`可以查看所有标签。
+- 命令`git push origin <tagname>`可以推送一个本地标签；
+- 命令`git push origin --tags`可以推送全部未推送过的本地标签；
+- 命令`git tag -d <tagname>`可以删除一个本地标签；
+- 命令`git push origin :refs/tags/<tagname>`可以删除一个远程标签。
 
 > 以下 from 美团
 
@@ -498,5 +534,5 @@ M 表示改动 A 表示添加 D 表示删除 R 表示重命名 C 表示拷贝 U 
 
 `git config --global color.ui true`
 
----
+***
 
