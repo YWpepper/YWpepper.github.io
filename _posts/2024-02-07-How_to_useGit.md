@@ -1,20 +1,15 @@
-***
-
-title: 'How\_to\_useGit'
+---
+title: 'How_to_useGit'
 lang: zh-CN
 date: 2024-02-07
 author: pepper
-
-# permalink: /posts/2024/02/how\_to\_use\_ubuntu/
-
 toc: true
 pinned: false
 tags:
+  - Server
+  - Command
+---
 
-- Server
-- Command
-
-***
 
 # 个人常用指令
 
