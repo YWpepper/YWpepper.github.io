@@ -1,5 +1,5 @@
 ---
-title: 'How_to_useUbuntu'
+title: "How_to_useUbuntu"
 lang: zh-CN
 date: 2024-02-07
 author: pepper
@@ -10,10 +10,13 @@ tags:
   - Server
   - Command
 ---
+
 这篇笔记汇总了在 Ubuntu 下常用的快速命令与进程/服务管理方法，包含文件/目录操作、显卡查看、后台进程管理（nohup、systemd、tmux）及自检与故障排查常用命令。便于快速查阅与实际操作参考。
+
 <!-- more -->
 
 ## 常见基本命令（快速参考）
+
 - 更新与安装软件
   ```bash
   sudo apt update           # 更新软件源
@@ -24,21 +27,21 @@ tags:
 - 文件/目录：查看、复制、移动、删除、权限
   ```bash
   ls -lah         # 列出详细信息
-  cd /path/to/dir   
+  cd /path/to/dir
   mkdir -p newdir
   cp -r src dst   # src源头复制到 dst 目标
   mv oldname newname  # 重命名或移动
   rm file.txt
   rm -rf directory/
   chmod 644 file.txt # 修改权限 644 rw-r--r-- 777 rwxrwxrwx 最高权限是 777
-  chmod +x script.sh # 添加可执行权限 
+  chmod +x script.sh # 添加可执行权限
   chown user:group file # 修改文件所有者和用户组
   ```
 - 查找与内容搜索
   ```bash
-  find /path -name "pattern" # 按名称查找文件 
-  grep -RIn "keyword" /path # 递归搜索关键词，显示行号 
-  sudo lsof -i :8080 # 查找端口是否被人使用 
+  find /path -name "pattern" # 按名称查找文件
+  grep -RIn "keyword" /path # 递归搜索关键词，显示行号
+  sudo lsof -i :8080 # 查找端口是否被人使用
   locate filename         # 需先 sudo updatedb
   ```
 - 磁盘与空间
@@ -58,6 +61,7 @@ tags:
   ```
 
 ## 文件和目录操作（建议与常用场景）
+
 - 递归复制并保留权限：
   ```bash
   cp -a src_dir/ dest_dir/
@@ -72,6 +76,7 @@ tags:
   ```
 
 ## 显卡动态查看（常见 NVIDIA）
+
 - 实时查看 GPU 使用情况：
   ```bash
   nvidia-smi
@@ -92,7 +97,24 @@ tags:
   journalctl -k | grep -i nvidia
   ```
 
+## 异常监测
+
+- 防止有后台运行的python进程占用资源：
+
+  ```bash
+  ps aux | grep python
+  ```
+
+- 服务器卡顿 :
+  ```bash
+  ps aux --sort=-%mem | head -10
+  # aux：看所有进程详情
+  # --sort=-%mem：按内存从大到小排序
+  # head -10：只显示前 10 个占用最高的
+  ```
+
 ## 进程管理（查看与定位）
+
 - 查看进程列表与资源占用：
   ```bash
   ps aux | grep process_name
@@ -111,10 +133,13 @@ tags:
   ```
 
 ## 后台进程管理方案（开发到生产）
+
 以下根据复杂度与可靠性由低到高排列。
 
 ### 1) 使用 nohup（简单、快速）
+
 优点：无需额外配置，适合短期任务。
+
 ```bash
 nohup python -u run_script.py > script.log 2>&1 &
 # 说明：
@@ -123,7 +148,9 @@ nohup python -u run_script.py > script.log 2>&1 &
 # > script.log 2>&1: 标准输出与错误输出合并到文件
 # &: 后台运行
 ```
+
 查看与终止：
+
 ```bash
 ps aux | grep "python run_script.py"
 tail -f script.log
@@ -132,7 +159,9 @@ kill -9 <pid>                       # 强制结束（谨慎）
 ```
 
 ### 2) 使用 tmux（会话管理）
+
 优点：交互式控制，方便重连和调试。
+
 ```bash
 sudo apt install tmux -y
 tmux new -s model_train
@@ -145,11 +174,15 @@ tmux attach -t model_train
 # 列出现有会话：
 tmux ls
 ```
+
 提示：tmux 可以配合日志重定向使用，或在会话内启动监控工具（htop、nvidia-smi -l 2 等）。
 
 ### 3) 使用 systemd（生产环境推荐）
+
 优点：开机自启、故障自动重启、日志集中（journalctl）。
+
 - 创建服务文件（命名示例：/etc/systemd/system/model.service）
+
   ```ini
   [Unit]
   Description=Model Training Service
@@ -168,6 +201,7 @@ tmux ls
   [Install]
   WantedBy=multi-user.target
   ```
+
 - 启用并管理服务：
   ```bash
   sudo systemctl daemon-reload
@@ -183,6 +217,7 @@ tmux ls
   ```
 
 ## 其他工具与建议
+
 - 使用 supervisor / pm2（针对 Python 或 Node 应用）也可管理进程并提供 Web 管理界面。
 - 使用虚拟环境或 conda 管理 Python 依赖，避免系统级冲突。
 - 使用 logrotate 管理日志文件大小：
@@ -191,6 +226,7 @@ tmux ls
   - 尽量避免以 root 运行业务进程，创建专用用户并赋予最小权限。
 
 ## 常见排查命令
+
 - 查看系统日志：
   ```bash
   sudo journalctl -xe
@@ -206,6 +242,7 @@ tmux ls
   ```
 
 ## 小结
+
 - 开发时：nohup 或 tmux 快速起步，便于调试与观察日志。
 - 生产时：使用 systemd（或 supervisor/pm2）以保证服务可管理、可重启与开机自启，并结合 journalctl/logrotate 做日志管理。
 - 常备命令：nvidia-smi、top/htop、ps/pgrep、lsof、journalctl、ss。掌握这些可应对大多数日常维护与排障场景。

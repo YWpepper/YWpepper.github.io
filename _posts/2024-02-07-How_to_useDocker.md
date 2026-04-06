@@ -1,5 +1,5 @@
 ---
-title: 'How_to_useDocker'
+title: "How_to_useDocker"
 lang: zh-CN
 date: 2024-02-07
 author: pepper
@@ -9,17 +9,18 @@ tags:
   - Server
   - Command
 ---
-这篇笔记汇总了在 docker 下常用的快速命令。
-<!-- more -->
 
+这篇笔记汇总了在 docker 下常用的快速命令。
+
+<!-- more -->
 
 ## 使用本地 Dockerfile 构建
 
-A text file containing instructions to build Docker images automatically 
-  -------- 包含自动构建 Docker 镜像指令的文本文件
+A text file containing instructions to build Docker images automatically
+-------- 包含自动构建 Docker 镜像指令的文本文件
 
 1. 项目样例： 对于easydataset项目，Dockerfile内容如下：
-  
+
 ```dockerfile
 # 创建包含pnpm的基础镜像
 FROM node:20-alpine AS pnpm-base
@@ -108,7 +109,9 @@ ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]
 CMD ["pnpm", "start"]
 
 ```
+
 由于想自行构建镜像，使用上面项目根目录中的 Dockerfile：
+
 - 克隆仓库：
 
 ```bash
@@ -117,11 +120,14 @@ cd easy-dataset
 ```
 
 - 构建 Docker 镜像：
+
 ```bash
 docker build -t easy-dataset .
+docker build -t easy-dataset:v1 .
 ```
 
 - 运行容器：
+
 ```bash
 docker run -d \\
   -p 1717:1717 \\
@@ -137,7 +143,29 @@ docker run -d \\
 
 - 打开浏览器，访问 `http://localhost:1717`
 
+> 常见问题：
 
+- 现在服务在容器里跑着，但外部浏览器打不开。日志里写的是：`Local: http://localhost:1717` 这是容器内部的 127.0.0.1，外面访问不到。
+  - 解决办法： 运行时加一个环境变量：`-e HOST=0.0.0.0`
+    ```bash
+    docker run -d \
+      -p 1717:1717 \
+      -e HOST=0.0.0.0 \
+      --name easy-dataset \
+      --restart always \
+      easy-dataset:v1
+    ```
+
+- 如何确保开机自启动这个服务？
+  - 解决办法： 运行时加一个参数：`--restart always`
+    ```bash
+    docker run -d \
+      -docker update --restart=always easy-dataset
+    ```
+  - 查看是否设置成功：
+    ```bash
+    docker inspect easy-dataset | grep Restart
+    ```
 
 ## 使用官方 Docker 镜像
 
@@ -156,7 +184,7 @@ services:
     image: ghcr.io/conardli/easy-dataset
     container_name: easy-dataset
     ports:
-      - '1717:1717'
+      - "1717:1717"
     volumes:
       - ./local-db:/app/local-db
       - ./prisma:/app/prisma
