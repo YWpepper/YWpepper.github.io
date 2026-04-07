@@ -1,9 +1,9 @@
 ---
-title: 'FinRpt_PapperReading.'
+title: 'Xinference_RAGFlow'
 lang: zh-CN
 date: 2025-11-11
 author: pepper
-permalink: /posts/2025/11/hFinRpt_PapperReading./
+tags: [service]
 pinned: false
 toc: true
 tags:

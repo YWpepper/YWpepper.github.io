@@ -1,9 +1,9 @@
 ---
 layout: post
-title: 'How to Use Gmail'
+title: 'How_to_Use_Gmail'
 date: 2025-11-22
 author: pepper
-tags: [Services, Gmail, Tips]
+tags: [tool]
 comments: true
 toc: true
 pinned: false

@@ -3,6 +3,7 @@ title: 'what_Torchversion_install'
 lang: zh-CN
 date: 2025-02-11
 author: pepper
+tags: [tool]
 permalink: /posts/2025/02/what_Torchversion_install/
 pinned: false
 toc: true

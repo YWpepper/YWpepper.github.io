@@ -3,7 +3,7 @@ layout: post
 title: 'How_to_downloadHF'
 date: 2025-11-14
 author: pepper
-tags: [Dlenv,LLM]
+tags: [server]
 comments: true
 toc: true
 pinned: false

@@ -3,7 +3,7 @@ layout: post
 title: 'CoDiEmb_PapperReading'
 date: 2025-11-17
 author: pepper
-tags: [papperReading, Note]
+tags: [papperReading]
 comments: true
 toc: true
 pinned: false

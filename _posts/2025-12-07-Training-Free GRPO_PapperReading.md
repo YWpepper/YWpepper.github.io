@@ -1,9 +1,9 @@
 ---
 layout: post
-title: 'Training-Free GRPO_PapperReading'
+title: 'Training_Free_GRPO'
 date: 2025-12-07
 author: pepper
-tags: [papperReading, Note]
+tags: [papperReading]
 comments: true
 toc: true
 pinned: false

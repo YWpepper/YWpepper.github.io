@@ -3,7 +3,7 @@ title: 'how_to_use_remoteSSH'
 lang: zh-CN
 date: 2025-03-11
 author: pepper
-permalink: /posts/2025/03/how_to_use_remoteSSH/
+tags: [service]
 pinned: false
 toc: true
 tags:

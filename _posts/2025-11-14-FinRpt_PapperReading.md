@@ -3,7 +3,7 @@ layout: post
 title: 'FinRpt_PapperReading_AAAI2026'
 date: 2025-11-14
 author: pepper
-tags: [papperReading, AAAI2026]
+tags: [papperReading]
 comments: true
 toc: true
 pinned: false

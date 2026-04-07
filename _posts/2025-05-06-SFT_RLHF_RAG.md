@@ -1,9 +1,9 @@
 ---
-title: how_to_make_LLM
+title: 理论知识_SFT_RLHF_RAG
 lang: zh-CN
 date: 2025-05-06
 author: pepper
-permalink: /posts/2025/05/how_to_make_LLM/
+tags: [papperReading]
 pinned: false
 toc: true
 tags:

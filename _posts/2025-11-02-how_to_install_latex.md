@@ -3,6 +3,7 @@ title: 'how_to_install_latex'
 lang: zh-CN
 date: 2025-11-02
 author: pepper
+tags: [tool]
 pinned: false
 toc: true
 tags:

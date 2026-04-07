@@ -3,7 +3,7 @@ layout: post
 title: 'What_accidentLLM'
 date: 2025-11-13
 author: pepper
-tags: [papperReading, Note]
+tags: [papperReading]
 comments: true
 toc: true
 pinned: false

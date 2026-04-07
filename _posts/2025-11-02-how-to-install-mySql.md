@@ -2,6 +2,7 @@
 title: 'how_to_install_mySql'
 lang: zh-CN
 date: 2025-11-02
+tags: [service]
 author: pepper
 pinned: false
 toc: true

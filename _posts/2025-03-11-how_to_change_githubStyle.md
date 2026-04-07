@@ -3,7 +3,7 @@ title: 'how_to_change_githubStyle'
 lang: zh-CN
 date: 2025-03-11
 author: pepper
-permalink: /posts/2025/03/how_to_change_githubStyle/
+tags: [service]
 pinned: false
 toc: true
 tags:

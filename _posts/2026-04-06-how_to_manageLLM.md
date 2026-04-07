@@ -3,7 +3,7 @@ layout: post
 title: "how_to_manageLLM"
 date: 2026-04-05
 author: pepper
-tags: [algorithm]
+tags: [server]
 comments: true
 toc: true
 pinned: false

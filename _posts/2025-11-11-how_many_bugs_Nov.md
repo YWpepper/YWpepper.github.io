@@ -3,7 +3,7 @@ layout: post
 title: 'how_many_bugs_nov'
 date: 2025-11-11
 author: pepper
-tags: [Windows, Note]
+tags: [bug]
 comments: true
 toc: true
 pinned: false
