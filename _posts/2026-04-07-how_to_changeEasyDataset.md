@@ -1,20 +1,23 @@
----
+***
+
 layout: post
-title: "how_to_changeEasyDataset"
+title: "how\_to\_changeEasyDataset"
 date: 2026-04-07
 author: pepper
-tags: [server]
+tags: \[server]
 comments: true
 toc: true
 pinned: false
----
+-------------
 
 这篇博客介绍了Easy Dataset项目的架构，并指导你如何添加登录验证页面。
+
 <!-- more -->
 
 ## 📋 项目架构分析
 
 Easy Dataset是一个基于Next.js的全栈应用，使用：
+
 - **前端**: Next.js 14 + React 18 + Material-UI
 - **后端**: Next.js API Routes + Prisma ORM
 - **数据库**: SQLite (Prisma)
@@ -26,6 +29,7 @@ Easy Dataset是一个基于Next.js的全栈应用，使用：
 ## 🎯 登录验证实现方案
 
 ### 1. 拉取仓库
+
 ```bash
 git clone https://github.com/ConardLi/easy-dataset.git
 cd easy-dataset
@@ -35,27 +39,25 @@ npm install
 ### 2. 需要修改的核心文件
 
 #### 后端部分（API Routes）:
+
 1. **创建认证API**：
    - `app/api/auth/login/route.js` - 登录验证
    - `app/api/auth/logout/route.js` - 登出
    - `app/api/auth/me/route.js` - 获取当前用户信息
    - `app/api/auth/register/route.js` - 用户注册（可选）
-
 2. **数据库模型**：
    - `prisma/schema.prisma` - 添加User模型
    - `lib/db/users.js` - 用户数据库操作
-
 3. **中间件**：
    - `middleware.js` - 路由保护中间件
 
 #### 前端部分：
+
 1. **登录页面**：
    - `app/login/page.js` - 登录页面组件
-
 2. **上下文和状态**：
    - `contexts/AuthContext.js` - 认证状态管理
    - `hooks/useAuth.js` - 认证相关hook
-
 3. **现有组件修改**：
    - `app/layout.js` - 添加认证provider
    - `app/page.js` - 添加登录检查
@@ -64,7 +66,9 @@ npm install
 ### 3. 详细实现步骤
 
 #### 步骤1: 修改数据库模型
+
 在`prisma/schema.prisma`中添加用户模型：
+
 ```prisma
 model User {
   id        String   @id @default(cuid())
@@ -77,7 +81,9 @@ model User {
 ```
 
 #### 步骤2: 创建认证API
+
 在`app/api/auth/login/route.js`：
+
 ```javascript
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
@@ -108,7 +114,9 @@ export async function POST(request) {
 ```
 
 #### 步骤3: 创建登录页面
+
 在`app/login/page.js`：
+
 ```javascript
 'use client';
 import { useState } from 'react';
@@ -181,7 +189,9 @@ export default function LoginPage() {
 ```
 
 #### 步骤4: 创建认证上下文
+
 在`contexts/AuthContext.js`：
+
 ```javascript
 'use client';
 import { createContext, useState, useContext, useEffect } from 'react';
@@ -263,7 +273,9 @@ export const useAuth = () => {
 ```
 
 #### 步骤5: 修改主布局
+
 更新`app/layout.js`：
+
 ```javascript
 import { AuthProvider } from '@/contexts/AuthContext';
 
@@ -288,7 +300,9 @@ export default function RootLayout({ children }) {
 ```
 
 #### 步骤6: 添加路由保护
+
 创建`middleware.js`：
+
 ```javascript
 import { NextResponse } from 'next/server';
 import { jwtVerify } from 'jose';
@@ -316,28 +330,39 @@ export const config = {
 ### 4. 本地构建和部署流程
 
 #### 安装依赖
+
 ```bash
 npm install bcryptjs jsonwebtoken jose
 ```
 
 #### 环境变量配置
+
 创建`.env.local`文件：
+
 ```
 JWT_SECRET=your-secret-key-here
 ```
 
-#### 数据库迁移
+#### 数据库管理
+
 ```bash
 npm run db:push
+# 由于本项目添加了一个登陆账号验证的功能
+# 新创建了一张表来做管理员账户
+npm rum db:studio
+
 ```
 
 #### 开发模式运行
+
 ```bash
 npm run dev
-# 访问 http://localhost:1717
+# 此处根据 package.json 中的配置，修改为1718
+# 访问 http://localhost:1718
 ```
 
 #### 生产构建
+
 ```bash
 npm run build
 npm run start
@@ -345,19 +370,40 @@ npm run start
 ```
 
 #### Docker部署
+
 ```bash
 # 构建镜像
 docker build -t easy-dataset-with-auth .
 
 # 运行容器
 docker run -d \
-  -p 1717:1717 \
+  -p 1718:1718 \
   -v ./local-db:/app/local-db \
   -v ./prisma:/app/prisma \
   -e JWT_SECRET=your-secret-key-here \
   --name easy-dataset-auth \
   easy-dataset-with-auth
+
+#还需要设置关机自启动
+docker run -d \
+  -p 1718:1718 \
+  -v ./local-db:/app/local-db \
+  -v ./prisma:/app/prisma \
+  -e JWT_SECRET=your-secret-key-here \
+  --name easy-dataset-auth \
+  --restart unless-stopped \
+  easy-dataset-with-auth
 ```
+`--restart`参数的说明
+
+| 参数值 | 说明 |
+| :--- | :--- |
+| **no** | 默认值。容器退出或系统重启后**不会**自动重启。 |
+| **always** | 只要 Docker 服务在运行，容器就会自动重启。即使你手动停止了它，重启电脑后它仍会尝试启动。 |
+| **unless-stopped** | **最推荐。** 重启电脑后会自动启动，但前提是你在关机前**没有手动停止**（`docker stop`）这个容器。 |
+| **on-failure** | 只有当容器非正常退出（退出状态码非 0）时才会重启。 |
+
+
 
 ## 🔧 额外建议
 
