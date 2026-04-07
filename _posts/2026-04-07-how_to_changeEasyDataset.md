@@ -1,14 +1,13 @@
-***
-
+---
 layout: post
-title: "how\_to\_changeEasyDataset"
+title: "how_to_changeEasyDataset"
 date: 2026-04-07
 author: pepper
-tags: \[server]
+tags: [server]
 comments: true
 toc: true
 pinned: false
--------------
+---
 
 这篇博客介绍了Easy Dataset项目的架构，并指导你如何添加登录验证页面。
 
