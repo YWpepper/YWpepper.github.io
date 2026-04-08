@@ -595,7 +595,7 @@ ALLOWED_ORIGINS=http://localhost:port,http://your.domain.name:port
 
 点击浏览器的`network` 状态,查看输入账号密码后的状态
 
-<img src="https://virginia-pepper.oss-cn-guangzhou.aliyuncs.com/20260408120737081.jpeg" alt="alt text" width="60%" />
+<img src="https://virginia-pepper.oss-cn-guangzhou.aliyuncs.com/20260408120737081.jpeg" alt="alt text" width="75%" />
 
 如果`\login`状态为 200， 但是无法进行跳转，则有可能是因为 CORS 跨域问题导致。
 
@@ -603,7 +603,7 @@ ALLOWED_ORIGINS=http://localhost:port,http://your.domain.name:port
 
 > ps: 解释CORS（跨域资源共享）： 安全机制导致的访问失败
 
-<img src="https://virginia-pepper.oss-cn-guangzhou.aliyuncs.com/20260408121001858.png" alt="alt text" width="60%" />
+<img src="https://virginia-pepper.oss-cn-guangzhou.aliyuncs.com/20260408121001858.png" alt="alt text" width="75%" />
 
 🔍 **核心原因排查**
 
