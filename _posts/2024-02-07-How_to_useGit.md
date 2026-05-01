@@ -13,6 +13,25 @@ tags:
 
 # 个人常用指令
 
+
+## 切换分支直接关联远程并提交：
+
+```bash
+git init
+git remote add origin git@github.com:YWpepper/zhuanli_shijue.git
+git checkout -b new_branch
+git add .
+git commit -m "your message"
+git push -u origin new_branch
+
+#若远程已有内容导致 push 失败，可先执行：
+git pull origin main --allow-unrelated-histories
+```
+
+
+
+
+
 ### 回退到指定提交版本
 
 **步骤1：查看提交历史**
