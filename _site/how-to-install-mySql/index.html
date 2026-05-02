@@ -1,0 +1,407 @@
+<p>安装 MySQL 关系型数据库管理系统的操作指南；
+<!-- more --></p>
+<h2 id="各种数据库的端口">各种数据库的端口</h2>
+
+<ul>
+  <li>MySQL：3306</li>
+  <li>Redis：6379</li>
+  <li>MongoDB：27017</li>
+  <li>Django：8000</li>
+  <li>flask：5000</li>
+</ul>
+
+<h2 id="使用-navicat-进行数据库管理">使用 Navicat 进行数据库管理</h2>
+
+<ol>
+  <li>设置实际运行的端口 3308，因为我的电脑上有 WSL 会有镜像问题</li>
+</ol>
+
+<p><img src="https://images.weserv.nl/?url=cdn.nlark.com/yuque/0/2025/png/40742019/1762142013620-2eb8d811-510a-427d-a214-8313c63e73b3.png" width="70%" /></p>
+
+<h2 id="安装报错">安装报错</h2>
+
+<h3 id="1-data-文件夹无法使用">1. data 文件夹无法使用</h3>
+
+<p><strong>解决方案</strong>：删除该文件夹，重新创建，确保其为空</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>C:<span class="se">\W</span>indows<span class="se">\S</span>ystem32&gt;mysqld <span class="nt">--initialize</span> <span class="nt">--console</span>
+2025-11-02T15:12:33.373893Z 0 <span class="o">[</span>System] <span class="o">[</span>MY-015017] <span class="o">[</span>Server] MySQL Server Initialization - start.
+2025-11-02T15:12:33.383215Z 0 <span class="o">[</span>System] <span class="o">[</span>MY-013169] <span class="o">[</span>Server] E:<span class="se">\M</span>ySql<span class="se">\m</span>ysql-8.4.7<span class="se">\b</span><span class="k">in</span><span class="se">\m</span>ysqld.exe <span class="o">(</span>mysqld 8.4.7<span class="o">)</span> initializing of server <span class="k">in </span>progress as process 40892
+2025-11-02T15:12:33.406661Z 1 <span class="o">[</span>System] <span class="o">[</span>MY-013576] <span class="o">[</span>InnoDB] InnoDB initialization has started.
+2025-11-02T15:12:33.592871Z 1 <span class="o">[</span>System] <span class="o">[</span>MY-013577] <span class="o">[</span>InnoDB] InnoDB initialization has ended.
+2025-11-02T15:12:34.444169Z 0 <span class="o">[</span>ERROR] <span class="o">[</span>MY-000067] <span class="o">[</span>Server] unknown variable <span class="s1">'default_authentication_plugin=mysql_native_password'</span><span class="nb">.</span>
+2025-11-02T15:12:34.445152Z 0 <span class="o">[</span>ERROR] <span class="o">[</span>MY-013236] <span class="o">[</span>Server] The designated data directory E:<span class="se">\M</span>ySql<span class="se">\m</span>ysql-8.4.7<span class="se">\d</span>ata<span class="se">\ </span>is unusable. You can remove all files that the server added to it.
+2025-11-02T15:12:34.445232Z 0 <span class="o">[</span>ERROR] <span class="o">[</span>MY-010119] <span class="o">[</span>Server] Aborting
+2025-11-02T15:12:35.218892Z 0 <span class="o">[</span>System] <span class="o">[</span>MY-015018] <span class="o">[</span>Server] MySQL Server Initialization - end.
+</code></pre></div></div>
+
+<h3 id="2-正常运行结果">2. 正常运行结果</h3>
+
+<p>临时密码：<code class="language-plaintext highlighter-rouge">**********</code></p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>C:<span class="se">\W</span>indows<span class="se">\S</span>ystem32&gt;mysqld <span class="nt">--initialize</span> <span class="nt">--console</span>
+2025-11-03T03:48:13.155389Z 0 <span class="o">[</span>System] <span class="o">[</span>MY-015017] <span class="o">[</span>Server] MySQL Server Initialization - start.
+2025-11-03T03:48:13.158492Z 0 <span class="o">[</span>System] <span class="o">[</span>MY-013169] <span class="o">[</span>Server] E:<span class="se">\M</span>ySql<span class="se">\b</span><span class="k">in</span><span class="se">\m</span>ysqld.exe <span class="o">(</span>mysqld 9.4.0<span class="o">)</span> initializing of server <span class="k">in </span>progress as process 16960
+2025-11-03T03:48:13.169209Z 1 <span class="o">[</span>System] <span class="o">[</span>MY-013576] <span class="o">[</span>InnoDB] InnoDB initialization has started.
+2025-11-03T03:48:13.358200Z 1 <span class="o">[</span>System] <span class="o">[</span>MY-013577] <span class="o">[</span>InnoDB] InnoDB initialization has ended.
+2025-11-03T03:48:14.164476Z 6 <span class="o">[</span>Note] <span class="o">[</span>MY-010454] <span class="o">[</span>Server] A temporary password is generated <span class="k">for </span>root@localhost: <span class="k">**********</span>
+2025-11-03T03:48:15.693586Z 0 <span class="o">[</span>System] <span class="o">[</span>MY-015018] <span class="o">[</span>Server] MySQL Server Initialization - end.
+</code></pre></div></div>
+
+<h3 id="3-服务无法打开">3. 服务无法打开</h3>
+
+<p>报错原因如下：</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>E:<span class="se">\M</span>ySql<span class="se">\b</span><span class="k">in</span><span class="o">&gt;</span>mysqld <span class="nt">--console</span>
+2025-11-03T03:18:35.629807Z 0 <span class="o">[</span>System] <span class="o">[</span>MY-015015] <span class="o">[</span>Server] MySQL Server - start.
+2025-11-03T03:18:35.708375Z 0 <span class="o">[</span>System] <span class="o">[</span>MY-010116] <span class="o">[</span>Server] E:<span class="se">\M</span>ySql<span class="se">\b</span><span class="k">in</span><span class="se">\m</span>ysqld.exe <span class="o">(</span>mysqld 8.4.7<span class="o">)</span> starting as process 41084
+2025-11-03T03:18:35.715892Z 1 <span class="o">[</span>System] <span class="o">[</span>MY-013576] <span class="o">[</span>InnoDB] InnoDB initialization has started.
+2025-11-03T03:18:35.863177Z 1 <span class="o">[</span>System] <span class="o">[</span>MY-013577] <span class="o">[</span>InnoDB] InnoDB initialization has ended.
+2025-11-03T03:18:35.938180Z 0 <span class="o">[</span>ERROR] <span class="o">[</span>MY-011292] <span class="o">[</span>Server] Plugin mysqlx reported: <span class="s1">'Preparation of I/O interfaces failed, X Protocol won'</span>t be accessible<span class="s1">'
+2025-11-03T03:18:35.938305Z 0 [ERROR] [MY-011300] [Server] Plugin mysqlx reported: '</span>Setup of bind-address: <span class="s1">'*'</span> port: 33060 failed, <span class="o">(</span>10013<span class="o">)</span><span class="nb">.</span> Do you already have another mysqld server running with Mysqlx ?<span class="s1">'
+2025-11-03T03:18:35.939039Z 0 [ERROR] [MY-013597] [Server] Plugin mysqlx reported: '</span>Value <span class="s1">'*'</span> <span class="nb">set </span>to <span class="sb">`</span>Mysqlx_bind_address<span class="sb">`</span>, X Plugin can<span class="s1">'t bind to it. Skipping this value.'</span>
+2025-11-03T03:18:35.990818Z 0 <span class="o">[</span>Warning] <span class="o">[</span>MY-010068] <span class="o">[</span>Server] CA certificate ca.pem is self signed.
+2025-11-03T03:18:35.990982Z 0 <span class="o">[</span>System] <span class="o">[</span>MY-013602] <span class="o">[</span>Server] Channel mysql_main configured to support TLS. Encrypted connections are now supported <span class="k">for </span>this channel.
+2025-11-03T03:18:35.994040Z 0 <span class="o">[</span>ERROR] <span class="o">[</span>MY-010262] <span class="o">[</span>Server] Can<span class="s1">'t start server: Bind on TCP/IP port: 通常每个套接字地址(协议/网络地址/端口)只允许使用一次。
+2025-11-03T03:18:35.994168Z 0 [ERROR] [MY-010257] [Server] Do you already have another mysqld server running on port: 3306 ?
+2025-11-03T03:18:35.994254Z 0 [ERROR] [MY-010119] [Server] Aborting
+2025-11-03T03:18:37.208184Z 0 [System] [MY-010910] [Server] E:\MySql\bin\mysqld.exe: Shutdown complete (mysqld 8.4.7) MySQL Community Server - GPL.
+2025-11-03T03:18:37.208369Z 0 [System] [MY-015016] [Server] MySQL Server - end.
+</span></code></pre></div></div>
+
+<h4 id="错误解析端口占用-">错误解析：端口占用 ❌</h4>
+
+<p>主要的错误集中在端口绑定失败上：</p>
+
+<p><strong>1. 传统连接端口 (Port 3306)</strong></p>
+
+<ul>
+  <li><strong>错误信息：</strong> <code class="language-plaintext highlighter-rouge">Can't start server: Bind on TCP/IP port: 通常每个套接字地址(协议/网络地址/端口)只允许使用一次。</code></li>
+  <li><strong>错误信息：</strong> <code class="language-plaintext highlighter-rouge">Do you already have another mysqld server running on port: 3306 ?</code></li>
+  <li><strong>解释：</strong> 这是最主要的错误。操作系统报告说 <strong>MySQL 的默认端口 3306 已经被另一个进程（可能是另一个 MySQL 实例或任何其他服务）占用</strong>。服务器无法绑定到这个端口，因此启动失败。</li>
+</ul>
+
+<p><strong>2. X Protocol 端口 (Port 33060)</strong></p>
+
+<ul>
+  <li><strong>错误信息：</strong> <code class="language-plaintext highlighter-rouge">Plugin mysqlx reported: 'Setup of bind-address: '*' port: 33060 failed, (10013). Do you already have another mysqld server running with Mysqlx ?'</code></li>
+  <li><strong>解释：</strong> MySQL 8.0+ 版本默认启用了 X Plugin，它使用 <strong>33060 端口</strong>。这个端口也遇到了类似的绑定失败问题，很可能是因为 <strong>另一个进程占用了 33060 端口</strong>，或者 <strong>权限不足 (错误代码 10013)</strong>，但最常见的原因仍是端口占用。</li>
+</ul>
+
+<h4 id="修改-mysql-的默认端口">修改 MySQL 的默认端口</h4>
+
+<p>如果 3306 端口被一个您不想或不能停止的程序占用，您可以<strong>修改您当前要启动的 MySQL 实例使用的端口</strong>。</p>
+
+<ol>
+  <li>找到您的 MySQL 配置文件 <code class="language-plaintext highlighter-rouge">my.ini</code>（通常在 <code class="language-plaintext highlighter-rouge">E:\MySql</code> 或其子目录下）</li>
+  <li>用文本编辑器打开它</li>
+  <li>在 <code class="language-plaintext highlighter-rouge">[mysqld]</code> 标题下，找到或添加 <code class="language-plaintext highlighter-rouge">port</code> 配置项，将其更改为<strong>另一个未被占用的端口</strong>（例如 <strong>3307</strong> 或 <strong>3308</strong>）：</li>
+</ol>
+
+<div class="language-ini highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nn">[mysqld]</span>
+<span class="c"># ... 其他配置
+</span><span class="py">port</span><span class="p">=</span><span class="s">3307</span>
+<span class="c"># ...
+</span></code></pre></div></div>
+
+<ol>
+  <li><strong>保存</strong> <code class="language-plaintext highlighter-rouge">my.ini</code> 文件</li>
+  <li><strong>重新启动</strong> MySQL 服务器：<code class="language-plaintext highlighter-rouge">E:\MySql\bin&gt;mysqld --console</code></li>
+</ol>
+
+<hr />
+
+<h2 id="参考指南">参考指南</h2>
+
+<h3 id="一各种数据库的端口">【一】各种数据库的端口</h3>
+
+<ul>
+  <li>MySQL：3306</li>
+  <li>Redis：6379</li>
+  <li>MongoDB：27017</li>
+  <li>Django：8000</li>
+  <li>flask：5000</li>
+</ul>
+
+<h3 id="二mysql-介绍">【二】MySQL 介绍</h3>
+
+<ul>
+  <li>MySQL 是一个开源免费的关系型数据库管理系统，由瑞典 MySQL AB 公司开发，目前属于 Oracle 旗下公司。</li>
+  <li>MySQL 是最流行的关系型数据库管理系统，在 WEB 应用方面 MySQL 是最好的 RDBMS (Relational Database Management System，关系数据库管理系统) 应用软件之一。</li>
+  <li>具有成本低、速度快、体积小且开放源代码等优点。</li>
+  <li>全球数据库引擎使用排行榜：</li>
+</ul>
+
+<p><img src="https://pica.zhimg.com/v2-64e9d5ab42a89c506420bcf17e625d44_1440w.jpg" width="70%" /></p>
+
+<h3 id="三下载-mysql-服务端">【三】下载 MySQL 服务端</h3>
+
+<h4 id="1打开官网">（1）打开官网</h4>
+
+<ul>
+  <li><a href="https://link.zhihu.com/?target=https%3A//www.mysql.com">https://www.mysql.com</a></li>
+</ul>
+
+<h4 id="2点击-downloads">（2）点击 downloads</h4>
+
+<p><img src="https://pic2.zhimg.com/v2-73f621867acaf68bc699326a1653537d_1440w.jpg" width="70%" /></p>
+
+<p><img src="https://picx.zhimg.com/v2-41787b19ae771ba440d66b39524e2463_1440w.jpg" width="70%" /></p>
+
+<h4 id="3选择-mysql-community-server">（3）选择 MySQL Community Server</h4>
+
+<p><img src="https://pic2.zhimg.com/v2-7da1db22a0e0246216aa93a1d4bfb45b_1440w.jpg" width="70%" /></p>
+
+<h4 id="4选择版本">（4）选择版本</h4>
+
+<p><img src="https://pic1.zhimg.com/v2-fd39072cf256372a9259ef2ecc48bd58_1440w.jpg" width="70%" /></p>
+
+<p><img src="https://pic3.zhimg.com/v2-3c90ad4e36584ed39ea6c0c28f8ffd7c_1440w.jpg" width="70%" /></p>
+
+<h3 id="四安装-mysql">【四】安装 MySQL</h3>
+
+<h4 id="1解压压缩包">（1）解压压缩包</h4>
+
+<ul>
+  <li>右键压缩包选择解压，可以改文件夹名字也可以不改</li>
+</ul>
+
+<p><img src="https://pic3.zhimg.com/v2-7a24844ce2598f24b3261dd0b1444a44_1440w.jpg" width="70%" /></p>
+
+<h4 id="2配置环境变量">（2）配置环境变量</h4>
+
+<ul>
+  <li>打开设置搜索环境变量</li>
+  <li>将 MySQL 的 bin 目录添加到环境变量中</li>
+</ul>
+
+<p><img src="https://pic3.zhimg.com/v2-1b1009da6e889dd87147a744b16cc97a_1440w.jpg" width="70%" /></p>
+
+<h4 id="3打开终端">（3）打开终端</h4>
+
+<ul>
+  <li>win+r</li>
+  <li>以管理员身份运行</li>
+</ul>
+
+<p><img src="https://pic3.zhimg.com/v2-d49d26e468fd9fd84deb769abfe3205a_1440w.jpg" width="70%" /></p>
+
+<h4 id="4配置-mysql-配置文件">（4）配置 MySQL 配置文件</h4>
+
+<ul>
+  <li>在你的 MySQL 安装目录下新建一个文件，文件名 <code class="language-plaintext highlighter-rouge">my.ini</code></li>
+</ul>
+
+<p><img src="https://pica.zhimg.com/v2-3611fbaadac1e1f556ae97c3e5f4fc54_1440w.jpg" width="70%" /></p>
+
+<ul>
+  <li>复制并且修改路径</li>
+</ul>
+
+<div class="language-ini highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nn">[mysqld]</span>
+<span class="c"># 设置3306端口
+</span><span class="py">port</span><span class="p">=</span><span class="s">3306</span>
+<span class="c"># 设置mysql的安装目录
+</span><span class="py">basedir</span><span class="p">=</span><span class="s">"D:</span><span class="se">\p</span><span class="s">ython_studyclass</span><span class="se">\M</span><span class="s">ySQL"</span>
+<span class="c"># 设置mysql数据库的数据的存放目录，就是前面手动创建的data目录
+</span><span class="py">datadir</span><span class="p">=</span><span class="s">"D:</span><span class="se">\p</span><span class="s">ython_studyclass</span><span class="se">\M</span><span class="s">ySQL</span><span class="se">\d</span><span class="s">ata"</span>
+<span class="c"># 允许最大连接数
+</span><span class="py">max_connections</span><span class="p">=</span><span class="s">200</span>
+<span class="c"># 允许连接失败的次数
+</span><span class="py">max_connect_errors</span><span class="p">=</span><span class="s">10</span>
+<span class="c"># 服务端使用的字符集默认为utf8mb4
+</span><span class="py">character-set-server</span><span class="p">=</span><span class="s">utf8mb4</span>
+<span class="c"># 创建新表时将使用的默认存储引擎
+</span><span class="py">default-storage-engine</span><span class="p">=</span><span class="s">INNODB</span>
+<span class="c"># 默认使用"mysql_native_password"插件认证
+</span><span class="py">default_authentication_plugin</span><span class="p">=</span><span class="s">mysql_native_password</span>
+
+<span class="nn">[mysql]</span>
+<span class="c"># 设置mysql网络通信的默认字符集
+</span><span class="py">default-character-set</span><span class="p">=</span><span class="s">utf8mb4</span>
+
+<span class="nn">[client]</span>
+<span class="c"># 设置mysql客户端连接服务端时默认使用的端口
+</span><span class="py">port</span><span class="p">=</span><span class="s">3306</span>
+<span class="c"># 设置mysql客户端的默认字符集
+</span><span class="py">default-character-set</span><span class="p">=</span><span class="s">utf8mb4</span>
+</code></pre></div></div>
+
+<p><img src="https://picx.zhimg.com/v2-56210162f1ea7d9cc80a5be6ce25277b_1440w.jpg" width="70%" /></p>
+
+<ul>
+  <li>再创建一个 data 文件夹</li>
+</ul>
+
+<p><img src="https://pic1.zhimg.com/v2-e9420745dfcad84c75e0dd7247dad57a_1440w.jpg" width="70%" /></p>
+
+<h4 id="5初始化-mysql-服务端">（5）初始化 MySQL 服务端</h4>
+
+<ul>
+  <li>执行命令进行初始化</li>
+</ul>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>mysqld <span class="nt">--initialize</span> <span class="nt">--console</span>
+</code></pre></div></div>
+
+<ul>
+  <li>复制并记住临时密码：<code class="language-plaintext highlighter-rouge">****</code></li>
+</ul>
+
+<p><img src="https://pic3.zhimg.com/v2-6f33a38a79b7e4ae723edf73ec84eab2_1440w.jpg" width="70%" /></p>
+
+<h4 id="6注册系统服务">（6）注册系统服务</h4>
+
+<ul>
+  <li>未注册之前是没有 MySQL 服务的</li>
+  <li>搜索栏里搜索服务 或者 右键我的电脑 打开计算机管理 → 服务和应用程序 → 服务</li>
+</ul>
+
+<p><img src="https://pic2.zhimg.com/v2-b04efc134337ad6c1b61b7e8bec42865_1440w.jpg" width="70%" /></p>
+
+<ul>
+  <li>执行命令注册</li>
+</ul>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>mysqld <span class="nt">--install</span>
+</code></pre></div></div>
+
+<p><img src="https://pic4.zhimg.com/v2-b9bf9eef852fc9df22ac3dd4ddce330d_1440w.jpg" width="70%" /></p>
+
+<p><img src="https://pic3.zhimg.com/v2-1ba8be270ba8d4c872783616fbb19e44_1440w.jpg" width="70%" /></p>
+
+<ul>
+  <li>如果后续要移除的话，cmd 中以管理员身份运行</li>
+</ul>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>mysqld <span class="nt">--remove</span>
+</code></pre></div></div>
+
+<p>刷新服务，可以看到 MySQL 服务就被移除了</p>
+
+<h4 id="7启动-mysql-服务">（7）启动 MySQL 服务</h4>
+
+<p><strong>方式一：</strong></p>
+
+<p><img src="https://pic4.zhimg.com/v2-564797523dad3ef2a3fa502a0ab342d5_1440w.jpg" width="70%" /></p>
+
+<p><strong>方式二：</strong> cmd 中以管理员身份运行</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>net start mysql  <span class="c"># 启动MySQL服务</span>
+</code></pre></div></div>
+
+<p><img src="https://pic3.zhimg.com/v2-937a6679f4fe354d48b15b4b03e31d6c_1440w.jpg" width="70%" /></p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>net stop mysql  <span class="c"># 停止MySQL服务</span>
+</code></pre></div></div>
+
+<p><img src="https://pic1.zhimg.com/v2-af17dd937ad8dab5caf21c70f69f5fb8_1440w.jpg" width="70%" /></p>
+
+<h3 id="五mysql-操作">【五】MySQL 操作</h3>
+
+<h4 id="1登入和退出">（1）登入和退出</h4>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># 登录</span>
+<span class="c"># 方式一：直接本地登入 u：username root：用户名 -p：password</span>
+mysql <span class="nt">-uroot</span> <span class="nt">-p</span>
+
+<span class="c"># 方式二：加上用户名和密码一起登入</span>
+mysql <span class="nt">-uroot</span> <span class="nt">-p123456</span>
+
+<span class="c"># 链接远程服务登入</span>
+mysql <span class="nt">-h</span> 192.168.1.63 <span class="nt">-P</span> 3306 <span class="nt">-uroot</span> <span class="nt">-p123456</span>
+
+<span class="c"># 在SQL语句中必须有结束符: ;</span>
+quit<span class="p">;</span>
+</code></pre></div></div>
+
+<h4 id="2修改密码">（2）修改密码</h4>
+
+<p><strong>登入客户端：</strong></p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># 先执行：</span>
+mysql <span class="nt">-uroot</span> <span class="nt">-p</span>
+
+<span class="c"># 再输入临时密码：</span>
+<span class="k">****</span>
+</code></pre></div></div>
+
+<p><img src="https://pica.zhimg.com/v2-8a159a0d71e3492637e8e4cb9648ce0c_1440w.jpg" width="70%" /></p>
+
+<p><strong>修改密码：</strong></p>
+
+<div class="language-sql highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">alter</span> <span class="k">user</span> <span class="s1">'root'</span><span class="o">@</span><span class="s1">'localhost'</span> <span class="n">identified</span> <span class="k">by</span> <span class="s1">'****'</span><span class="p">;</span>
+</code></pre></div></div>
+
+<p><img src="https://pic3.zhimg.com/v2-0e8397a2c714459bd74e8f0639dc197c_1440w.jpg" width="70%" /></p>
+
+<p><strong>刷新权限：</strong></p>
+
+<div class="language-sql highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">flush</span> <span class="k">privileges</span><span class="p">;</span>
+</code></pre></div></div>
+
+<p><img src="https://pic3.zhimg.com/v2-62485287f11618a38cfda7036c9ca484_1440w.jpg" width="70%" /></p>
+
+<p><strong>退出：</strong></p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>quit<span class="p">;</span>
+</code></pre></div></div>
+
+<h4 id="3修改密码忘记原本的密码">（3）修改密码（忘记原本的密码）</h4>
+
+<ul>
+  <li>先关闭 MySQL 服务</li>
+</ul>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>net stop mysql
+</code></pre></div></div>
+
+<ul>
+  <li>执行跳表命令</li>
+</ul>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>mysqld <span class="nt">--skip-grant-tables</span>
+</code></pre></div></div>
+
+<ul>
+  <li>以无密码登入的启动模式启动 MySQL 服务端</li>
+  <li>额外再用管理员身份打开一个终端</li>
+  <li>执行 MySQL 登入命令 <code class="language-plaintext highlighter-rouge">mysql -uroot -p</code></li>
+  <li>输入密码的时候什么都不要输，直接 enter</li>
+</ul>
+
+<p><img src="https://pic2.zhimg.com/v2-2bb097e513664db57488e2a0e4ee167f_1440w.jpg" width="70%" /></p>
+
+<ul>
+  <li>继续修改密码，先刷新一下权限</li>
+</ul>
+
+<div class="language-sql highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">flush</span> <span class="k">privileges</span><span class="p">;</span>
+</code></pre></div></div>
+
+<ul>
+  <li>再执行修改密码</li>
+</ul>
+
+<div class="language-sql highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">alter</span> <span class="k">user</span> <span class="s1">'root'</span><span class="o">@</span><span class="s1">'localhost'</span> <span class="n">identified</span> <span class="k">by</span> <span class="s1">'****'</span><span class="p">;</span>
+</code></pre></div></div>
+
+<ul>
+  <li>再刷新权限</li>
+</ul>
+
+<div class="language-sql highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">flush</span> <span class="k">privileges</span><span class="p">;</span>
+</code></pre></div></div>
+
+<h4 id="4跳过输入密码直接登入">（4）跳过输入密码直接登入</h4>
+
+<ul>
+  <li>在 <code class="language-plaintext highlighter-rouge">my.ini</code> 配置文件中增加下述配置（在 <code class="language-plaintext highlighter-rouge">[mysql]</code> 部分）</li>
+  <li>不需要每次输入验证码即可登陆</li>
+</ul>
+
+<div class="language-ini highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nn">[mysql]</span>
+<span class="py">user</span><span class="p">=</span><span class="s">"root"</span>
+<span class="py">password</span><span class="p">=</span><span class="s">**********</span>
+<span class="py">default-character-set</span><span class="p">=</span><span class="s">utf8mb4</span>
+</code></pre></div></div>

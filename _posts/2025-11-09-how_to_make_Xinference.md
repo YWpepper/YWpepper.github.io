@@ -1,13 +1,11 @@
 ---
-title: 'Xinference_RAGFlow'
+title: '服务器-Xinference模型推理框架部署'
 lang: zh-CN
 date: 2025-11-11
 author: pepper
-tags: [service]
+tags: [xinference, llm, server]
 pinned: false
 toc: true
-tags:
-  - LLM
 ---
 
 这篇博客介绍了选用Xinference作为RAGFlow的模型推理框架的技术说明。

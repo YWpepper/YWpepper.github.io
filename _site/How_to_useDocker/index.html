@@ -1,0 +1,222 @@
+<p>这篇笔记汇总了在 docker 下常用的快速命令。</p>
+
+<!-- more -->
+
+<h2 id="使用本地-dockerfile-构建">使用本地 Dockerfile 构建</h2>
+
+<p>A text file containing instructions to build Docker images automatically
+——– 包含自动构建 Docker 镜像指令的文本文件</p>
+
+<ol>
+  <li>项目样例： 对于easydataset项目，Dockerfile内容如下：</li>
+</ol>
+
+<div class="language-dockerfile highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># 创建包含pnpm的基础镜像</span>
+<span class="k">FROM</span><span class="w"> </span><span class="s">node:20-alpine</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="s">pnpm-base</span>
+<span class="k">RUN </span>npm <span class="nb">install</span> <span class="nt">-g</span> pnpm@9
+
+<span class="c"># 构建阶段</span>
+<span class="k">FROM</span><span class="w"> </span><span class="s">pnpm-base</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="s">builder</span>
+<span class="k">WORKDIR</span><span class="s"> /app</span>
+
+<span class="c"># 添加构建参数，用于识别目标平台</span>
+<span class="k">ARG</span><span class="s"> TARGETPLATFORM</span>
+
+<span class="c"># 安装构建依赖</span>
+<span class="k">RUN </span>apk add <span class="nt">--no-cache</span> <span class="nt">--virtual</span> .build-deps <span class="se">\
+</span>    python3 <span class="se">\
+</span>    make <span class="se">\
+</span>    g++ <span class="se">\
+</span>    cairo-dev <span class="se">\
+</span>    pango-dev <span class="se">\
+</span>    jpeg-dev <span class="se">\
+</span>    giflib-dev <span class="se">\
+</span>    librsvg-dev <span class="se">\
+</span>    build-base <span class="se">\
+</span>    pixman-dev <span class="se">\
+</span>    pkgconfig
+
+<span class="c"># 复制依赖文件和npm配置并安装(.npmrc中可配置国内源加速)</span>
+<span class="k">COPY</span><span class="s"> package.json pnpm-lock.yaml .npmrc ./</span>
+<span class="k">RUN </span>pnpm <span class="nb">install</span>
+
+<span class="c"># 复制源代码</span>
+<span class="k">COPY</span><span class="s"> . .</span>
+
+<span class="c"># 根据目标平台设置Prisma二进制目标并构建应用</span>
+<span class="k">RUN if</span> <span class="o">[</span> <span class="s2">"</span><span class="nv">$TARGETPLATFORM</span><span class="s2">"</span> <span class="o">=</span> <span class="s2">"linux/arm64"</span> <span class="o">]</span><span class="p">;</span> <span class="k">then</span> <span class="se">\
+</span>        <span class="nb">echo</span> <span class="s2">"Configuring for ARM64 platform"</span><span class="p">;</span> <span class="se">\
+</span>        <span class="nb">sed</span> <span class="nt">-i</span> <span class="s1">'s/binaryTargets = \[.*\]/binaryTargets = \["linux-musl-arm64-openssl-3.0.x"\]/'</span> prisma/schema.prisma<span class="p">;</span> <span class="se">\
+</span>        <span class="nv">PRISMA_CLI_BINARY_TARGETS</span><span class="o">=</span><span class="s2">"linux-musl-arm64-openssl-3.0.x"</span> pnpm build<span class="p">;</span> <span class="se">\
+</span>    <span class="k">else</span> <span class="se">\
+</span>        <span class="nb">echo</span> <span class="s2">"Configuring for AMD64 platform (default)"</span><span class="p">;</span> <span class="se">\
+</span>        <span class="nb">sed</span> <span class="nt">-i</span> <span class="s1">'s/binaryTargets = \[.*\]/binaryTargets = \["linux-musl-openssl-3.0.x"\]/'</span> prisma/schema.prisma<span class="p">;</span> <span class="se">\
+</span>        <span class="nv">PRISMA_CLI_BINARY_TARGETS</span><span class="o">=</span><span class="s2">"linux-musl-openssl-3.0.x"</span> pnpm build<span class="p">;</span> <span class="se">\
+</span>    <span class="k">fi</span>
+
+<span class="c"># 构建完成后移除开发依赖，只保留生产依赖</span>
+<span class="k">RUN </span>pnpm prune <span class="nt">--prod</span>
+
+<span class="c"># 运行阶段</span>
+<span class="k">FROM</span><span class="w"> </span><span class="s">pnpm-base</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="s">runner</span>
+<span class="k">WORKDIR</span><span class="s"> /app</span>
+
+<span class="c"># 只安装运行时依赖</span>
+<span class="k">RUN </span>apk add <span class="nt">--no-cache</span> <span class="se">\
+</span>    cairo <span class="se">\
+</span>    pango <span class="se">\
+</span>    jpeg <span class="se">\
+</span>    giflib <span class="se">\
+</span>    librsvg <span class="se">\
+</span>    pixman
+
+<span class="c"># 复制package.json和.env文件</span>
+<span class="k">COPY</span><span class="s"> package.json .env ./</span>
+
+<span class="c"># 从构建阶段复制精简后的node_modules（只包含生产依赖）</span>
+<span class="k">COPY</span><span class="s"> --from=builder /app/node_modules ./node_modules</span>
+
+<span class="c"># 从构建阶段复制构建产物</span>
+<span class="k">COPY</span><span class="s"> --from=builder /app/.next ./.next</span>
+<span class="k">COPY</span><span class="s"> --from=builder /app/public ./public</span>
+<span class="k">COPY</span><span class="s"> --from=builder /app/electron ./electron</span>
+
+<span class="c"># 复制 prisma 到模板目录（用于自动初始化）</span>
+<span class="k">COPY</span><span class="s"> --from=builder /app/prisma /app/prisma-template</span>
+
+<span class="c"># 复制并设置 entrypoint 脚本</span>
+<span class="k">COPY</span><span class="s"> docker-entrypoint.sh /usr/local/bin/</span>
+<span class="k">RUN </span><span class="nb">chmod</span> +x /usr/local/bin/docker-entrypoint.sh
+
+<span class="c"># 设置生产环境</span>
+<span class="k">ENV</span><span class="s"> NODE_ENV=production</span>
+
+<span class="k">EXPOSE</span><span class="s"> 1717</span>
+
+<span class="c"># 使用 entrypoint 脚本</span>
+<span class="k">ENTRYPOINT</span><span class="s"> ["/usr/local/bin/docker-entrypoint.sh"]</span>
+<span class="k">CMD</span><span class="s"> ["pnpm", "start"]</span>
+
+</code></pre></div></div>
+
+<p>由于想自行构建镜像，使用上面项目根目录中的 Dockerfile：</p>
+
+<ul>
+  <li>克隆仓库：</li>
+</ul>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>git clone https://github.com/ConardLi/easy-dataset.git
+<span class="nb">cd </span>easy-dataset
+</code></pre></div></div>
+
+<ul>
+  <li>构建 Docker 镜像：</li>
+</ul>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>docker build <span class="nt">-t</span> easy-dataset <span class="nb">.</span>
+docker build <span class="nt">-t</span> easy-dataset:v1 <span class="nb">.</span>
+</code></pre></div></div>
+
+<ul>
+  <li>运行容器：</li>
+</ul>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>docker run <span class="nt">-d</span> <span class="se">\\</span>
+  <span class="nt">-p</span> 1717:1717 <span class="se">\\</span>
+  <span class="nt">-v</span> ./local-db:/app/local-db <span class="se">\\</span>
+  <span class="nt">-v</span> ./prisma:/app/prisma <span class="se">\\</span>
+  <span class="nt">--name</span> easy-dataset <span class="se">\\</span>
+  easy-dataset
+</code></pre></div></div>
+
+<blockquote>
+  <p><strong>注意：</strong> 建议直接使用当前代码仓库目录下的 <code class="language-plaintext highlighter-rouge">local-db</code> 和 <code class="language-plaintext highlighter-rouge">prisma</code> 文件夹作为挂载路径，这样可以和 NPM 启动时的数据库路径保持一致。</p>
+</blockquote>
+
+<blockquote>
+  <p><strong>注意：</strong> 数据库文件会在首次启动时自动初始化，无需手动执行 <code class="language-plaintext highlighter-rouge">npm run db:push</code>。</p>
+</blockquote>
+
+<ul>
+  <li>打开浏览器，访问 <code class="language-plaintext highlighter-rouge">http://localhost:1717</code></li>
+</ul>
+
+<blockquote>
+  <p>常见问题：</p>
+</blockquote>
+
+<ul>
+  <li>现在服务在容器里跑着，但外部浏览器打不开。日志里写的是：<code class="language-plaintext highlighter-rouge">Local: http://localhost:1717</code> 这是容器内部的 127.0.0.1，外面访问不到。
+    <ul>
+      <li>解决办法： 运行时加一个环境变量：<code class="language-plaintext highlighter-rouge">-e HOST=0.0.0.0</code>
+        <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>docker run <span class="nt">-d</span> <span class="se">\</span>
+  <span class="nt">-p</span> 1717:1717 <span class="se">\</span>
+  <span class="nt">-e</span> <span class="nv">HOST</span><span class="o">=</span>0.0.0.0 <span class="se">\</span>
+  <span class="nt">--name</span> easy-dataset <span class="se">\</span>
+  <span class="nt">--restart</span> always <span class="se">\</span>
+  easy-dataset:v1
+</code></pre></div>        </div>
+      </li>
+    </ul>
+  </li>
+  <li>如何确保开机自启动这个服务？
+    <ul>
+      <li>解决办法： 运行时加一个参数：<code class="language-plaintext highlighter-rouge">--restart always</code>
+        <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>docker run <span class="nt">-d</span> <span class="se">\</span>
+  <span class="nt">-docker</span> update <span class="nt">--restart</span><span class="o">=</span>always easy-dataset
+</code></pre></div>        </div>
+      </li>
+      <li>查看是否设置成功：
+        <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>docker inspect easy-dataset | <span class="nb">grep </span>Restart
+</code></pre></div>        </div>
+      </li>
+    </ul>
+  </li>
+</ul>
+
+<h2 id="使用官方-docker-镜像">使用官方 Docker 镜像</h2>
+
+<ul>
+  <li>克隆仓库：</li>
+</ul>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>git clone https://github.com/ConardLi/easy-dataset.git
+<span class="nb">cd </span>easy-dataset
+</code></pre></div></div>
+
+<ul>
+  <li>更改 <code class="language-plaintext highlighter-rouge">docker-compose.yml</code> 文件：</li>
+</ul>
+
+<div class="language-yml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="na">services</span><span class="pi">:</span>
+  <span class="na">easy-dataset</span><span class="pi">:</span>
+    <span class="na">image</span><span class="pi">:</span> <span class="s">ghcr.io/conardli/easy-dataset</span>
+    <span class="na">container_name</span><span class="pi">:</span> <span class="s">easy-dataset</span>
+    <span class="na">ports</span><span class="pi">:</span>
+      <span class="pi">-</span> <span class="s2">"</span><span class="s">1717:1717"</span>
+    <span class="na">volumes</span><span class="pi">:</span>
+      <span class="pi">-</span> <span class="s">./local-db:/app/local-db</span>
+      <span class="pi">-</span> <span class="s">./prisma:/app/prisma</span>
+    <span class="na">restart</span><span class="pi">:</span> <span class="s">unless-stopped</span>
+</code></pre></div></div>
+
+<blockquote>
+  <p><strong>注意：</strong> 建议直接使用当前代码仓库目录下的 <code class="language-plaintext highlighter-rouge">local-db</code> 和 <code class="language-plaintext highlighter-rouge">prisma</code> 文件夹作为挂载路径，这样可以和 NPM 启动时的数据库路径保持一致。</p>
+</blockquote>
+
+<blockquote>
+  <p><strong>注意：</strong> 数据库文件会在首次启动时自动初始化，无需手动执行 <code class="language-plaintext highlighter-rouge">npm run db:push</code>。</p>
+</blockquote>
+
+<ul>
+  <li>使用 docker-compose 启动</li>
+</ul>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>docker-compose up <span class="nt">-d</span>
+</code></pre></div></div>
+
+<ul>
+  <li>打开浏览器并访问 <code class="language-plaintext highlighter-rouge">http://localhost:1717</code></li>
+</ul>
+
+<hr />

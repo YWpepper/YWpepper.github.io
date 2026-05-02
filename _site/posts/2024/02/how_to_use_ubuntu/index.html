@@ -1,0 +1,257 @@
+<p>这篇笔记汇总了在 Ubuntu 下常用的快速命令与进程/服务管理方法，包含文件/目录操作、显卡查看、后台进程管理（nohup、systemd、tmux）及自检与故障排查常用命令。便于快速查阅与实际操作参考。</p>
+
+<!-- more -->
+
+<h2 id="常见基本命令快速参考">常见基本命令（快速参考）</h2>
+
+<ul>
+  <li>更新与安装软件
+    <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">sudo </span>apt update           <span class="c"># 更新软件源</span>
+<span class="nb">sudo </span>apt upgrade <span class="nt">-y</span>        <span class="c"># 更新已安装软件</span>
+<span class="nb">sudo </span>apt <span class="nb">install</span> &lt;package&gt; <span class="nt">-y</span>  <span class="c"># 安装软件包</span>
+<span class="nb">sudo </span>apt <span class="nb">install</span> ./debfile.deb <span class="nt">-y</span>     <span class="c"># 本地deb包安装</span>
+</code></pre></div>    </div>
+  </li>
+  <li>文件/目录：查看、复制、移动、删除、权限
+    <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">ls</span> <span class="nt">-lah</span>         <span class="c"># 列出详细信息</span>
+<span class="nb">cd</span> /path/to/dir
+<span class="nb">mkdir</span> <span class="nt">-p</span> newdir
+<span class="nb">cp</span> <span class="nt">-r</span> src dst   <span class="c"># src源头复制到 dst 目标</span>
+<span class="nb">mv </span>oldname newname  <span class="c"># 重命名或移动</span>
+<span class="nb">rm </span>file.txt
+<span class="nb">rm</span> <span class="nt">-rf</span> directory/
+<span class="nb">chmod </span>644 file.txt <span class="c"># 修改权限 644 rw-r--r-- 777 rwxrwxrwx 最高权限是 777</span>
+<span class="nb">chmod</span> +x script.sh <span class="c"># 添加可执行权限</span>
+<span class="nb">chown </span>user:group file <span class="c"># 修改文件所有者和用户组</span>
+</code></pre></div>    </div>
+  </li>
+  <li>查找与内容搜索
+    <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>find /path <span class="nt">-name</span> <span class="s2">"pattern"</span> <span class="c"># 按名称查找文件</span>
+<span class="nb">grep</span> <span class="nt">-RIn</span> <span class="s2">"keyword"</span> /path <span class="c"># 递归搜索关键词，显示行号</span>
+<span class="nb">sudo </span>lsof <span class="nt">-i</span> :8080 <span class="c"># 查找端口是否被人使用</span>
+locate filename         <span class="c"># 需先 sudo updatedb</span>
+</code></pre></div>    </div>
+  </li>
+  <li>磁盘与空间
+    <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">df</span> <span class="nt">-h</span>                  <span class="c"># 挂载点磁盘空间</span>
+<span class="nb">du</span> <span class="nt">-sh</span> /path           <span class="c"># 目录大小</span>
+<span class="nb">du</span> <span class="nt">-sh</span> <span class="k">*</span>               <span class="c"># 当前目录下各文件/目录大小</span>
+lsblk                  <span class="c"># 块设备信息</span>
+</code></pre></div>    </div>
+  </li>
+  <li>网络与端口
+    <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>ip addr show
+ss <span class="nt">-tuln</span>               <span class="c"># 监听端口</span>
+<span class="nb">sudo </span>lsof <span class="nt">-i</span> :8080
+<span class="nb">grep</span> <span class="nt">-RIn</span> <span class="s2">"main.py"</span> /etc/systemd/system/ <span class="c"># 查找main.py 运行在哪个端口</span>
+curl <span class="nt">-I</span> https://example.com
+</code></pre></div>    </div>
+  </li>
+</ul>
+
+<h2 id="文件和目录操作建议与常用场景">文件和目录操作（建议与常用场景）</h2>
+
+<ul>
+  <li>递归复制并保留权限：
+    <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">cp</span> <span class="nt">-a</span> src_dir/ dest_dir/
+</code></pre></div>    </div>
+  </li>
+  <li>批量重命名（示例）：
+    <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">for </span>f <span class="k">in</span> <span class="k">*</span>.txt<span class="p">;</span> <span class="k">do </span><span class="nb">mv</span> <span class="s2">"</span><span class="nv">$f</span><span class="s2">"</span> <span class="s2">"</span><span class="k">${</span><span class="nv">f</span><span class="p">%.txt</span><span class="k">}</span><span class="s2">.bak"</span><span class="p">;</span> <span class="k">done</span>
+</code></pre></div>    </div>
+  </li>
+  <li>查找大文件：
+    <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>find / <span class="nt">-type</span> f <span class="nt">-size</span> +100M <span class="nt">-exec</span> <span class="nb">ls</span> <span class="nt">-lh</span> <span class="o">{}</span> <span class="se">\;</span>
+</code></pre></div>    </div>
+  </li>
+</ul>
+
+<h2 id="显卡动态查看常见-nvidia">显卡动态查看（常见 NVIDIA）</h2>
+
+<ul>
+  <li>实时查看 GPU 使用情况：
+    <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>nvidia-smi
+watch <span class="nt">-n</span> 2 nvidia-smi    <span class="c"># 每2秒刷新</span>
+</code></pre></div>    </div>
+  </li>
+  <li>查看显卡详细信息：
+    <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">sudo </span>lshw <span class="nt">-C</span> display
+nvidia-smi <span class="nt">--query-gpu</span><span class="o">=</span>name,memory.total,memory.used,utilization.gpu <span class="nt">--format</span><span class="o">=</span>csv
+</code></pre></div>    </div>
+  </li>
+  <li>NVIDIA 设置 GUI：
+    <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>nvidia-settings
+</code></pre></div>    </div>
+  </li>
+  <li>如果使用 CUDA/驱动出问题，检查内核驱动与日志：
+    <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>dmesg | <span class="nb">grep</span> <span class="nt">-i</span> nvidia
+journalctl <span class="nt">-k</span> | <span class="nb">grep</span> <span class="nt">-i</span> nvidia
+</code></pre></div>    </div>
+  </li>
+</ul>
+
+<h2 id="异常监测">异常监测</h2>
+
+<ul>
+  <li>
+    <p>防止有后台运行的python进程占用资源：</p>
+
+    <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>ps aux | <span class="nb">grep </span>python
+</code></pre></div>    </div>
+  </li>
+  <li>
+    <p>服务器卡顿 :</p>
+    <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>ps aux <span class="nt">--sort</span><span class="o">=</span>-%mem | <span class="nb">head</span> <span class="nt">-10</span>
+<span class="c"># aux：看所有进程详情</span>
+<span class="c"># --sort=-%mem：按内存从大到小排序</span>
+<span class="c"># head -10：只显示前 10 个占用最高的</span>
+</code></pre></div>    </div>
+  </li>
+</ul>
+
+<h2 id="进程管理查看与定位">进程管理（查看与定位）</h2>
+
+<ul>
+  <li>查看进程列表与资源占用：
+    <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>ps aux | <span class="nb">grep </span>process_name
+top
+htop             <span class="c"># 更友好的交互式工具（需安装）</span>
+</code></pre></div>    </div>
+  </li>
+  <li>根据名称查进程 ID：
+    <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>pgrep <span class="nt">-fl</span> <span class="s2">"python run_script.py"</span>
+ps aux | <span class="nb">grep</span> <span class="s2">"[p]ython run_script.py"</span>
+</code></pre></div>    </div>
+  </li>
+  <li>文件/端口被哪个进程占用：
+    <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">sudo </span>lsof <span class="nt">-i</span> :PORT
+<span class="nb">sudo </span>lsof /path/to/file
+</code></pre></div>    </div>
+  </li>
+</ul>
+
+<h2 id="后台进程管理方案开发到生产">后台进程管理方案（开发到生产）</h2>
+
+<p>以下根据复杂度与可靠性由低到高排列。</p>
+
+<h3 id="1-使用-nohup简单快速">1) 使用 nohup（简单、快速）</h3>
+
+<p>优点：无需额外配置，适合短期任务。</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">nohup </span>python <span class="nt">-u</span> run_script.py <span class="o">&gt;</span> script.log 2&gt;&amp;1 &amp;
+<span class="c"># 说明：</span>
+<span class="c"># nohup: 忽略挂断信号，使进程在登出后继续运行</span>
+<span class="c"># -u (Python): 禁用输出缓冲，适合实时日志</span>
+<span class="c"># &gt; script.log 2&gt;&amp;1: 标准输出与错误输出合并到文件</span>
+<span class="c"># &amp;: 后台运行</span>
+</code></pre></div></div>
+
+<p>查看与终止：</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>ps aux | <span class="nb">grep</span> <span class="s2">"python run_script.py"</span>
+<span class="nb">tail</span> <span class="nt">-f</span> script.log
+pkill <span class="nt">-f</span> <span class="s2">"python run_script.py"</span>     <span class="c"># 优雅结束</span>
+<span class="nb">kill</span> <span class="nt">-9</span> &lt;pid&gt;                       <span class="c"># 强制结束（谨慎）</span>
+</code></pre></div></div>
+
+<h3 id="2-使用-tmux会话管理">2) 使用 tmux（会话管理）</h3>
+
+<p>优点：交互式控制，方便重连和调试。</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">sudo </span>apt <span class="nb">install </span>tmux <span class="nt">-y</span>
+tmux new <span class="nt">-s</span> model_train
+<span class="c"># 在会话中运行：</span>
+python run_script.py
+<span class="c"># 分离：</span>
+Ctrl+B 然后 D
+<span class="c"># 重连：</span>
+tmux attach <span class="nt">-t</span> model_train
+<span class="c"># 列出现有会话：</span>
+tmux <span class="nb">ls</span>
+</code></pre></div></div>
+
+<p>提示：tmux 可以配合日志重定向使用，或在会话内启动监控工具（htop、nvidia-smi -l 2 等）。</p>
+
+<h3 id="3-使用-systemd生产环境推荐">3) 使用 systemd（生产环境推荐）</h3>
+
+<p>优点：开机自启、故障自动重启、日志集中（journalctl）。</p>
+
+<ul>
+  <li>
+    <p>创建服务文件（命名示例：/etc/systemd/system/model.service）</p>
+
+    <div class="language-ini highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nn">[Unit]</span>
+<span class="py">Description</span><span class="p">=</span><span class="s">Model Training Service</span>
+<span class="py">After</span><span class="p">=</span><span class="s">network.target</span>
+
+<span class="nn">[Service]</span>
+<span class="py">User</span><span class="p">=</span><span class="s">root</span>
+<span class="py">WorkingDirectory</span><span class="p">=</span><span class="s">/root/PDFormer</span>
+<span class="py">ExecStart</span><span class="p">=</span><span class="s">/root/miniconda3/envs/base/bin/python run_script.py</span>
+<span class="py">Restart</span><span class="p">=</span><span class="s">always</span>
+<span class="py">RestartSec</span><span class="p">=</span><span class="s">5</span>
+<span class="py">StandardOutput</span><span class="p">=</span><span class="s">file:/var/log/model.log</span>
+<span class="py">StandardError</span><span class="p">=</span><span class="s">file:/var/log/model_error.log</span>
+<span class="py">Environment</span><span class="p">=</span><span class="s">PYTHONUNBUFFERED=1</span>
+
+<span class="nn">[Install]</span>
+<span class="py">WantedBy</span><span class="p">=</span><span class="s">multi-user.target</span>
+</code></pre></div>    </div>
+  </li>
+  <li>启用并管理服务：
+    <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">sudo </span>systemctl daemon-reload
+<span class="nb">sudo </span>systemctl <span class="nb">enable </span>model
+<span class="nb">sudo </span>systemctl start model
+<span class="nb">sudo </span>systemctl status model
+<span class="nb">sudo </span>systemctl stop model
+</code></pre></div>    </div>
+  </li>
+  <li>查看日志：
+    <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">sudo </span>journalctl <span class="nt">-u</span> model <span class="nt">-f</span>
+<span class="c"># 如果使用 StandardOutput=file: 也可直接 tail -f /var/log/model.log</span>
+</code></pre></div>    </div>
+  </li>
+</ul>
+
+<h2 id="其他工具与建议">其他工具与建议</h2>
+
+<ul>
+  <li>使用 supervisor / pm2（针对 Python 或 Node 应用）也可管理进程并提供 Web 管理界面。</li>
+  <li>使用虚拟环境或 conda 管理 Python 依赖，避免系统级冲突。</li>
+  <li>使用 logrotate 管理日志文件大小：
+    <ul>
+      <li>为 /var/log/model.log 添加 logrotate 配置，防止磁盘被日志占满。</li>
+    </ul>
+  </li>
+  <li>安全与权限：
+    <ul>
+      <li>尽量避免以 root 运行业务进程，创建专用用户并赋予最小权限。</li>
+    </ul>
+  </li>
+</ul>
+
+<h2 id="常见排查命令">常见排查命令</h2>
+
+<ul>
+  <li>查看系统日志：
+    <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">sudo </span>journalctl <span class="nt">-xe</span>
+</code></pre></div>    </div>
+  </li>
+  <li>查看最近内核/驱动消息：
+    <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>dmesg | <span class="nb">tail</span> <span class="nt">-n</span> 50
+</code></pre></div>    </div>
+  </li>
+  <li>检查磁盘使用导致的问题：
+    <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">df</span> <span class="nt">-h</span>
+<span class="nb">sudo du</span> <span class="nt">-sh</span> /var/log
+</code></pre></div>    </div>
+  </li>
+</ul>
+
+<h2 id="小结">小结</h2>
+
+<ul>
+  <li>开发时：nohup 或 tmux 快速起步，便于调试与观察日志。</li>
+  <li>生产时：使用 systemd（或 supervisor/pm2）以保证服务可管理、可重启与开机自启，并结合 journalctl/logrotate 做日志管理。</li>
+  <li>常备命令：nvidia-smi、top/htop、ps/pgrep、lsof、journalctl、ss。掌握这些可应对大多数日常维护与排障场景。</li>
+</ul>

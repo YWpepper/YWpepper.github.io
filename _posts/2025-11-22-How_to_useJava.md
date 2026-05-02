@@ -1,9 +1,9 @@
 ---
 layout: post
-title: 'How_to_useJava'
+title: '开发-Java代码生成器使用'
 date: 2025-11-22
 author: pepper
-tags: [Java]
+tags: [java, maven]
 comments: true
 toc: true
 pinned: false

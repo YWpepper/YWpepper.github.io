@@ -1,14 +1,12 @@
 ---
-title: 'how_to_do_ScientificResearchDrawings'
+title: '工具-科研绘图与LaTeX模板'
 lang: zh-CN
 date: 2025-02-09
 author: pepper
 permalink: /posts/2025/02/how_to_do_ScientificResearchDrawings/
 pinned: false
 toc: true
-tags:
-  - Server
-  - Windows
+tags: [latex, plot]
 ---
 这篇博客主要存储一些latex的语法工具链接。
 <!-- more -->

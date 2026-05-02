@@ -1,0 +1,2315 @@
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.4.1">Jekyll</generator><link href="http://localhost:4000/feed.xml" rel="self" type="application/atom+xml" /><link href="http://localhost:4000/" rel="alternate" type="text/html" /><updated>2026-05-02T13:21:46+08:00</updated><id>http://localhost:4000/feed.xml</id><title type="html">Pepper</title><subtitle>一个随心记录的地方</subtitle><entry><title type="html">开发-EasyDataset登录验证开发</title><link href="http://localhost:4000/how_to_changeEasyDataset/" rel="alternate" type="text/html" title="开发-EasyDataset登录验证开发" /><published>2026-04-07T00:00:00+08:00</published><updated>2026-04-07T00:00:00+08:00</updated><id>http://localhost:4000/how_to_changeEasyDataset</id><content type="html" xml:base="http://localhost:4000/how_to_changeEasyDataset/"><![CDATA[<p>这篇博客介绍了Easy Dataset项目的架构，并指导你如何添加登录验证页面。</p>
+
+<!-- more -->
+
+<h2 id="-项目架构分析">📋 项目架构分析</h2>
+
+<p>Easy Dataset是一个基于Next.js的全栈应用，使用：</p>
+
+<ul>
+  <li><strong>前端</strong>: Next.js 14 + React 18 + Material-UI</li>
+  <li><strong>后端</strong>: Next.js API Routes + Prisma ORM</li>
+  <li><strong>数据库</strong>: SQLite (Prisma)</li>
+  <li><strong>状态管理</strong>: Jotai</li>
+  <li><strong>主题</strong>: next-themes</li>
+</ul>
+
+<p>当前项目<strong>没有身份验证系统</strong>，所有页面都是公开访问的,所以本博客将介绍如何添加一个简单的登录验证系统，保护敏感页面，并提供用户管理功能。</p>
+
+<h2 id="-登录验证实现方案">🎯 登录验证实现方案</h2>
+
+<h3 id="1-拉取仓库">1. 拉取仓库</h3>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>git clone https://github.com/ConardLi/easy-dataset.git
+<span class="nb">cd </span>easy-dataset
+<span class="c">## 这个是本地构建的时候的命令行</span>
+npm <span class="nb">install</span>
+</code></pre></div></div>
+
+<h3 id="2-需要修改的核心文件">2. 需要修改的核心文件</h3>
+
+<h4 id="后端部分api-routes">后端部分（API Routes）:</h4>
+
+<ol>
+  <li><strong>创建认证API</strong>：
+    <ul>
+      <li><code class="language-plaintext highlighter-rouge">app/api/auth/login/route.js</code> - 登录验证</li>
+      <li><code class="language-plaintext highlighter-rouge">app/api/auth/logout/route.js</code> - 登出</li>
+      <li><code class="language-plaintext highlighter-rouge">app/api/auth/me/route.js</code> - 获取当前用户信息</li>
+      <li><code class="language-plaintext highlighter-rouge">app/api/auth/register/route.js</code> - 用户注册（可选）</li>
+    </ul>
+  </li>
+  <li><strong>数据库模型</strong>：
+    <ul>
+      <li><code class="language-plaintext highlighter-rouge">prisma/schema.prisma</code> - 添加User模型</li>
+      <li><code class="language-plaintext highlighter-rouge">lib/db/users.js</code> - 用户数据库操作</li>
+    </ul>
+  </li>
+  <li><strong>中间件</strong>：
+    <ul>
+      <li><code class="language-plaintext highlighter-rouge">middleware.js</code> - 路由保护中间件</li>
+    </ul>
+  </li>
+</ol>
+
+<h4 id="前端部分">前端部分：</h4>
+
+<ol>
+  <li><strong>登录页面</strong>：
+    <ul>
+      <li><code class="language-plaintext highlighter-rouge">app/login/page.js</code> - 登录页面组件</li>
+    </ul>
+  </li>
+  <li><strong>上下文和状态</strong>：
+    <ul>
+      <li><code class="language-plaintext highlighter-rouge">contexts/AuthContext.js</code> - 认证状态管理</li>
+      <li><code class="language-plaintext highlighter-rouge">hooks/useAuth.js</code> - 认证相关hook</li>
+    </ul>
+  </li>
+  <li><strong>现有组件修改</strong>：
+    <ul>
+      <li><code class="language-plaintext highlighter-rouge">app/layout.js</code> - 添加认证provider</li>
+      <li><code class="language-plaintext highlighter-rouge">app/page.js</code> - 添加登录检查</li>
+      <li><code class="language-plaintext highlighter-rouge">components/Navbar/index.js</code> - 添加登录/登出按钮</li>
+    </ul>
+  </li>
+</ol>
+
+<h3 id="3-详细实现步骤">3. 详细实现步骤</h3>
+
+<h4 id="步骤1-修改数据库模型">步骤1: 修改数据库模型</h4>
+
+<p>在<code class="language-plaintext highlighter-rouge">prisma/schema.prisma</code>中添加用户模型：</p>
+
+<pre><code class="language-prisma">model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  password  String
+  name      String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+</code></pre>
+
+<h4 id="步骤2-创建认证api">步骤2: 创建认证API</h4>
+
+<p>在<code class="language-plaintext highlighter-rouge">app/api/auth/login/route.js</code>：</p>
+
+<div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">import</span> <span class="nx">bcrypt</span> <span class="k">from</span> <span class="dl">"</span><span class="s2">bcryptjs</span><span class="dl">"</span><span class="p">;</span>
+<span class="k">import</span> <span class="nx">jwt</span> <span class="k">from</span> <span class="dl">"</span><span class="s2">jsonwebtoken</span><span class="dl">"</span><span class="p">;</span>
+<span class="k">import</span> <span class="p">{</span> <span class="nx">getUserByEmail</span> <span class="p">}</span> <span class="k">from</span> <span class="dl">"</span><span class="s2">@/lib/db/users</span><span class="dl">"</span><span class="p">;</span>
+
+<span class="k">export</span> <span class="k">async</span> <span class="kd">function</span> <span class="nf">POST</span><span class="p">(</span><span class="nx">request</span><span class="p">)</span> <span class="p">{</span>
+  <span class="k">try</span> <span class="p">{</span>
+    <span class="kd">const</span> <span class="p">{</span> <span class="nx">email</span><span class="p">,</span> <span class="nx">password</span> <span class="p">}</span> <span class="o">=</span> <span class="k">await</span> <span class="nx">request</span><span class="p">.</span><span class="nf">json</span><span class="p">();</span>
+
+    <span class="c1">// 验证用户</span>
+    <span class="kd">const</span> <span class="nx">user</span> <span class="o">=</span> <span class="k">await</span> <span class="nf">getUserByEmail</span><span class="p">(</span><span class="nx">email</span><span class="p">);</span>
+    <span class="k">if </span><span class="p">(</span><span class="o">!</span><span class="nx">user</span> <span class="o">||</span> <span class="o">!</span><span class="nx">bcrypt</span><span class="p">.</span><span class="nf">compareSync</span><span class="p">(</span><span class="nx">password</span><span class="p">,</span> <span class="nx">user</span><span class="p">.</span><span class="nx">password</span><span class="p">))</span> <span class="p">{</span>
+      <span class="k">return</span> <span class="nx">Response</span><span class="p">.</span><span class="nf">json</span><span class="p">({</span> <span class="na">error</span><span class="p">:</span> <span class="dl">"</span><span class="s2">Invalid credentials</span><span class="dl">"</span> <span class="p">},</span> <span class="p">{</span> <span class="na">status</span><span class="p">:</span> <span class="mi">401</span> <span class="p">});</span>
+    <span class="p">}</span>
+
+    <span class="c1">// 生成JWT token</span>
+    <span class="kd">const</span> <span class="nx">token</span> <span class="o">=</span> <span class="nx">jwt</span><span class="p">.</span><span class="nf">sign</span><span class="p">(</span>
+      <span class="p">{</span> <span class="na">userId</span><span class="p">:</span> <span class="nx">user</span><span class="p">.</span><span class="nx">id</span><span class="p">,</span> <span class="na">email</span><span class="p">:</span> <span class="nx">user</span><span class="p">.</span><span class="nx">email</span> <span class="p">},</span>
+      <span class="nx">process</span><span class="p">.</span><span class="nx">env</span><span class="p">.</span><span class="nx">JWT_SECRET</span><span class="p">,</span>
+      <span class="p">{</span> <span class="na">expiresIn</span><span class="p">:</span> <span class="dl">"</span><span class="s2">7d</span><span class="dl">"</span> <span class="p">},</span>
+    <span class="p">);</span>
+
+    <span class="k">return</span> <span class="nx">Response</span><span class="p">.</span><span class="nf">json</span><span class="p">({</span>
+      <span class="nx">token</span><span class="p">,</span>
+      <span class="na">user</span><span class="p">:</span> <span class="p">{</span> <span class="na">id</span><span class="p">:</span> <span class="nx">user</span><span class="p">.</span><span class="nx">id</span><span class="p">,</span> <span class="na">email</span><span class="p">:</span> <span class="nx">user</span><span class="p">.</span><span class="nx">email</span><span class="p">,</span> <span class="na">name</span><span class="p">:</span> <span class="nx">user</span><span class="p">.</span><span class="nx">name</span> <span class="p">},</span>
+    <span class="p">});</span>
+  <span class="p">}</span> <span class="k">catch </span><span class="p">(</span><span class="nx">error</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="nx">Response</span><span class="p">.</span><span class="nf">json</span><span class="p">({</span> <span class="na">error</span><span class="p">:</span> <span class="dl">"</span><span class="s2">Login failed</span><span class="dl">"</span> <span class="p">},</span> <span class="p">{</span> <span class="na">status</span><span class="p">:</span> <span class="mi">500</span> <span class="p">});</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<h4 id="步骤3-创建登录页面">步骤3: 创建登录页面</h4>
+
+<p>在<code class="language-plaintext highlighter-rouge">app/login/page.js</code>：</p>
+
+<div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="dl">"</span><span class="s2">use client</span><span class="dl">"</span><span class="p">;</span>
+<span class="k">import</span> <span class="p">{</span> <span class="nx">useState</span> <span class="p">}</span> <span class="k">from</span> <span class="dl">"</span><span class="s2">react</span><span class="dl">"</span><span class="p">;</span>
+<span class="k">import</span> <span class="p">{</span> <span class="nx">useRouter</span> <span class="p">}</span> <span class="k">from</span> <span class="dl">"</span><span class="s2">next/navigation</span><span class="dl">"</span><span class="p">;</span>
+<span class="k">import</span> <span class="p">{</span> <span class="nx">useAuth</span> <span class="p">}</span> <span class="k">from</span> <span class="dl">"</span><span class="s2">@/hooks/useAuth</span><span class="dl">"</span><span class="p">;</span>
+<span class="k">import</span> <span class="p">{</span>
+  <span class="nx">Container</span><span class="p">,</span>
+  <span class="nx">TextField</span><span class="p">,</span>
+  <span class="nx">Button</span><span class="p">,</span>
+  <span class="nx">Typography</span><span class="p">,</span>
+  <span class="nx">Box</span><span class="p">,</span>
+  <span class="nx">Paper</span><span class="p">,</span>
+<span class="p">}</span> <span class="k">from</span> <span class="dl">"</span><span class="s2">@mui/material</span><span class="dl">"</span><span class="p">;</span>
+
+<span class="k">export</span> <span class="k">default</span> <span class="kd">function</span> <span class="nf">LoginPage</span><span class="p">()</span> <span class="p">{</span>
+  <span class="kd">const</span> <span class="p">[</span><span class="nx">email</span><span class="p">,</span> <span class="nx">setEmail</span><span class="p">]</span> <span class="o">=</span> <span class="nf">useState</span><span class="p">(</span><span class="dl">""</span><span class="p">);</span>
+  <span class="kd">const</span> <span class="p">[</span><span class="nx">password</span><span class="p">,</span> <span class="nx">setPassword</span><span class="p">]</span> <span class="o">=</span> <span class="nf">useState</span><span class="p">(</span><span class="dl">""</span><span class="p">);</span>
+  <span class="kd">const</span> <span class="p">{</span> <span class="nx">login</span> <span class="p">}</span> <span class="o">=</span> <span class="nf">useAuth</span><span class="p">();</span>
+  <span class="kd">const</span> <span class="nx">router</span> <span class="o">=</span> <span class="nf">useRouter</span><span class="p">();</span>
+
+  <span class="kd">const</span> <span class="nx">handleSubmit</span> <span class="o">=</span> <span class="k">async </span><span class="p">(</span><span class="nx">e</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="p">{</span>
+    <span class="nx">e</span><span class="p">.</span><span class="nf">preventDefault</span><span class="p">();</span>
+    <span class="k">try</span> <span class="p">{</span>
+      <span class="k">await</span> <span class="nf">login</span><span class="p">(</span><span class="nx">email</span><span class="p">,</span> <span class="nx">password</span><span class="p">);</span>
+      <span class="nx">router</span><span class="p">.</span><span class="nf">push</span><span class="p">(</span><span class="dl">"</span><span class="s2">/</span><span class="dl">"</span><span class="p">);</span>
+    <span class="p">}</span> <span class="k">catch </span><span class="p">(</span><span class="nx">error</span><span class="p">)</span> <span class="p">{</span>
+      <span class="nf">alert</span><span class="p">(</span><span class="dl">"</span><span class="s2">登录失败</span><span class="dl">"</span><span class="p">);</span>
+    <span class="p">}</span>
+  <span class="p">};</span>
+
+  <span class="k">return </span><span class="p">(</span>
+    <span class="o">&lt;</span><span class="nx">Container</span> <span class="nx">maxWidth</span><span class="o">=</span><span class="dl">"</span><span class="s2">sm</span><span class="dl">"</span><span class="o">&gt;</span>
+      <span class="o">&lt;</span><span class="nx">Box</span>
+        <span class="nx">sx</span><span class="o">=</span>
+      <span class="o">&gt;</span>
+        <span class="o">&lt;</span><span class="nx">Paper</span> <span class="nx">elevation</span><span class="o">=</span><span class="p">{</span><span class="mi">3</span><span class="p">}</span> <span class="nx">sx</span><span class="o">=&gt;</span>
+          <span class="o">&lt;</span><span class="nx">Typography</span> <span class="nx">component</span><span class="o">=</span><span class="dl">"</span><span class="s2">h1</span><span class="dl">"</span> <span class="nx">variant</span><span class="o">=</span><span class="dl">"</span><span class="s2">h5</span><span class="dl">"</span> <span class="nx">align</span><span class="o">=</span><span class="dl">"</span><span class="s2">center</span><span class="dl">"</span><span class="o">&gt;</span>
+            <span class="nx">登录</span>
+          <span class="o">&lt;</span><span class="sr">/Typography</span><span class="err">&gt;
+</span>          <span class="o">&lt;</span><span class="nx">Box</span> <span class="nx">component</span><span class="o">=</span><span class="dl">"</span><span class="s2">form</span><span class="dl">"</span> <span class="nx">onSubmit</span><span class="o">=</span><span class="p">{</span><span class="nx">handleSubmit</span><span class="p">}</span> <span class="nx">sx</span><span class="o">=&gt;</span>
+            <span class="o">&lt;</span><span class="nx">TextField</span>
+              <span class="nx">margin</span><span class="o">=</span><span class="dl">"</span><span class="s2">normal</span><span class="dl">"</span>
+              <span class="nx">required</span>
+              <span class="nx">fullWidth</span>
+              <span class="nx">id</span><span class="o">=</span><span class="dl">"</span><span class="s2">email</span><span class="dl">"</span>
+              <span class="nx">label</span><span class="o">=</span><span class="dl">"</span><span class="s2">邮箱</span><span class="dl">"</span>
+              <span class="nx">name</span><span class="o">=</span><span class="dl">"</span><span class="s2">email</span><span class="dl">"</span>
+              <span class="nx">autoComplete</span><span class="o">=</span><span class="dl">"</span><span class="s2">email</span><span class="dl">"</span>
+              <span class="nx">autoFocus</span>
+              <span class="nx">value</span><span class="o">=</span><span class="p">{</span><span class="nx">email</span><span class="p">}</span>
+              <span class="nx">onChange</span><span class="o">=</span><span class="p">{(</span><span class="nx">e</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="nf">setEmail</span><span class="p">(</span><span class="nx">e</span><span class="p">.</span><span class="nx">target</span><span class="p">.</span><span class="nx">value</span><span class="p">)}</span>
+            <span class="sr">/</span><span class="err">&gt;
+</span>            <span class="o">&lt;</span><span class="nx">TextField</span>
+              <span class="nx">margin</span><span class="o">=</span><span class="dl">"</span><span class="s2">normal</span><span class="dl">"</span>
+              <span class="nx">required</span>
+              <span class="nx">fullWidth</span>
+              <span class="nx">name</span><span class="o">=</span><span class="dl">"</span><span class="s2">password</span><span class="dl">"</span>
+              <span class="nx">label</span><span class="o">=</span><span class="dl">"</span><span class="s2">密码</span><span class="dl">"</span>
+              <span class="nx">type</span><span class="o">=</span><span class="dl">"</span><span class="s2">password</span><span class="dl">"</span>
+              <span class="nx">id</span><span class="o">=</span><span class="dl">"</span><span class="s2">password</span><span class="dl">"</span>
+              <span class="nx">autoComplete</span><span class="o">=</span><span class="dl">"</span><span class="s2">current-password</span><span class="dl">"</span>
+              <span class="nx">value</span><span class="o">=</span><span class="p">{</span><span class="nx">password</span><span class="p">}</span>
+              <span class="nx">onChange</span><span class="o">=</span><span class="p">{(</span><span class="nx">e</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="nf">setPassword</span><span class="p">(</span><span class="nx">e</span><span class="p">.</span><span class="nx">target</span><span class="p">.</span><span class="nx">value</span><span class="p">)}</span>
+            <span class="sr">/</span><span class="err">&gt;
+</span>            <span class="o">&lt;</span><span class="nx">Button</span>
+              <span class="nx">type</span><span class="o">=</span><span class="dl">"</span><span class="s2">submit</span><span class="dl">"</span>
+              <span class="nx">fullWidth</span>
+              <span class="nx">variant</span><span class="o">=</span><span class="dl">"</span><span class="s2">contained</span><span class="dl">"</span>
+              <span class="nx">sx</span><span class="o">=</span>
+            <span class="o">&gt;</span>
+              <span class="nx">登录</span>
+            <span class="o">&lt;</span><span class="sr">/Button</span><span class="err">&gt;
+</span>          <span class="o">&lt;</span><span class="sr">/Box</span><span class="err">&gt;
+</span>        <span class="o">&lt;</span><span class="sr">/Paper</span><span class="err">&gt;
+</span>      <span class="o">&lt;</span><span class="sr">/Box</span><span class="err">&gt;
+</span>    <span class="o">&lt;</span><span class="sr">/Container</span><span class="err">&gt;
+</span>  <span class="p">);</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<h4 id="步骤4-创建认证上下文">步骤4: 创建认证上下文</h4>
+
+<p>在<code class="language-plaintext highlighter-rouge">contexts/AuthContext.js</code>：</p>
+
+<div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="dl">"</span><span class="s2">use client</span><span class="dl">"</span><span class="p">;</span>
+<span class="k">import</span> <span class="p">{</span> <span class="nx">createContext</span><span class="p">,</span> <span class="nx">useState</span><span class="p">,</span> <span class="nx">useContext</span><span class="p">,</span> <span class="nx">useEffect</span> <span class="p">}</span> <span class="k">from</span> <span class="dl">"</span><span class="s2">react</span><span class="dl">"</span><span class="p">;</span>
+<span class="k">import</span> <span class="p">{</span> <span class="nx">useRouter</span> <span class="p">}</span> <span class="k">from</span> <span class="dl">"</span><span class="s2">next/navigation</span><span class="dl">"</span><span class="p">;</span>
+
+<span class="kd">const</span> <span class="nx">AuthContext</span> <span class="o">=</span> <span class="nf">createContext</span><span class="p">();</span>
+
+<span class="k">export</span> <span class="kd">const</span> <span class="nx">AuthProvider</span> <span class="o">=</span> <span class="p">({</span> <span class="nx">children</span> <span class="p">})</span> <span class="o">=&gt;</span> <span class="p">{</span>
+  <span class="kd">const</span> <span class="p">[</span><span class="nx">user</span><span class="p">,</span> <span class="nx">setUser</span><span class="p">]</span> <span class="o">=</span> <span class="nf">useState</span><span class="p">(</span><span class="kc">null</span><span class="p">);</span>
+  <span class="kd">const</span> <span class="p">[</span><span class="nx">loading</span><span class="p">,</span> <span class="nx">setLoading</span><span class="p">]</span> <span class="o">=</span> <span class="nf">useState</span><span class="p">(</span><span class="kc">true</span><span class="p">);</span>
+  <span class="kd">const</span> <span class="nx">router</span> <span class="o">=</span> <span class="nf">useRouter</span><span class="p">();</span>
+
+  <span class="nf">useEffect</span><span class="p">(()</span> <span class="o">=&gt;</span> <span class="p">{</span>
+    <span class="c1">// 检查本地存储的token</span>
+    <span class="kd">const</span> <span class="nx">token</span> <span class="o">=</span> <span class="nx">localStorage</span><span class="p">.</span><span class="nf">getItem</span><span class="p">(</span><span class="dl">"</span><span class="s2">token</span><span class="dl">"</span><span class="p">);</span>
+    <span class="k">if </span><span class="p">(</span><span class="nx">token</span><span class="p">)</span> <span class="p">{</span>
+      <span class="c1">// 验证token有效性</span>
+      <span class="nf">fetchUser</span><span class="p">(</span><span class="nx">token</span><span class="p">);</span>
+    <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+      <span class="nf">setLoading</span><span class="p">(</span><span class="kc">false</span><span class="p">);</span>
+    <span class="p">}</span>
+  <span class="p">},</span> <span class="p">[]);</span>
+
+  <span class="kd">const</span> <span class="nx">fetchUser</span> <span class="o">=</span> <span class="k">async </span><span class="p">(</span><span class="nx">token</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="p">{</span>
+    <span class="k">try</span> <span class="p">{</span>
+      <span class="kd">const</span> <span class="nx">response</span> <span class="o">=</span> <span class="k">await</span> <span class="nf">fetch</span><span class="p">(</span><span class="dl">"</span><span class="s2">/api/auth/me</span><span class="dl">"</span><span class="p">,</span> <span class="p">{</span>
+        <span class="na">headers</span><span class="p">:</span> <span class="p">{</span> <span class="na">Authorization</span><span class="p">:</span> <span class="s2">`Bearer </span><span class="p">${</span><span class="nx">token</span><span class="p">}</span><span class="s2">`</span> <span class="p">},</span>
+      <span class="p">});</span>
+      <span class="k">if </span><span class="p">(</span><span class="nx">response</span><span class="p">.</span><span class="nx">ok</span><span class="p">)</span> <span class="p">{</span>
+        <span class="kd">const</span> <span class="nx">userData</span> <span class="o">=</span> <span class="k">await</span> <span class="nx">response</span><span class="p">.</span><span class="nf">json</span><span class="p">();</span>
+        <span class="nf">setUser</span><span class="p">(</span><span class="nx">userData</span><span class="p">);</span>
+      <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+        <span class="nx">localStorage</span><span class="p">.</span><span class="nf">removeItem</span><span class="p">(</span><span class="dl">"</span><span class="s2">token</span><span class="dl">"</span><span class="p">);</span>
+      <span class="p">}</span>
+    <span class="p">}</span> <span class="k">catch </span><span class="p">(</span><span class="nx">error</span><span class="p">)</span> <span class="p">{</span>
+      <span class="nx">localStorage</span><span class="p">.</span><span class="nf">removeItem</span><span class="p">(</span><span class="dl">"</span><span class="s2">token</span><span class="dl">"</span><span class="p">);</span>
+    <span class="p">}</span> <span class="k">finally</span> <span class="p">{</span>
+      <span class="nf">setLoading</span><span class="p">(</span><span class="kc">false</span><span class="p">);</span>
+    <span class="p">}</span>
+  <span class="p">};</span>
+
+  <span class="kd">const</span> <span class="nx">login</span> <span class="o">=</span> <span class="k">async </span><span class="p">(</span><span class="nx">email</span><span class="p">,</span> <span class="nx">password</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="p">{</span>
+    <span class="kd">const</span> <span class="nx">response</span> <span class="o">=</span> <span class="k">await</span> <span class="nf">fetch</span><span class="p">(</span><span class="dl">"</span><span class="s2">/api/auth/login</span><span class="dl">"</span><span class="p">,</span> <span class="p">{</span>
+      <span class="na">method</span><span class="p">:</span> <span class="dl">"</span><span class="s2">POST</span><span class="dl">"</span><span class="p">,</span>
+      <span class="na">headers</span><span class="p">:</span> <span class="p">{</span> <span class="dl">"</span><span class="s2">Content-Type</span><span class="dl">"</span><span class="p">:</span> <span class="dl">"</span><span class="s2">application/json</span><span class="dl">"</span> <span class="p">},</span>
+      <span class="na">body</span><span class="p">:</span> <span class="nx">JSON</span><span class="p">.</span><span class="nf">stringify</span><span class="p">({</span> <span class="nx">email</span><span class="p">,</span> <span class="nx">password</span> <span class="p">}),</span>
+    <span class="p">});</span>
+
+    <span class="k">if </span><span class="p">(</span><span class="nx">response</span><span class="p">.</span><span class="nx">ok</span><span class="p">)</span> <span class="p">{</span>
+      <span class="kd">const</span> <span class="nx">data</span> <span class="o">=</span> <span class="k">await</span> <span class="nx">response</span><span class="p">.</span><span class="nf">json</span><span class="p">();</span>
+      <span class="nx">localStorage</span><span class="p">.</span><span class="nf">setItem</span><span class="p">(</span><span class="dl">"</span><span class="s2">token</span><span class="dl">"</span><span class="p">,</span> <span class="nx">data</span><span class="p">.</span><span class="nx">token</span><span class="p">);</span>
+      <span class="nf">setUser</span><span class="p">(</span><span class="nx">data</span><span class="p">.</span><span class="nx">user</span><span class="p">);</span>
+      <span class="k">return</span> <span class="nx">data</span><span class="p">;</span>
+    <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+      <span class="k">throw</span> <span class="k">new</span> <span class="nc">Error</span><span class="p">(</span><span class="dl">"</span><span class="s2">Login failed</span><span class="dl">"</span><span class="p">);</span>
+    <span class="p">}</span>
+  <span class="p">};</span>
+
+  <span class="kd">const</span> <span class="nx">logout</span> <span class="o">=</span> <span class="p">()</span> <span class="o">=&gt;</span> <span class="p">{</span>
+    <span class="nx">localStorage</span><span class="p">.</span><span class="nf">removeItem</span><span class="p">(</span><span class="dl">"</span><span class="s2">token</span><span class="dl">"</span><span class="p">);</span>
+    <span class="nf">setUser</span><span class="p">(</span><span class="kc">null</span><span class="p">);</span>
+    <span class="nx">router</span><span class="p">.</span><span class="nf">push</span><span class="p">(</span><span class="dl">"</span><span class="s2">/login</span><span class="dl">"</span><span class="p">);</span>
+  <span class="p">};</span>
+
+  <span class="k">return </span><span class="p">(</span>
+    <span class="o">&lt;</span><span class="nx">AuthContext</span><span class="p">.</span><span class="nx">Provider</span> <span class="nx">value</span><span class="o">=&gt;</span>
+      <span class="p">{</span><span class="nx">children</span><span class="p">}</span>
+    <span class="o">&lt;</span><span class="sr">/AuthContext.Provider</span><span class="err">&gt;
+</span>  <span class="p">);</span>
+<span class="p">};</span>
+
+<span class="k">export</span> <span class="kd">const</span> <span class="nx">useAuth</span> <span class="o">=</span> <span class="p">()</span> <span class="o">=&gt;</span> <span class="p">{</span>
+  <span class="kd">const</span> <span class="nx">context</span> <span class="o">=</span> <span class="nf">useContext</span><span class="p">(</span><span class="nx">AuthContext</span><span class="p">);</span>
+  <span class="k">if </span><span class="p">(</span><span class="o">!</span><span class="nx">context</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">throw</span> <span class="k">new</span> <span class="nc">Error</span><span class="p">(</span><span class="dl">"</span><span class="s2">useAuth must be used within AuthProvider</span><span class="dl">"</span><span class="p">);</span>
+  <span class="p">}</span>
+  <span class="k">return</span> <span class="nx">context</span><span class="p">;</span>
+<span class="p">};</span>
+</code></pre></div></div>
+
+<h4 id="步骤5-修改主布局">步骤5: 修改主布局</h4>
+
+<p>更新<code class="language-plaintext highlighter-rouge">app/layout.js</code>：</p>
+
+<div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">import</span> <span class="p">{</span> <span class="nx">AuthProvider</span> <span class="p">}</span> <span class="k">from</span> <span class="dl">"</span><span class="s2">@/contexts/AuthContext</span><span class="dl">"</span><span class="p">;</span>
+
+<span class="k">export</span> <span class="k">default</span> <span class="kd">function</span> <span class="nf">RootLayout</span><span class="p">({</span> <span class="nx">children</span> <span class="p">})</span> <span class="p">{</span>
+  <span class="k">return </span><span class="p">(</span>
+    <span class="o">&lt;</span><span class="nx">html</span> <span class="nx">lang</span><span class="o">=</span><span class="dl">"</span><span class="s2">zh</span><span class="dl">"</span> <span class="nx">suppressHydrationWarning</span><span class="o">&gt;</span>
+      <span class="o">&lt;</span><span class="nx">body</span> <span class="nx">suppressHydrationWarning</span><span class="o">&gt;</span>
+        <span class="o">&lt;</span><span class="nx">AuthProvider</span><span class="o">&gt;</span>
+          <span class="o">&lt;</span><span class="nx">Provider</span><span class="o">&gt;</span>
+            <span class="o">&lt;</span><span class="nx">ThemeRegistry</span><span class="o">&gt;</span>
+              <span class="o">&lt;</span><span class="nx">I18nProvider</span><span class="o">&gt;</span>
+                <span class="p">{</span><span class="nx">children</span><span class="p">}</span>
+                <span class="o">&lt;</span><span class="nx">Toaster</span> <span class="nx">richColors</span> <span class="nx">position</span><span class="o">=</span><span class="dl">"</span><span class="s2">top-right</span><span class="dl">"</span> <span class="nx">duration</span><span class="o">=</span><span class="p">{</span><span class="mi">1000</span><span class="p">}</span> <span class="sr">/</span><span class="err">&gt;
+</span>              <span class="o">&lt;</span><span class="sr">/I18nProvider</span><span class="err">&gt;
+</span>            <span class="o">&lt;</span><span class="sr">/ThemeRegistry</span><span class="err">&gt;
+</span>          <span class="o">&lt;</span><span class="sr">/Provider</span><span class="err">&gt;
+</span>        <span class="o">&lt;</span><span class="sr">/AuthProvider</span><span class="err">&gt;
+</span>      <span class="o">&lt;</span><span class="sr">/body</span><span class="err">&gt;
+</span>    <span class="o">&lt;</span><span class="sr">/html</span><span class="err">&gt;
+</span>  <span class="p">);</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<h4 id="步骤6-添加路由保护">步骤6: 添加路由保护</h4>
+
+<p>创建<code class="language-plaintext highlighter-rouge">middleware.js</code>：</p>
+
+<div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">import</span> <span class="p">{</span> <span class="nx">NextResponse</span> <span class="p">}</span> <span class="k">from</span> <span class="dl">"</span><span class="s2">next/server</span><span class="dl">"</span><span class="p">;</span>
+<span class="k">import</span> <span class="p">{</span> <span class="nx">jwtVerify</span> <span class="p">}</span> <span class="k">from</span> <span class="dl">"</span><span class="s2">jose</span><span class="dl">"</span><span class="p">;</span>
+
+<span class="k">export</span> <span class="k">async</span> <span class="kd">function</span> <span class="nf">middleware</span><span class="p">(</span><span class="nx">request</span><span class="p">)</span> <span class="p">{</span>
+  <span class="kd">const</span> <span class="nx">token</span> <span class="o">=</span> <span class="nx">request</span><span class="p">.</span><span class="nx">cookies</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="dl">"</span><span class="s2">token</span><span class="dl">"</span><span class="p">)?.</span><span class="nx">value</span><span class="p">;</span>
+  <span class="kd">const</span> <span class="nx">isAuthPage</span> <span class="o">=</span> <span class="nx">request</span><span class="p">.</span><span class="nx">nextUrl</span><span class="p">.</span><span class="nx">pathname</span><span class="p">.</span><span class="nf">startsWith</span><span class="p">(</span><span class="dl">"</span><span class="s2">/login</span><span class="dl">"</span><span class="p">);</span>
+
+  <span class="k">if </span><span class="p">(</span><span class="o">!</span><span class="nx">token</span> <span class="o">&amp;&amp;</span> <span class="o">!</span><span class="nx">isAuthPage</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="nx">NextResponse</span><span class="p">.</span><span class="nf">redirect</span><span class="p">(</span><span class="k">new</span> <span class="nc">URL</span><span class="p">(</span><span class="dl">"</span><span class="s2">/login</span><span class="dl">"</span><span class="p">,</span> <span class="nx">request</span><span class="p">.</span><span class="nx">url</span><span class="p">));</span>
+  <span class="p">}</span>
+
+  <span class="k">if </span><span class="p">(</span><span class="nx">token</span> <span class="o">&amp;&amp;</span> <span class="nx">isAuthPage</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="nx">NextResponse</span><span class="p">.</span><span class="nf">redirect</span><span class="p">(</span><span class="k">new</span> <span class="nc">URL</span><span class="p">(</span><span class="dl">"</span><span class="s2">/</span><span class="dl">"</span><span class="p">,</span> <span class="nx">request</span><span class="p">.</span><span class="nx">url</span><span class="p">));</span>
+  <span class="p">}</span>
+
+  <span class="k">return</span> <span class="nx">NextResponse</span><span class="p">.</span><span class="nf">next</span><span class="p">();</span>
+<span class="p">}</span>
+
+<span class="k">export</span> <span class="kd">const</span> <span class="nx">config</span> <span class="o">=</span> <span class="p">{</span>
+  <span class="na">matcher</span><span class="p">:</span> <span class="p">[</span><span class="dl">"</span><span class="s2">/((?!api|_next/static|_next/image|favicon.ico).*)</span><span class="dl">"</span><span class="p">],</span>
+<span class="p">};</span>
+</code></pre></div></div>
+
+<h3 id="4-本地构建和部署流程">4. 本地构建和部署流程</h3>
+
+<h4 id="安装依赖">安装依赖</h4>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>npm <span class="nb">install </span>bcryptjs jsonwebtoken jose
+</code></pre></div></div>
+
+<h4 id="环境变量配置">环境变量配置</h4>
+
+<p>创建<code class="language-plaintext highlighter-rouge">.env.local</code>文件：</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>JWT_SECRET=your-secret-key-here
+</code></pre></div></div>
+
+<h4 id="数据库管理">数据库管理</h4>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># 由于本项目添加了一个登陆账号验证的功能，新创建了一张表来做管理员账户</span>
+<span class="c"># 1. 把你的数据库结构 → 同步到真实数据库</span>
+npm run db:push
+<span class="c"># 2. 启动一个网页版数据库可视化管理工具</span>
+npm rum db:studio
+
+</code></pre></div></div>
+
+<h4 id="开发模式运行">开发模式运行</h4>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>npm run dev
+</code></pre></div></div>
+
+<h4 id="生产构建">生产构建</h4>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>npm run build
+npm run start
+<span class="c"># 访问 http://localhost:1717</span>
+</code></pre></div></div>
+
+<h4 id="docker部署">Docker部署</h4>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># 构建镜像</span>
+docker build <span class="nt">-t</span> easy-dataset-with-auth <span class="nb">.</span>
+docker build <span class="nt">-t</span> easy-dataset-v1 <span class="nb">.</span>
+docker build <span class="nt">-t</span> easy-dataset-v2 <span class="nb">.</span>
+</code></pre></div></div>
+
+<h5 id="1-镜像源npmrc文件优化">1. 镜像源.npmrc文件优化</h5>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># 下载慢，镜像源更改，配置.npmrc文件</span>
+<span class="nv">registry</span><span class="o">=</span>https://registry.npmjs.org  <span class="c"># 比https://registry.npmmirror.com要好用</span>
+strict-ssl<span class="o">=</span><span class="nb">false
+</span>fetch-retry-mintimeout<span class="o">=</span>20000
+fetch-retry-maxtimeout<span class="o">=</span>120000
+fetch-timeout<span class="o">=</span>300000
+<span class="nv">electron_mirror</span><span class="o">=</span>https://npmmirror.com/mirrors/electron/
+<span class="nv">canvas_binary_host_mirror</span><span class="o">=</span>https://npmmirror.com/mirrors/node-canvas-prebuilt/
+<span class="nv">prisma_engines_mirror</span><span class="o">=</span>https://registry.npmmirror.com/-/binary/prisma
+</code></pre></div></div>
+
+<h5 id="2-dockerfile优化">2. Dockerfile优化</h5>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># 创建包含pnpm的基础镜像</span>
+<span class="c"># http://r.cnpmjs.org/</span>
+FROM node:20-alpine AS pnpm-base
+
+<span class="c"># 1. 修改 Alpine 软件源为阿里云镜像 (加速 apk add)</span>
+RUN <span class="nb">sed</span> <span class="nt">-i</span> <span class="s1">'s/dl-cdn.alpinelinux.org/mirrors.aliyun.com/g'</span> /etc/apk/repositories
+
+<span class="c"># 2. 设置 pnpm 镜像源并安装</span>
+RUN npm config <span class="nb">set </span>registry https://registry.npmjs.org <span class="o">&amp;&amp;</span> <span class="se">\</span>
+    npm <span class="nb">install</span> <span class="nt">-g</span> pnpm@9
+
+<span class="c"># 构建阶段</span>
+FROM pnpm-base AS builder
+WORKDIR /app
+
+<span class="c"># 添加构建参数，用于识别目标平台</span>
+ARG TARGETPLATFORM
+
+<span class="c"># 安装构建依赖 (此时已使用国内 apk 镜像)</span>
+RUN apk add <span class="nt">--no-cache</span> <span class="nt">--virtual</span> .build-deps <span class="se">\</span>
+    python3 <span class="se">\</span>
+    make <span class="se">\</span>
+    g++ <span class="se">\</span>
+    cairo-dev <span class="se">\</span>
+    pango-dev <span class="se">\</span>
+    jpeg-dev <span class="se">\</span>
+    giflib-dev <span class="se">\</span>
+    librsvg-dev <span class="se">\</span>
+    build-base <span class="se">\</span>
+    pixman-dev <span class="se">\</span>
+    pkgconfig
+
+
+<span class="c"># 复制依赖文件</span>
+COPY package.json pnpm-lock.yaml .npmrc ./
+
+<span class="c"># 核心优化：</span>
+<span class="c"># 1. 设置 Electron 镜像 (加速 electron 下载)</span>
+<span class="c"># 2. 设置 Canvas 镜像 (加速 canvas 下载，避免本地编译)</span>
+<span class="c"># 3. 设置 Prisma 镜像 (加速 prisma 引擎下载)</span>
+RUN pnpm config <span class="nb">set </span>registry https://registry.npmjs.org <span class="o">&amp;&amp;</span> <span class="se">\</span>
+    pnpm config <span class="nb">set </span>fetch-retries 5 <span class="o">&amp;&amp;</span> <span class="se">\</span>
+    pnpm config <span class="nb">set </span>fetch-retry-maxtimeout 600000 <span class="o">&amp;&amp;</span> <span class="se">\</span>
+    <span class="nb">export </span><span class="nv">ELECTRON_MIRROR</span><span class="o">=</span><span class="s2">"https://npmmirror.com/mirrors/electron/"</span> <span class="o">&amp;&amp;</span> <span class="se">\</span>
+    <span class="nb">export </span><span class="nv">CANVAS_BINARY_HOST_MIRROR</span><span class="o">=</span><span class="s2">"https://npmmirror.com/mirrors/node-canvas-prebuilt/"</span> <span class="o">&amp;&amp;</span> <span class="se">\</span>
+    <span class="nb">export </span><span class="nv">PRISMA_ENGINES_MIRROR</span><span class="o">=</span><span class="s2">"https://registry.npmmirror.com/-/binary/prisma"</span> <span class="o">&amp;&amp;</span> <span class="se">\</span>
+    pnpm <span class="nb">install</span> <span class="nt">--no-frozen-lockfile</span>
+<span class="c"># 复制源代码</span>
+COPY <span class="nb">.</span> <span class="nb">.</span>
+
+<span class="c"># 根据目标平台设置Prisma二进制目标并构建应用</span>
+<span class="c"># 增加 PRISMA_ENGINES_MIRROR 确保 build 过程中的下载也走国内</span>
+RUN <span class="nb">export </span><span class="nv">PRISMA_ENGINES_MIRROR</span><span class="o">=</span>https://registry.npmmirror.com/-/binary/prisma <span class="o">&amp;&amp;</span> <span class="se">\</span>
+    <span class="k">if</span> <span class="o">[</span> <span class="s2">"</span><span class="nv">$TARGETPLATFORM</span><span class="s2">"</span> <span class="o">=</span> <span class="s2">"linux/arm64"</span> <span class="o">]</span><span class="p">;</span> <span class="k">then</span> <span class="se">\</span>
+    <span class="nb">echo</span> <span class="s2">"Configuring for ARM64 platform"</span><span class="p">;</span> <span class="se">\</span>
+    <span class="nb">sed</span> <span class="nt">-i</span> <span class="s1">'s/binaryTargets = \[.*\]/binaryTargets = \["linux-musl-arm64-openssl-3.0.x"\]/'</span> prisma/schema.prisma<span class="p">;</span> <span class="se">\</span>
+    <span class="nv">PRISMA_CLI_BINARY_TARGETS</span><span class="o">=</span><span class="s2">"linux-musl-arm64-openssl-3.0.x"</span> pnpm build<span class="p">;</span> <span class="se">\</span>
+    <span class="k">else</span> <span class="se">\</span>
+    <span class="nb">echo</span> <span class="s2">"Configuring for AMD64 platform (default)"</span><span class="p">;</span> <span class="se">\</span>
+    <span class="nb">sed</span> <span class="nt">-i</span> <span class="s1">'s/binaryTargets = \[.*\]/binaryTargets = \["linux-musl-openssl-3.0.x"\]/'</span> prisma/schema.prisma<span class="p">;</span> <span class="se">\</span>
+    <span class="nv">PRISMA_CLI_BINARY_TARGETS</span><span class="o">=</span><span class="s2">"linux-musl-openssl-3.0.x"</span> pnpm build<span class="p">;</span> <span class="se">\</span>
+    <span class="k">fi</span>
+
+<span class="c"># 保留Prisma CLI用于数据库管理</span>
+<span class="c"># RUN pnpm prune --prod</span>
+
+<span class="c"># 运行阶段</span>
+FROM pnpm-base AS runner
+WORKDIR /app
+
+<span class="c"># 只安装运行时依赖 (同样受惠于第一步的 apk 加速)</span>
+RUN apk add <span class="nt">--no-cache</span> <span class="se">\</span>
+    cairo <span class="se">\</span>
+    pango <span class="se">\</span>
+    jpeg <span class="se">\</span>
+    giflib <span class="se">\</span>
+    librsvg <span class="se">\</span>
+    pixman
+
+<span class="c"># 复制文件... (保持不变)</span>
+COPY package.json .env ./
+COPY <span class="nt">--from</span><span class="o">=</span>builder /app/node_modules ./node_modules
+COPY <span class="nt">--from</span><span class="o">=</span>builder /app/.next ./.next
+COPY <span class="nt">--from</span><span class="o">=</span>builder /app/public ./public
+COPY <span class="nt">--from</span><span class="o">=</span>builder /app/electron ./electron
+COPY <span class="nt">--from</span><span class="o">=</span>builder /app/prisma /app/prisma-template
+COPY docker-entrypoint.sh /usr/local/bin/
+RUN <span class="nb">chmod</span> +x /usr/local/bin/docker-entrypoint.sh
+
+ENV <span class="nv">NODE_ENV</span><span class="o">=</span>production
+EXPOSE 1717
+
+ENTRYPOINT <span class="o">[</span><span class="s2">"/usr/local/bin/docker-entrypoint.sh"</span><span class="o">]</span>
+CMD <span class="o">[</span><span class="s2">"pnpm"</span>, <span class="s2">"start"</span><span class="o">]</span>
+
+</code></pre></div></div>
+
+<h5 id="3-运行容器">3. 运行容器</h5>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># 运行容器</span>
+docker run <span class="nt">-d</span> <span class="se">\</span>
+  <span class="nt">-p</span> port:port <span class="se">\</span>
+  <span class="nt">-v</span> ./local-db:/app/local-db <span class="se">\</span>
+  <span class="nt">-v</span> ./prisma:/app/prisma <span class="se">\</span>
+  <span class="nt">-e</span> <span class="nv">JWT_SECRET</span><span class="o">=</span>your-secret-key-here <span class="se">\</span>
+  <span class="nt">--name</span> easy-dataset <span class="se">\</span>
+  easy-dataset
+
+<span class="c">#还需要设置关机自启动</span>
+docker run <span class="nt">-d</span> <span class="se">\</span>
+  <span class="nt">-p</span> port:port <span class="se">\</span>
+  <span class="nt">-v</span> ./local-db:/app/local-db <span class="se">\</span>
+  <span class="nt">-v</span> ./prisma:/app/prisma <span class="se">\</span>
+  <span class="nt">-e</span> <span class="nv">JWT_SECRET</span><span class="o">=</span>your-secret-key-here <span class="se">\</span>
+  <span class="nt">--name</span> easy-dataset <span class="se">\</span>
+  <span class="nt">--restart</span> unless-stopped <span class="se">\</span>
+  easy-dataset
+</code></pre></div></div>
+
+<p><code class="language-plaintext highlighter-rouge">--restart</code>参数的说明</p>
+
+<table>
+  <thead>
+    <tr>
+      <th style="text-align: left">参数值</th>
+      <th style="text-align: left">说明</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td style="text-align: left"><strong>no</strong></td>
+      <td style="text-align: left">默认值。容器退出或系统重启后<strong>不会</strong>自动重启。</td>
+    </tr>
+    <tr>
+      <td style="text-align: left"><strong>always</strong></td>
+      <td style="text-align: left">只要 Docker 服务在运行，容器就会自动重启。即使你手动停止了它，重启电脑后它仍会尝试启动。</td>
+    </tr>
+    <tr>
+      <td style="text-align: left"><strong>unless-stopped</strong></td>
+      <td style="text-align: left"><strong>最推荐。</strong> 重启电脑后会自动启动，但前提是你在关机前<strong>没有手动停止</strong>（<code class="language-plaintext highlighter-rouge">docker stop</code>）这个容器。</td>
+    </tr>
+    <tr>
+      <td style="text-align: left"><strong>on-failure</strong></td>
+      <td style="text-align: left">只有当容器非正常退出（退出状态码非 0）时才会重启。</td>
+    </tr>
+  </tbody>
+</table>
+
+<h5 id="4-容器报错管理">4. 容器报错管理</h5>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># 查看日志</span>
+docker logs easy-dataset
+
+<span class="c"># 查看正在运行的容器日志（实时滚动）</span>
+docker logs <span class="nt">-f</span> easy-dataset
+
+<span class="c"># 查看最近 100 行日志（最常用）</span>
+docker logs <span class="nt">--tail</span> 100 easy-dataset
+
+<span class="c"># 把日志保存到本地文件里</span>
+docker logs easy-dataset <span class="o">&gt;</span> easy-dataset-logs.txt
+
+<span class="c"># 进入容器</span>
+docker <span class="nb">exec</span> <span class="nt">-it</span> easy-dataset sh
+</code></pre></div></div>
+
+<h5 id="4-启动容器内数据库管理功能">4. 启动容器内数据库管理功能</h5>
+
+<p>由于easydataset内置有一个数据库可视化管理工具，运行以下命令后，在浏览器访问 http://localhost:5555/studio 就可以看到数据库管理界面了，是用来管理用户数据的。</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># 1. 进入容器</span>
+easy-dataset <span class="nv">$ </span>docker <span class="nb">exec</span> <span class="nt">-it</span> easy-dataset  sh
+/app <span class="nv">$ </span> pnpm prisma studio
+ ERR_PNPM_RECURSIVE_EXEC_FIRST_FAIL  Command <span class="s2">"prisma"</span> not found
+
+<span class="c"># 2. 执行上述命令行发现docker的image里未安装prisma工具</span>
+<span class="c">#  由于安装prisma需要先安装openssl，故先配置环境，由于本环境是Alpine 精简系统，缺库，直接装上就好：</span>
+apk update  <span class="c"># 可以不执行</span>
+apk add <span class="nt">--no-cache</span> openssl libc6-compat <span class="c"># 一定要加上--no-cache</span>
+
+<span class="c"># 3. 再次执行命令行，成功启动数据库可视化工具</span>
+pnpm dlx prisma@5.20.0 studio <span class="nt">--schema</span> /app/prisma/schema.prisma
+<span class="c"># http://localhost:5555</span>
+
+<span class="c"># 4. 若需要配置镜像</span>
+pnpm config <span class="nb">set </span>registry http://r.cnpmjs.org/
+
+</code></pre></div></div>
+
+<h3 id="5-常见登录问题">5. 常见登录问题</h3>
+
+<h4 id="51-公网访问问题">5.1 公网访问问题</h4>
+
+<p>如果是公网访问问题，可以在<code class="language-plaintext highlighter-rouge">.env</code>文件中进行配置</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">ALLOWED_ORIGINS</span><span class="o">=</span>http://localhost:port,http://your.domain.name:port
+</code></pre></div></div>
+
+<p>点击浏览器的<code class="language-plaintext highlighter-rouge">network</code> 状态,查看输入账号密码后的状态</p>
+
+<p><img src="https://virginia-pepper.oss-cn-guangzhou.aliyuncs.com/20260408120737081.jpeg" alt="alt text" width="75%" /></p>
+
+<p>如果<code class="language-plaintext highlighter-rouge">\login</code>状态为 200， 但是无法进行跳转，则有可能是因为 CORS 跨域问题导致。</p>
+
+<blockquote>
+  <p>进一步解释： login 请求的状态码已经是 200 OK 了！这说明后端已经验证通过并返回了成功信息。之所以没有跳转，是因为在跨域或穿透环境下，浏览器没有成功处理后端返回的 Set-Cookie（登录凭证），导致前端认为你还是未登录状态，从而卡在原地</p>
+</blockquote>
+
+<blockquote>
+  <p>ps: 解释CORS（跨域资源共享）： 安全机制导致的访问失败</p>
+</blockquote>
+
+<p><img src="https://virginia-pepper.oss-cn-guangzhou.aliyuncs.com/20260408121001858.png" alt="alt text" width="75%" /></p>
+
+<p>🔍 <strong>核心原因排查</strong></p>
+
+<ol>
+  <li>
+    <p>协议不匹配：你使用的是 <code class="language-plaintext highlighter-rouge">http://domain.cn</code>（非加密）。现代浏览器对于非<code class="language-plaintext highlighter-rouge">https</code> 的网站，在处理跨域 <code class="language-plaintext highlighter-rouge">Cookie </code>`转发时有非常严格的限制。</p>
+  </li>
+  <li>
+    <p><code class="language-plaintext highlighter-rouge">Cookie</code> 写入失败：由于你是通过 <code class="language-plaintext highlighter-rouge">frp</code> 穿透访问，请求头里的 <code class="language-plaintext highlighter-rouge">Host</code> 是 <code class="language-plaintext highlighter-rouge">domain.cn:port</code>。如果后端代码中设置 <code class="language-plaintext highlighter-rouge">Cookie</code> 时指定了 <code class="language-plaintext highlighter-rouge">Domain=localhost</code> 或者开启了 <code class="language-plaintext highlighter-rouge">Secure</code> 属性（要求必须 <code class="language-plaintext highlighter-rouge">https</code>），浏览器会直接丢弃这个 <code class="language-plaintext highlighter-rouge">Cookie</code>。</p>
+  </li>
+</ol>
+
+<p>🔍 <strong>处理方法</strong></p>
+
+<p>方案一：修改浏览器的安全策略（最快验证法）</p>
+
+<p>如果只是你自己使用，可以让 Chrome 暂时对你的域名放开 Secure 限制。</p>
+
+<ol>
+  <li>
+    <p>在 Chrome 地址栏输入并打开：<code class="language-plaintext highlighter-rouge">chrome://flags/#unsafely-treat-insecure-origin-as-secure</code></p>
+  </li>
+  <li>
+    <p>在输入框中填写你的域名和端口，例如：<code class="language-plaintext highlighter-rouge">http://domain.cn:port</code></p>
+  </li>
+  <li>
+    <p>把右侧的状态从 <code class="language-plaintext highlighter-rouge">Disabled</code> 改为 <code class="language-plaintext highlighter-rouge">Enabled</code>。</p>
+  </li>
+  <li>
+    <p>点击右下角的 <code class="language-plaintext highlighter-rouge">Relaunch</code> 重启浏览器。</p>
+  </li>
+  <li>
+    <p>验证：重启后再次登录。此时浏览器会把你的 HTTP 域名当成“安全环境”，即便有 <code class="language-plaintext highlighter-rouge">Secure</code> 标志，它也会强行存入 Cookie 并允许跳转。</p>
+  </li>
+</ol>
+
+<p>方案二：给自己的域名配置 <code class="language-plaintext highlighter-rouge">ssl</code> 服务</p>
+
+<p>详细我回再出一篇博客讲解，简单来说就是给自己的域名申请一个免费的 <code class="language-plaintext highlighter-rouge">SSL</code> 证书（比如通过 Let’s Encrypt），然后在你的服务器上配置 <code class="language-plaintext highlighter-rouge">HTTPS</code> 服务。这样浏览器就会认为你的域名是安全的，自然就不会丢弃<code class="language-plaintext highlighter-rouge"> Cookie</code> 了。</p>
+
+<h4 id="52-数据库权限问题">5.2 数据库权限问题</h4>
+
+<p>如果是数据库无法读写的问题，需要配置读取权限：<code class="language-plaintext highlighter-rouge">Error code 14: Unable to open the database file</code> 是 <code class="language-plaintext highlighter-rouge">SQLite</code>的标准错误，意味着 <code class="language-plaintext highlighter-rouge">Prisma</code> 找到了路径，但是 没有权限读写文件 或者 该路径指向了一个不存在的目录。</p>
+
+<p>这通常是因为 `Docker 挂载（Volume）后的文件权限变成了 root，而容器内的服务（以其他用户运行）无法操作它。</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># 给数据库目录和文件读写权限</span>
+<span class="nb">chmod</span> <span class="nt">-R</span> 777 <span class="si">$(</span><span class="nb">pwd</span><span class="si">)</span>/prisma-data
+<span class="nb">chmod</span> <span class="nt">-R</span> 777 <span class="si">$(</span><span class="nb">pwd</span><span class="si">)</span>/local-db
+</code></pre></div></div>
+
+<h2 id="-额外建议">🔧 额外建议</h2>
+
+<ol>
+  <li><strong>用户注册</strong>: 可以添加注册页面和API</li>
+  <li><strong>密码重置</strong>: 实现忘记密码功能</li>
+  <li><strong>用户管理</strong>: 管理员可以管理用户</li>
+  <li><strong>权限控制</strong>: 不同用户访问不同项目</li>
+  <li><strong>会话管理</strong>: 实现refresh token机制</li>
+  <li><strong>安全加固</strong>: 添加CSRF保护、输入验证等</li>
+</ol>
+
+<p>这个方案提供了完整的身份验证系统，你可以根据具体需求进行调整和扩展。</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>
+</code></pre></div></div>]]></content><author><name>pepper</name></author><category term="easydataset" /><category term="java" /><summary type="html"><![CDATA[这篇博客介绍了Easy Dataset项目的架构，并指导你如何添加登录验证页面。]]></summary></entry><entry><title type="html">服务器-SSL证书安装与配置</title><link href="http://localhost:4000/how_to_makeSSL/" rel="alternate" type="text/html" title="服务器-SSL证书安装与配置" /><published>2026-04-07T00:00:00+08:00</published><updated>2026-04-07T00:00:00+08:00</updated><id>http://localhost:4000/how_to_makeSSL</id><content type="html" xml:base="http://localhost:4000/how_to_makeSSL/"><![CDATA[<p>这篇博客介绍了安装SSL证书，防止“裸奔”在互联网——用户信息可能被窃取，搜索引擎排名也会大打折扣。一张SSL证书，不仅能实现HTTPS加密，还能提升用户信任度！</p>
+
+<!-- more -->
+
+<h3 id="一ssl证书怎么选">一、SSL证书怎么选？</h3>
+
+<p>看域名数量</p>
+
+<ul>
+  <li>
+    <p>单域名：保护1个主域名（如 http://www.company.com）。</p>
+  </li>
+  <li>
+    <p>通配符：保护主域名+所有子域名（如 *.http://company.com）。</p>
+  </li>
+  <li>
+    <p>多域名：一张证书覆盖多个独立域名（如 http://company.com + http://shop.company.net）。</p>
+  </li>
+</ul>
+
+<h3 id="二托管平台不建议">二、托管平台(不建议)</h3>
+
+<p>由于一开始是新手，自己不会，所以在网上找了免费签发版本。申请后五分钟内可以发放，参考 <a href="https://ohttps.com/docs/">OHTTPS</a> 的免费版 HTTPS 证书 / SSL 证书。其中，OHTTPS 的免费版 HTTPS证书 / SSL 证书是由 Let’s Encrypt 颁发。</p>
+
+<h4 id="0-dns授权">0. DNS授权</h4>
+
+<p>由于这个托管平台需要帮你管理，它需要有很多权限，其中我们按照它的指南开始操作，以下选择DNS授权验证模式，可以参考它的<a href="https://ohttps.com/docs/dns/aliyun">指南</a>，但是有点旧了。</p>
+
+<p><img src="https://virginia-pepper.oss-cn-guangzhou.aliyuncs.com/20260408222044022.png" alt="alt text" width="80%" /></p>
+
+<h4 id="1-新建ram用户">1. 新建RAM用户</h4>
+<p>访问阿里云的链接如下：<code class="language-plaintext highlighter-rouge">https://ram.console.aliyun.com/overview</code></p>
+
+<p><img src="https://virginia-pepper.oss-cn-guangzhou.aliyuncs.com/20260408222548784.png" alt="alt text" width="80%" /></p>
+
+<h4 id="2-保存accesskey-id和accesskey-secret">2. 保存AccessKey ID和AccessKey Secret</h4>
+
+<p><img src="https://virginia-pepper.oss-cn-guangzhou.aliyuncs.com/20260408222226606.png" alt="alt text" width="80%" /></p>
+
+<p>阿里云中的获取方式与之前的传统不一样，在用户新建完成后，及时保存 <code class="language-plaintext highlighter-rouge">AccessKey ID</code> 和<code class="language-plaintext highlighter-rouge">AccessKey Secret</code>。</p>
+
+<p><img src="https://virginia-pepper.oss-cn-guangzhou.aliyuncs.com/20260408223229155.png" alt="alt text" width="80%" /></p>
+
+<h4 id="3-为用户添加权限">3. 为用户添加权限</h4>
+<p>选择新建的<code class="language-plaintext highlighter-rouge">ohttps-dns</code>用户，为该用户添加<code class="language-plaintext highlighter-rouge">[AliyunDNSFullAccess(管理云解析（DNS）的权限)]</code> 以及 <code class="language-plaintext highlighter-rouge">[AliyunYundunCertFullAccess(管理云盾证书服务的权限)]</code> 权限。该权限仅在申请证书时证书提供商 Let’sEncrypt 验证域名所属权使用,以及该权限仅用于上传用户在 OHTTPS 中申请的 HTTPS 证书 / SSL 证书。</p>
+
+<p><img src="https://virginia-pepper.oss-cn-guangzhou.aliyuncs.com/20260408223417844.png" alt="alt text" width="80%" /></p>
+
+<p><img src="https://virginia-pepper.oss-cn-guangzhou.aliyuncs.com/20260408223614769.png" alt="alt text" width="80%" /></p>
+
+<h4 id="4-部署ssl证书">4. 部署SSL证书</h4>
+
+<p>下载证书放到服务器上，或者使用平台直接托管一键操作。</p>
+
+<p><img src="https://virginia-pepper.oss-cn-guangzhou.aliyuncs.com/20260408223652679.png" alt="alt text" width="80%" /></p>
+
+<h3 id="三-certbot工具配置">三、 certbot工具配置</h3>
+
+<p>在自己的服务器上配置 Let’s Encrypt SSL 证书，最主流、最省心的方案是使用 Certbot 工具。它能自动完成域名验证、证书签发、Web 服务器配置（Nginx/Apache）、自动续期全流程。</p>
+
+<h4 id="1-安装-certbot官方推荐">1. 安装 Certbot（官方推荐）</h4>
+
+<p>用 apt 安装（Ubuntu/Debian）</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">sudo </span>apt update
+<span class="nb">sudo </span>apt <span class="nb">install </span>certbot python3-certbot-nginx python3-certbot-apache <span class="nt">-y</span>
+</code></pre></div></div>
+<h4 id="2申请--自动配置证书">2.申请 &amp; 自动配置证书</h4>
+
+<p>Nginx 服务器（全自动，最常用）:Certbot 会自动修改 Nginx 配置、开启 HTTPS、强制 HTTP→HTTPS 重定向。</p>
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>certbot <span class="nt">--nginx</span> <span class="nt">-d</span> 你的域名.com <span class="nt">--non-interactive</span> <span class="nt">--agree-tos</span> <span class="nt">-m</span> 你的邮箱@xxx.com
+</code></pre></div></div>
+
+<p>这条命令会：自动验证域名 /  自动签发证书 / 自动修改 Nginx 配置 / 自动开启 HTTPS / 自动把 80 重定向到 443 / 自动配置自动续期任务</p>
+
+<blockquote>
+  <p>执行后会问你 3 个问题：
+    1. 输入邮箱：随便填一个你的邮箱
+    2. 同意协议：输入 Y
+    3. 是否共享邮箱：输入 N
+    4. 最后问是否重定向：输入 2（自动 HTTP 转 HTTPS）</p>
+</blockquote>
+
+<h4 id="3交互过程执行命令后">3、交互过程（执行命令后）</h4>
+<p>成功后会提示：</p>
+<ul>
+  <li>证书路径：<code class="language-plaintext highlighter-rouge">/etc/letsencrypt/live/yourdomain.com/</code> 也可以手动指定移动到例如 <code class="language-plaintext highlighter-rouge">/etc/nginx/ssl/yourdomain.com</code></li>
+  <li>关键文件：
+    <ul>
+      <li>fullchain.pem（证书链）</li>
+      <li>privkey.pem（私钥）</li>
+    </ul>
+  </li>
+</ul>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># 复制 Let's Encrypt 证书到这个目录（自动续期后也需要重新复制）</span>
+<span class="nb">sudo cp</span> /etc/letsencrypt/live/yourdomain.com/fullchain.pem /etc/nginx/ssl/yourdomain.com/
+<span class="nb">sudo cp</span> /etc/letsencrypt/live/yourdomain.com/privkey.pem /etc/nginx/ssl/yourdomain.com/
+
+<span class="c"># 设置正确权限</span>
+<span class="nb">sudo chmod </span>600 /etc/nginx/ssl/yourdomain.com/<span class="k">*</span>
+<span class="nb">sudo chown </span>nginx:nginx /etc/nginx/ssl/yourdomain.com/<span class="k">*</span>  <span class="c"># 如果是 Ubuntu 则是 www-data:www-data</span>
+
+</code></pre></div></div>
+
+<h4 id="4-配置">4. 配置</h4>
+<p>打开配置文件：</p>
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">sudo </span>vi /etc/nginx/conf.d/vllm-https.conf
+</code></pre></div></div>
+<p>把下面内容完整粘贴进去（只需要把 yourdomain.com 换成你的真实域名）：</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>
+<span class="c"># HTTPS 安全配置</span>
+server <span class="o">{</span>
+    listen 443 ssl http2<span class="p">;</span>
+    server_name yourdomain.com<span class="p">;</span>  <span class="c"># 改成你的域名</span>
+
+    <span class="c"># 你要求的证书路径</span>
+    ssl_certificate /etc/nginx/ssl/yourdomain.com/fullchain.pem<span class="p">;</span>
+    ssl_certificate_key /etc/nginx/ssl/yourdomain.com/privkey.pem<span class="p">;</span>
+
+    <span class="c"># 安全优化（官方推荐）</span>
+    ssl_protocols TLSv1.2 TLSv1.3<span class="p">;</span>
+    ssl_prefer_server_ciphers on<span class="p">;</span>
+    ssl_session_cache shared:SSL:10m<span class="p">;</span>
+    ssl_session_timeout 10m<span class="p">;</span>
+
+    <span class="c"># 这里是你的 vllm 代理配置</span>
+    location / <span class="o">{</span>
+        proxy_pass http://127.0.0.1:8000<span class="p">;</span>  <span class="c"># vllm 默认端口</span>
+        proxy_set_header Host <span class="nv">$host</span><span class="p">;</span>
+        proxy_set_header X-Real-IP <span class="nv">$remote_addr</span><span class="p">;</span>
+        proxy_set_header X-Forwarded-For <span class="nv">$proxy_add_x_forwarded_for</span><span class="p">;</span>
+        proxy_set_header X-Forwarded-Proto <span class="nv">$scheme</span><span class="p">;</span>
+        
+        <span class="c"># 大模型接口需要长连接</span>
+        proxy_connect_timeout 300<span class="p">;</span>
+        proxy_send_timeout 300<span class="p">;</span>
+        proxy_read_timeout 300<span class="p">;</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+
+<span class="c"># 强制 HTTP 跳转到 HTTPS（必开）</span>
+server <span class="o">{</span>
+    listen 80<span class="p">;</span>
+    server_name yourdomain.com<span class="p">;</span>
+    <span class="k">return </span>301 https://<span class="nv">$host$request_uri</span><span class="p">;</span>
+<span class="o">}</span>
+
+</code></pre></div></div>
+
+<h4 id="5-测试--重启-nginx">5. 测试 + 重启 Nginx</h4>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># 测试配置是否正确</span>
+<span class="nb">sudo </span>nginx <span class="nt">-t</span>
+
+<span class="c"># 重启生效</span>
+<span class="nb">sudo </span>systemctl restart nginx
+</code></pre></div></div>
+
+<h4 id="6-自动续期证书必须配置">6. 自动续期证书（必须配置）</h4>
+<p>因为你手动移动了证书，Certbot 自动续期后不会同步到 /etc/nginx/ssl，所以要加一个自动复制脚本:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">sudo </span>vi /etc/letsencrypt/renewal-hooks/deploy/copy-to-nginx-ssl.sh
+</code></pre></div></div>
+<p>粘贴内容：</p>
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">#!/bin/bash</span>
+<span class="nv">DOMAIN</span><span class="o">=</span><span class="s2">"yourdomain.com"</span>
+<span class="nb">cp</span> /etc/letsencrypt/live/<span class="nv">$DOMAIN</span>/fullchain.pem /etc/nginx/ssl/<span class="nv">$DOMAIN</span>/
+<span class="nb">cp</span> /etc/letsencrypt/live/<span class="nv">$DOMAIN</span>/privkey.pem /etc/nginx/ssl/<span class="nv">$DOMAIN</span>/
+<span class="nb">chmod </span>600 /etc/nginx/ssl/<span class="nv">$DOMAIN</span>/<span class="k">*</span>
+systemctl reload nginx
+</code></pre></div></div>
+
+<p>加执行权限：</p>
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">sudo chmod</span> +x /etc/letsencrypt/renewal-hooks/deploy/copy-to-nginx-ssl.sh
+</code></pre></div></div>]]></content><author><name>pepper</name></author><category term="ssl" /><category term="server" /><summary type="html"><![CDATA[这篇博客介绍了安装SSL证书，防止“裸奔”在互联网——用户信息可能被窃取，搜索引擎排名也会大打折扣。一张SSL证书，不仅能实现HTTPS加密，还能提升用户信任度！]]></summary></entry><entry><title type="html">服务器-vLLM多端口部署LLM</title><link href="http://localhost:4000/how_to_useVLLM/" rel="alternate" type="text/html" title="服务器-vLLM多端口部署LLM" /><published>2026-04-06T00:00:00+08:00</published><updated>2026-04-06T00:00:00+08:00</updated><id>http://localhost:4000/how_to_useVLLM</id><content type="html" xml:base="http://localhost:4000/how_to_useVLLM/"><![CDATA[<p>这篇博客介绍了如何管理本地的LLM，本文将详细梳理使用xinference管理LLM模型的常用命令，以及通过vllm部署LLM模型的核心操作步骤与命令示例，帮助读者快速掌握本地LLM的管理与部署流程。</p>
+
+<!-- more -->
+<h1 id="vllm-多端口部署-llm-模型">vllm 多端口部署 LLM 模型</h1>
+<p>针对<strong>后端多端口部署多个 LLM 模型</strong>的需求，本文设计了一套高可维护、易扩展、符合生产环境规范的目录结构，同时配套了核心配置与启动脚本模板，直接可用。</p>
+
+<h2 id="目录结构">目录结构</h2>
+<pre><code class="language-plain">vllm/
+├── config/                  # 🔧 模型配置中心（核心）
+│   ├── model_7b_8000.yaml   # 7B 模型，端口 8000 配置
+│   ├── model_14b_8001.yaml  # 14B 模型，端口 8001 配置
+│   ├── model_70b_8002.yaml  # 70B 模型，端口 8002 配置
+│   └── common.yaml          # 全局通用配置（日志、监控、超时等）
+├── scripts/                 # 🚀 启动/管理脚本
+│   ├── start_all.sh         # 一键启动所有模型服务
+│   ├── start_single.sh      # 单模型启动脚本（传参指定端口/模型）
+│   ├── stop_all.sh          # 一键停止所有服务
+│   ├── stop_single.sh       # 单模型停止脚本
+│   ├── restart_single.sh    # 单模型重启脚本
+│   └── health_check.sh      # 服务健康巡检脚本
+├── logs/                    # 📝 日志目录（按模型/端口分类）
+│   ├── model_7b_8000/
+│   │   ├── access.log       # 访问日志
+│   │   ├── error.log        # 错误日志
+│   │   └── server.log       # 服务运行日志
+│   ├── model_14b_8001/
+│   └── model_70b_8002/
+├── models/                  # 🧠 模型权重目录（软链接/实际存储）
+│   ├── qwen2-7b-instruct/
+│   ├── qwen2-14b-instruct/
+│   └── qwen2-72b-instruct/
+├── utils/                   # 🛠️ 工具脚本
+│   ├── port_check.py        # 端口占用检查工具
+│   ├── gpu_monitor.py       # GPU 资源监控工具
+│   └── log_rotate.py        # 日志轮转工具
+├── env/                     # ⚙️ 环境配置
+│   ├── .env.base            # 基础环境变量（Python 路径、CUDA 等）
+│   ├── .env.7b_8000         # 7B 模型专属环境变量
+│   └── .env.14b_8001        # 14B 模型专属环境变量
+└── README.md                # 📖 项目说明文档
+</code></pre>
+
+<hr />
+
+<h2 id="-目录设计核心思路">🎯 目录设计核心思路</h2>
+<h3 id="1-配置分离config">1. 配置分离（config/）</h3>
+<ul>
+  <li><strong>按模型/端口拆分配置</strong>：每个模型一个独立 YAML 文件，避免配置冲突，方便单独调整参数（如 <code class="language-plaintext highlighter-rouge">max_num_batched_tokens</code>、<code class="language-plaintext highlighter-rouge">tensor_parallel_size</code>）</li>
+  <li><strong>全局配置复用</strong>：<code class="language-plaintext highlighter-rouge">common.yaml</code> 统一管理日志格式、超时时间、监控地址等，减少重复配置</li>
+  <li><strong>支持热更新</strong>：修改配置后无需改脚本，直接重启对应服务即可生效</li>
+</ul>
+
+<h3 id="2-脚本标准化scripts">2. 脚本标准化（scripts/）</h3>
+<ul>
+  <li><strong>一键启停</strong>：<code class="language-plaintext highlighter-rouge">start_all.sh</code>/<code class="language-plaintext highlighter-rouge">stop_all.sh</code> 适合批量管理，<code class="language-plaintext highlighter-rouge">start_single.sh</code> 适合单独调试</li>
+  <li><strong>参数化启动</strong>：单模型脚本支持传参指定端口、模型路径、GPU 编号，灵活适配多场景</li>
+  <li><strong>健康巡检</strong>：<code class="language-plaintext highlighter-rouge">health_check.sh</code> 定期检查服务状态，自动重启异常服务，保障高可用</li>
+</ul>
+
+<h3 id="3-日志隔离logs">3. 日志隔离（logs/）</h3>
+<ul>
+  <li><strong>按模型分类存储</strong>：每个模型独立日志目录，避免日志混杂，方便问题排查</li>
+  <li><strong>日志轮转</strong>：配套 <code class="language-plaintext highlighter-rouge">log_rotate.py</code> 自动清理旧日志，防止磁盘占满</li>
+  <li><strong>日志分级</strong>：区分访问日志、错误日志、运行日志，定位问题更高效</li>
+</ul>
+
+<h3 id="4-模型与环境解耦models--env">4. 模型与环境解耦（models/ + env/）</h3>
+<ul>
+  <li><strong>模型目录独立</strong>：支持软链接挂载外部存储，避免代码与权重耦合，方便模型版本管理</li>
+  <li><strong>环境变量隔离</strong>：不同模型可配置不同的 Python 环境、CUDA 版本、环境变量，适配多模型部署需求</li>
+</ul>
+
+<hr />
+
+<h2 id="-核心文件模板直接可用">📝 核心文件模板（直接可用）</h2>
+<h3 id="1-单模型配置文件configmodel_7b_8000yaml">1. 单模型配置文件（config/model_7b_8000.yaml）</h3>
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># 模型基础配置</span>
+<span class="na">model</span><span class="pi">:</span> <span class="s">/path/to/vllm_script/models/qwen2-7b-instruct</span>
+<span class="na">tokenizer</span><span class="pi">:</span> <span class="s">/path/to/vllm_script/models/qwen2-7b-instruct</span>
+<span class="na">host</span><span class="pi">:</span> <span class="s">0.0.0.0</span>
+<span class="na">port</span><span class="pi">:</span> <span class="m">8000</span>
+
+<span class="c1"># 服务性能配置</span>
+<span class="na">tensor_parallel_size</span><span class="pi">:</span> <span class="m">1</span>  <span class="c1"># GPU 并行数，多卡部署时调整</span>
+<span class="na">max_num_batched_tokens</span><span class="pi">:</span> <span class="m">32768</span>
+<span class="na">max_num_seqs</span><span class="pi">:</span> <span class="m">256</span>
+<span class="na">max_model_len</span><span class="pi">:</span> <span class="m">8192</span>
+<span class="na">gpu_memory_utilization</span><span class="pi">:</span> <span class="m">0.9</span>  <span class="c1"># GPU 显存利用率，避免 OOM</span>
+
+<span class="c1"># 日志配置（继承 common.yaml 可覆盖）</span>
+<span class="na">log_level</span><span class="pi">:</span> <span class="s">INFO</span>
+<span class="na">log_file</span><span class="pi">:</span> <span class="s">/path/to/vllm_script/logs/model_7b_8000/server.log</span>
+<span class="na">access_log_file</span><span class="pi">:</span> <span class="s">/path/to/vllm_script/logs/model_7b_8000/access.log</span>
+<span class="na">error_log_file</span><span class="pi">:</span> <span class="s">/path/to/vllm_script/logs/model_7b_8000/error.log</span>
+
+<span class="c1"># 其他可选配置</span>
+<span class="na">trust_remote_code</span><span class="pi">:</span> <span class="kc">true</span>
+<span class="na">enable_prefix_caching</span><span class="pi">:</span> <span class="kc">true</span>
+<span class="na">api_key</span><span class="pi">:</span> <span class="s">your_secure_api_key</span>  <span class="c1"># 接口鉴权，生产环境必加</span>
+</code></pre></div></div>
+
+<h3 id="2-单模型启动脚本scriptsstart_singlesh">2. 单模型启动脚本（scripts/start_single.sh）</h3>
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">#!/bin/bash</span>
+<span class="nb">set</span> <span class="nt">-e</span>
+
+<span class="c"># 加载基础环境变量</span>
+<span class="nb">source</span> /path/to/vllm_script/env/.env.base
+
+<span class="c"># 检查参数</span>
+<span class="k">if</span> <span class="o">[</span> <span class="nv">$# </span><span class="nt">-ne</span> 3 <span class="o">]</span><span class="p">;</span> <span class="k">then
+    </span><span class="nb">echo</span> <span class="s2">"Usage: </span><span class="nv">$0</span><span class="s2"> &lt;config_file&gt; &lt;port&gt; &lt;gpu_ids&gt;"</span>
+    <span class="nb">echo</span> <span class="s2">"Example: </span><span class="nv">$0</span><span class="s2"> ../config/model_7b_8000.yaml 8000 0"</span>
+    <span class="nb">exit </span>1
+<span class="k">fi
+
+</span><span class="nv">CONFIG_FILE</span><span class="o">=</span><span class="nv">$1</span>
+<span class="nv">PORT</span><span class="o">=</span><span class="nv">$2</span>
+<span class="nv">GPU_IDS</span><span class="o">=</span><span class="nv">$3</span>
+
+<span class="c"># 检查端口是否被占用</span>
+bash /path/to/vllm_script/utils/port_check.sh <span class="nv">$PORT</span>
+<span class="k">if</span> <span class="o">[</span> <span class="nv">$?</span> <span class="nt">-ne</span> 0 <span class="o">]</span><span class="p">;</span> <span class="k">then
+    </span><span class="nb">echo</span> <span class="s2">"Error: Port </span><span class="nv">$PORT</span><span class="s2"> is already in use!"</span>
+    <span class="nb">exit </span>1
+<span class="k">fi</span>
+
+<span class="c"># 加载模型专属环境变量</span>
+<span class="nv">ENV_FILE</span><span class="o">=</span><span class="s2">"/path/to/vllm_script/env/.env.</span><span class="k">${</span><span class="nv">PORT</span><span class="k">}</span><span class="s2">"</span>
+<span class="k">if</span> <span class="o">[</span> <span class="nt">-f</span> <span class="s2">"</span><span class="nv">$ENV_FILE</span><span class="s2">"</span> <span class="o">]</span><span class="p">;</span> <span class="k">then
+    </span><span class="nb">source</span> <span class="nv">$ENV_FILE</span>
+<span class="k">fi</span>
+
+<span class="c"># 启动 vLLM 服务</span>
+<span class="nb">echo</span> <span class="s2">"Starting vLLM service on port </span><span class="nv">$PORT</span><span class="s2">, GPU: </span><span class="nv">$GPU_IDS</span><span class="s2">, config: </span><span class="nv">$CONFIG_FILE</span><span class="s2">"</span>
+<span class="nv">CUDA_VISIBLE_DEVICES</span><span class="o">=</span><span class="nv">$GPU_IDS</span> <span class="nb">nohup </span>python <span class="nt">-m</span> vllm.entrypoints.openai.api_server <span class="se">\</span>
+    <span class="nt">--config</span> <span class="nv">$CONFIG_FILE</span> <span class="se">\</span>
+    <span class="o">&gt;</span> /path/to/vllm_script/logs/model_<span class="k">${</span><span class="nv">PORT</span><span class="k">}</span>/nohup.out 2&gt;&amp;1 &amp;
+
+<span class="c"># 记录进程 PID</span>
+<span class="nb">echo</span> <span class="nv">$!</span> <span class="o">&gt;</span> /path/to/vllm_script/logs/model_<span class="k">${</span><span class="nv">PORT</span><span class="k">}</span>/service.pid
+<span class="nb">echo</span> <span class="s2">"Service started with PID: </span><span class="si">$(</span><span class="nb">cat</span> /path/to/vllm_script/logs/model_<span class="k">${</span><span class="nv">PORT</span><span class="k">}</span>/service.pid<span class="si">)</span><span class="s2">"</span>
+</code></pre></div></div>
+
+<h3 id="3-一键启动所有服务脚本scriptsstart_allsh">3. 一键启动所有服务脚本（scripts/start_all.sh）</h3>
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">#!/bin/bash</span>
+<span class="nb">set</span> <span class="nt">-e</span>
+
+<span class="c"># 定义模型配置、端口、GPU 对应关系</span>
+<span class="nb">declare</span> <span class="nt">-a</span> <span class="nv">models</span><span class="o">=(</span>
+    <span class="s2">"model_7b_8000.yaml 8000 0"</span>
+    <span class="s2">"model_14b_8001.yaml 8001 1"</span>
+    <span class="s2">"model_70b_8002.yaml 8002 2,3"</span>
+<span class="o">)</span>
+
+<span class="c"># 遍历启动所有模型</span>
+<span class="k">for </span>model <span class="k">in</span> <span class="s2">"</span><span class="k">${</span><span class="nv">models</span><span class="p">[@]</span><span class="k">}</span><span class="s2">"</span><span class="p">;</span> <span class="k">do
+    </span><span class="nb">read </span>config port gpu <span class="o">&lt;&lt;&lt;</span> <span class="s2">"</span><span class="nv">$model</span><span class="s2">"</span>
+    <span class="nb">echo</span> <span class="s2">"=== Starting </span><span class="nv">$config</span><span class="s2"> on port </span><span class="nv">$port</span><span class="s2">, GPU: </span><span class="nv">$gpu</span><span class="s2"> ==="</span>
+    bash /path/to/vllm_script/scripts/start_single.sh <span class="s2">"/path/to/vllm_script/config/</span><span class="nv">$config</span><span class="s2">"</span> <span class="nv">$port</span> <span class="nv">$gpu</span>
+    <span class="nb">sleep </span>5  <span class="c"># 间隔启动，避免资源抢占</span>
+<span class="k">done
+
+</span><span class="nb">echo</span> <span class="s2">"All services started successfully!"</span>
+</code></pre></div></div>
+
+<h3 id="4-端口检查工具utilsport_checksh">4. 端口检查工具（utils/port_check.sh）</h3>
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">#!/bin/bash</span>
+<span class="nv">PORT</span><span class="o">=</span><span class="nv">$1</span>
+<span class="k">if </span>lsof <span class="nt">-i</span>:<span class="nv">$PORT</span> <span class="o">&gt;</span> /dev/null 2&gt;&amp;1<span class="p">;</span> <span class="k">then
+    </span><span class="nb">exit </span>1  <span class="c"># 端口被占用</span>
+<span class="k">else
+    </span><span class="nb">exit </span>0  <span class="c"># 端口可用</span>
+<span class="k">fi</span>
+</code></pre></div></div>
+
+<hr />
+
+<h2 id="️-多端口部署关键优化建议">⚙️ 多端口部署关键优化建议</h2>
+<h3 id="1-gpu-资源分配">1. GPU 资源分配</h3>
+<ul>
+  <li><strong>单卡多模型</strong>：通过 <code class="language-plaintext highlighter-rouge">gpu_memory_utilization</code> 控制显存占用，例如 24G 卡可部署 1 个 7B（0.5 显存）+ 1 个 14B（0.4 显存）</li>
+  <li><strong>多卡并行</strong>：大模型（70B+）使用 <code class="language-plaintext highlighter-rouge">tensor_parallel_size: 2/4</code> 多卡部署，提升推理速度</li>
+  <li><strong>GPU 隔离</strong>：通过 <code class="language-plaintext highlighter-rouge">CUDA_VISIBLE_DEVICES</code> 严格隔离不同模型的 GPU 资源，避免资源争抢</li>
+</ul>
+
+<h3 id="2-高可用保障">2. 高可用保障</h3>
+<ul>
+  <li><strong>进程守护</strong>：用 <code class="language-plaintext highlighter-rouge">nohup</code> + <code class="language-plaintext highlighter-rouge">systemd</code> 托管服务，服务器重启后自动恢复</li>
+  <li><strong>健康巡检</strong>：<code class="language-plaintext highlighter-rouge">health_check.sh</code> 定时调用 <code class="language-plaintext highlighter-rouge">/health</code> 接口，异常自动重启</li>
+  <li><strong>限流熔断</strong>：配置 <code class="language-plaintext highlighter-rouge">max_num_seqs</code> 限制并发请求，防止服务雪崩</li>
+</ul>
+
+<h3 id="3-运维便捷性">3. 运维便捷性</h3>
+<ul>
+  <li><strong>日志轮转</strong>：配置 <code class="language-plaintext highlighter-rouge">logrotate</code> 或 <code class="language-plaintext highlighter-rouge">log_rotate.py</code>，定期清理 7 天前的日志</li>
+  <li><strong>监控告警</strong>：对接 Prometheus + Grafana，监控 GPU 使用率、QPS、延迟等指标</li>
+  <li><strong>版本管理</strong>：<code class="language-plaintext highlighter-rouge">models/</code> 目录下按版本存放模型权重，支持快速切换模型版本</li>
+</ul>
+
+<hr />
+
+<h2 id="-部署步骤快速上手">📌 部署步骤（快速上手）</h2>
+<ol>
+  <li><strong>创建目录结构</strong>：按上述结构创建所有文件夹</li>
+  <li><strong>配置模型参数</strong>：在 <code class="language-plaintext highlighter-rouge">config/</code> 下编写每个模型的 YAML 配置</li>
+  <li><strong>修改脚本路径</strong>：将脚本中的 <code class="language-plaintext highlighter-rouge">/path/to/vllm_script</code> 替换为你的实际根目录</li>
+  <li><strong>添加执行权限</strong>：<code class="language-plaintext highlighter-rouge">chmod +x scripts/*.sh utils/*.sh</code></li>
+  <li><strong>启动服务</strong>：<code class="language-plaintext highlighter-rouge">bash scripts/start_all.sh</code></li>
+  <li><strong>验证服务</strong>：<code class="language-plaintext highlighter-rouge">curl http://localhost:8000/v1/chat/completions</code> 测试接口</li>
+</ol>
+
+<hr />
+
+<h2 id="-额外优化生产环境必看">💡 额外优化（生产环境必看）</h2>
+<ul>
+  <li><strong>API 鉴权</strong>：所有模型配置 <code class="language-plaintext highlighter-rouge">api_key</code>，防止未授权访问</li>
+  <li><strong>HTTPS 加密</strong>：用 Nginx 反向代理，配置 SSL 证书，加密传输</li>
+  <li><strong>负载均衡</strong>：多实例部署时，用 Nginx 做负载均衡，提升并发能力</li>
+  <li><strong>模型热更新</strong>：支持不中断服务的模型版本切换（vLLM 0.4+ 支持）</li>
+</ul>
+
+<hr />
+
+<h3 id="其他冷知识">其他冷知识</h3>
+<p>日志中，GLM-4-9B 虽然标称是 <strong>90亿参数（9B）</strong>，但在 vLLM 加载时却吃掉了大量的显存。通过日志中的关键数据（<code class="language-plaintext highlighter-rouge">Model loading took 17.56 GiB memory</code>）来拆解，为什么一个 9B 的模型会占用这么多空间。</p>
+
+<h4 id="1-权重本身的大小weights">1. 权重本身的大小（Weights）</h4>
+<p>这是最基础的占用。模型有 92.3 亿个参数，日志显示加载的精度是 <code class="language-plaintext highlighter-rouge">dtype=torch.bfloat16</code>。</p>
+
+<ul>
+  <li><strong>BF16/FP16 精度：</strong> 每个参数占用 <strong>2 字节（Bytes）</strong>。</li>
+  <li><strong>计算公式：</strong> $9.23 \times 10^9 \text{ params} \times 2 \text{ bytes/param} \approx 18.46 \times 10^9 \text{ bytes} \approx 17.19 \text{ GiB}$ 。</li>
+  <li><strong>日志对应：</strong> 日志显示 <code class="language-plaintext highlighter-rouge">Loading weights took... 17.56 GiB</code>。这非常吻合，多出来的部分是架构本身的开销和一些临时 Buffer。</li>
+</ul>
+
+<p><strong>结论：</strong> 仅仅是把模型挂载到显存里，就需要约 <strong>17.2 GiB</strong>。</p>
+
+<hr />
+
+<h4 id="2-vllm-的显存预分配机制kv-cache">2. vLLM 的显存预分配机制（KV Cache）</h4>
+<p>如果发现显存占用远超 17 GiB（比如达到了 24G 甚至更多），那是 <strong>vLLM</strong> 的特性导致的。</p>
+
+<p>vLLM 默认会执行 <strong>显存接管策略</strong>：</p>
+
+<ol>
+  <li><strong>加载权重：</strong> 消耗约 17.2 GiB。</li>
+  <li><strong>剩余显存：</strong> vLLM 会扫描显卡剩下的空间，并根据你的配置 <code class="language-plaintext highlighter-rouge">gpu_memory_utilization: 0.92</code>，强行占掉 92% 的总显存。</li>
+  <li><strong>KV Cache 池：</strong> 剩下的这些空间会被划分为一个个“Block”，用来存储对话过程中的中间变量（Key-Value Cache）。</li>
+</ol>
+
+<p><strong>日志证据：</strong></p>
+
+<p><code class="language-plaintext highlighter-rouge">Available KV cache memory: 22.64 GiB</code>，这意味着 vLLM 在加载完模型后，为了保证高并发推理，预留了巨大的空间来存 Token。</p>
+
+<hr />
+
+<h4 id="3-其他隐形开销">3. 其他“隐形”开销</h4>
+<p>日志里提到了几个现代推理框架的加速技术，它们也会吃掉一点显存：</p>
+
+<ul>
+  <li><strong>CUDA Graphs（显存图捕获）：</strong></li>
+</ul>
+
+<p><code class="language-plaintext highlighter-rouge">Estimated CUDA graph memory: 0.53 GiB total</code></p>
+
+<p>为了加速小 Batch 的推理，vLLM 会提前录制计算图，这通常需要几百 MB 到 1 GB。</p>
+
+<ul>
+  <li><strong>torch.compile（编译开销）：</strong></li>
+</ul>
+
+<p><code class="language-plaintext highlighter-rouge">Directly load the compiled graph(s)...</code></p>
+
+<p>虽然主要是 CPU 和时间开销，但在编译和运行 Kernel 时也会占用额外的显存 Buffer。</p>
+
+<hr />
+
+<h4 id="总结你的显存去哪了">总结：你的显存去哪了？</h4>
+
+<table>
+  <thead>
+    <tr>
+      <th style="text-align: left"><strong>组成部分</strong></th>
+      <th><strong>估计大小</strong></th>
+      <th><strong>说明</strong></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td style="text-align: left"><strong>模型静态权重</strong></td>
+      <td><strong>~17.2 GiB</strong></td>
+      <td>9.23B 参数 $\times$ BF16(2 Bytes)</td>
+    </tr>
+    <tr>
+      <td style="text-align: left"><strong>CUDA Graph / Overhead</strong></td>
+      <td><strong>~0.6 GiB</strong></td>
+      <td>预录制计算图，加速推理</td>
+    </tr>
+    <tr>
+      <td style="text-align: left"><strong>KV Cache (用户数据池)</strong></td>
+      <td><strong>显存剩余部分</strong></td>
+      <td>由 <code class="language-plaintext highlighter-rouge">gpu_memory_utilization</code>决定，越大支持的并发越高</td>
+    </tr>
+  </tbody>
+</table>
+
+<h4 id="小贴士如何让它变小">小贴士：如何让它变小？</h4>
+<p>如果你觉得占用太高，可以尝试：</p>
+
+<ol>
+  <li><strong>量化（Quantization）：</strong> 使用 AWQ 或 GPTQ 4bit 格式，权重大小会直接减半（从 17 GiB 降到约 6-8 GiB）。</li>
+  <li><strong>限制显存占用：</strong> 在启动命令中加入 <code class="language-plaintext highlighter-rouge">--gpu-memory-utilization 0.7</code>（手动限制 vLLM 只占 70% 显存）。</li>
+  <li><strong>缩短长度：</strong> 减小 <code class="language-plaintext highlighter-rouge">--max-model-len</code>，这会显著减少 KV Cache 的压力。</li>
+</ol>
+
+<h2 id="常见精度对比表">常见精度对比表</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th><strong>格式名称</strong></th>
+      <th><strong>每个参数占用空间</strong></th>
+      <th><strong>适用场景</strong></th>
+      <th><strong>特点</strong></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>FP32</strong> (单精度)</td>
+      <td>4 Bytes (32 bit)</td>
+      <td>模型训练 / 调试</td>
+      <td>精度最高，但显存占用是 BF16 的两倍，推理极慢。</td>
+    </tr>
+    <tr>
+      <td><strong>BF16 / FP16</strong></td>
+      <td>2 Bytes (16 bit)</td>
+      <td><strong>当前主流推理</strong></td>
+      <td>平衡了精度和速度，你的 GLM-4-9B 默认就在跑这个。</td>
+    </tr>
+    <tr>
+      <td><strong>INT8</strong></td>
+      <td>1 Byte (8 bit)</td>
+      <td>早期量化方案</td>
+      <td>显存减半，但精度有一定损失，现在逐渐被 4bit 取代。</td>
+    </tr>
+    <tr>
+      <td><strong>INT4 / FP4</strong></td>
+      <td>0.5 Byte (4 bit)</td>
+      <td><strong>消费级显卡首选</strong></td>
+      <td>显存占用仅为 BF16 的 1/4，9B 模型只需约 5-6G 显存。</td>
+    </tr>
+    <tr>
+      <td><strong>FP8</strong></td>
+      <td>1 Byte (8 bit)</td>
+      <td>H100 等新一代 GPU</td>
+      <td>兼顾 INT8 的速度和浮点数的动态范围，训练和推理都很强，能够比较好处理模型中那些突然变大的异常值</td>
+    </tr>
+  </tbody>
+</table>]]></content><author><name>pepper</name></author><category term="vllm" /><category term="llm" /><category term="server" /><summary type="html"><![CDATA[这篇博客介绍了如何管理本地的LLM，本文将详细梳理使用xinference管理LLM模型的常用命令，以及通过vllm部署LLM模型的核心操作步骤与命令示例，帮助读者快速掌握本地LLM的管理与部署流程。]]></summary></entry><entry><title type="html">开发-放贷业务面试应答指南</title><link href="http://localhost:4000/interview_recommand/" rel="alternate" type="text/html" title="开发-放贷业务面试应答指南" /><published>2026-04-06T00:00:00+08:00</published><updated>2026-04-06T00:00:00+08:00</updated><id>http://localhost:4000/interview_recommand</id><content type="html" xml:base="http://localhost:4000/interview_recommand/"><![CDATA[<p>京东面试题目1 
+<!-- more --></p>
+
+<hr />
+<h1 id="业务技术面试全流程应答放贷业务场景">业务&amp;技术面试全流程应答（放贷业务场景）</h1>
+<p>结合放贷业务核心场景（风控审核、合同解析、数据流转、并发交易），针对技术面试高频问题逐一给出结构化、可直接复用的应答，兼顾业务落地性与技术深度，适配技术岗（后端/算法/架构）面试场景。</p>
+
+<h2 id="一业务与个人介绍">一、业务与个人介绍</h2>
+<h3 id="1-业务介绍放贷业务">1. 业务介绍（放贷业务）</h3>
+<p>参与的放贷业务核心是<strong>全流程线上化信贷服务</strong>，覆盖用户准入、资质审核、合同生成、放款执行、贷后监控五大核心环节，支撑个人消费贷、小微企业经营贷两类产品。
+业务核心目标是<strong>平衡放款效率与风险控制</strong>：通过技术手段将传统人工审核的T+1流程压缩至分钟级，同时依托AI与数据治理将不良率控制在行业合理区间；技术侧需解决高并发交易（峰值每秒千级放款请求）、海量合同解析（日均百万份）、跨系统数据一致性三大核心问题，保障业务合规、高效、安全运行。</p>
+
+<h3 id="2-自我介绍适配技术岗放贷业务">2. 自我介绍（适配技术岗+放贷业务）</h3>
+<p>面试官好，我是XX，核心技术栈覆盖<strong>AI大模型应用（GraphRAG、YOLO系列、TensorRT部署）、后端开发（Java/Python、MySQL、Redis、ES、Linux运维）、并发与分布式技术</strong>，同时熟悉放贷业务全流程，主导过合同智能解析、风控数据流转、高并发放款系统三大核心项目。
+其中合同解析项目是我核心负责模块，从文档分块设计、模型选型优化到准确率提升、高可用架构搭建全流程参与，最终将解析准确率从85%提升至98.2%，支撑日均百万份合同的智能审核；同时在高并发场景中，通过RedisStream替代传统消息队列、优化线程并发模型，保障了峰值下系统零宕机。
+我擅长将技术能力与业务场景结合，既懂底层技术原理（如AQS、MVCC、RPC序列化），又能落地解决实际业务问题，非常契合贵司放贷业务的技术需求，也希望能在面试中进一步交流。</p>
+
+<h2 id="二实习项目应答放贷业务-合同智能解析项目">二、实习项目应答（放贷业务-合同智能解析项目）</h2>
+<h3 id="1-项目大体内容">1. 项目大体内容</h3>
+<p>实习期间核心参与<strong>放贷业务合同智能解析项目</strong>，目标是替代人工完成信贷合同的关键信息提取（借款人信息、借款金额、利率、还款期限、担保条款等），直接对接风控审核系统与放款执行系统，解决人工解析效率低、易出错、成本高的问题。
+项目整体流程：对接业务方获取原始合同（PDF/Word/扫描件）→ 文档预处理（去噪、格式标准化、OCR识别扫描件）→ 分块处理与特征提取→ 大模型解析与信息抽取→ 结果校验与入库→ 对接风控与放款系统。
+最终实现效果：单份合同解析耗时≤2秒，准确率达98.2%，日均处理百万份合同，覆盖95%以上的信贷合同类型，直接替代80%的人工解析岗位，年节省成本超XX万元。</p>
+
+<h3 id="2-项目使用的核心模型">2. 项目使用的核心模型</h3>
+<ol>
+  <li><strong>基础文档解析模型</strong>：使用<strong>LayoutLMv3</strong>（多模态预训练模型），负责合同的版式识别、区域划分（如借款人信息区、金额条款区、签章区），解决复杂版式合同的结构化问题；</li>
+  <li><strong>信息抽取核心模型</strong>：基于<strong>Llama 3（7B参数）</strong> 进行微调，针对放贷合同专属术语（如“年化综合利率”“连带保证责任”）进行领域适配，提升专业信息抽取准确率；</li>
+  <li><strong>后处理校验模型</strong>：轻量<strong>BERT</strong>模型，用于校验抽取结果的逻辑一致性（如借款金额与大写金额是否匹配、还款期限是否符合监管要求），避免单一模型的解析误差；</li>
+  <li><strong>部署优化模型</strong>：使用<strong>TensorRT</strong>对Llama 3与LayoutLMv3进行量化部署（INT8量化），在保证准确率下降≤0.5%的前提下，推理速度提升3倍，内存占用降低40%，满足高并发场景需求。</li>
+</ol>
+
+<h3 id="3-文档分块方式与分块原因">3. 文档分块方式与分块原因</h3>
+<h4 id="1文档分块方式">（1）文档分块方式</h4>
+<p>结合放贷合同的<strong>业务逻辑与版式特征</strong>，采用“<strong>按语义分块+按版式分块结合</strong>”的方式，具体分3层：</p>
+<ol>
+  <li><strong>一级分块（按业务模块）</strong>：将合同划分为【基础信息块】（借款人、出借人、合同编号、签订日期）、【核心条款块】（借款金额、利率、还款方式、期限）、【担保条款块】（抵押/保证信息、担保范围）、【违约责任块】、【争议解决块】、【签章块】6个核心模块；</li>
+  <li><strong>二级分块（按语义段落）</strong>：每个核心模块内，按语义完整度拆分为独立段落（如“借款金额”块拆分为“小写金额”“大写金额”“金额说明”3个语义段）；</li>
+  <li><strong>三级分块（按版式特征）</strong>：针对扫描件/非标准化合同，通过LayoutLMv3识别版式元素（标题、正文、表格、签章），将每个版式元素作为最小分块，确保复杂版式下的信息不遗漏。</li>
+</ol>
+
+<h4 id="2分块核心原因">（2）分块核心原因</h4>
+<ol>
+  <li><strong>降低模型解析复杂度</strong>：放贷合同篇幅长（平均5-10页），直接整体输入模型会导致上下文溢出、推理效率极低，分块后单块输入长度控制在512-1024token，大幅提升推理速度；</li>
+  <li><strong>提升信息抽取精准度</strong>：不同业务模块的信息特征差异大（如基础信息块是短文本、核心条款块是数值+文本组合），分块后可针对不同块类型匹配专属解析策略，避免跨模块信息干扰；</li>
+  <li><strong>便于结果校验与纠错</strong>：分块后每个语义块的解析结果可独立校验（如金额块需满足数值逻辑、条款块需符合监管规则），某一块解析错误时可精准定位并重新解析，无需整体返工；</li>
+  <li><strong>适配业务规则落地</strong>：放贷业务有明确的监管要求（如利率需标注“年化综合利率”、担保条款需明确范围），分块后可将监管规则嵌入对应块的解析流程，确保抽取结果合规；</li>
+  <li><strong>支持高并发批量处理</strong>：分块后可将合同拆分为多个子任务并行处理，结合分布式任务调度，提升百万级合同的处理效率，满足业务峰值需求。</li>
+</ol>
+
+<h3 id="4-准确率提升至98的方法与提示词设计">4. 准确率提升至98%的方法与提示词设计</h3>
+<h4 id="1准确率提升核心方法分4阶段落地">（1）准确率提升核心方法（分4阶段落地）</h4>
+<ol>
+  <li><strong>数据层：领域数据微调与增强</strong>
+    <ul>
+      <li>收集10万份真实放贷合同（覆盖不同产品、版式、年代），标注15类核心信息字段，对Llama 3进行<strong>全参数微调</strong>（学习率2e-5，迭代10轮），让模型掌握合同专属术语与语义逻辑；</li>
+      <li>数据增强：通过同义词替换、句式改写、版式模拟（如调整表格位置、修改字体）生成5万份增强数据，提升模型对复杂场景的鲁棒性；</li>
+      <li>引入监管规则数据（如银保监会信贷合同规范），构建规则库，作为模型解析的“硬约束”。</li>
+    </ul>
+  </li>
+  <li><strong>模型层：多模型协同与部署优化</strong>
+    <ul>
+      <li>采用“<strong>LayoutLMv3（版式识别）+ Llama 3（语义抽取）+ BERT（逻辑校验）</strong>”三级架构，避免单一模型的局限性；</li>
+      <li>对Llama 3进行<strong>LoRA微调</strong>（低秩适配，参数效率提升10倍），同时结合RAG技术，将合同相关的行业规范、监管规则构建成向量库，解析时动态检索相关知识，补充模型上下文；</li>
+      <li>使用TensorRT进行INT8量化部署，ONNX Runtime进行推理加速，保证高并发下模型推理的稳定性，避免因性能问题导致的解析错误。</li>
+    </ul>
+  </li>
+  <li><strong>流程层：分块策略优化与人工校验闭环</strong>
+    <ul>
+      <li>基于解析错误案例，迭代优化分块规则（如将易混淆的“利率”与“手续费”块拆分更细致），累计优化12版分块策略；</li>
+      <li>建立“<strong>AI解析+人工复核</strong>”闭环：对解析置信度≥0.98的结果直接入库，置信度＜0.98的自动推送人工复核，同时将人工纠错结果回灌到模型训练数据，形成迭代优化；</li>
+      <li>引入规则引擎，对关键字段（如利率、金额）进行硬校验，不符合监管规则的结果直接拦截，避免错误放款。</li>
+    </ul>
+  </li>
+  <li><strong>监控层：实时监控与迭代</strong>
+    <ul>
+      <li>搭建解析准确率实时监控平台，按合同类型、版式、业务模块统计准确率，发现异常（如某类合同准确率骤降）及时触发模型微调与分块策略优化；</li>
+      <li>每月复盘解析错误案例，形成错误分析报告，针对性优化模型与流程，累计解决23类典型错误场景。</li>
+    </ul>
+  </li>
+</ol>
+
+<h4 id="2提示词设计核心场景示例">（2）提示词设计（核心场景示例）</h4>
+<p>针对不同分块类型，设计<strong>结构化、强约束、分步骤</strong>的提示词，核心原则是“明确目标+限定格式+给出示例+补充规则”，以下为核心条款块的提示词设计：</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code># 角色
+你是一名专业的信贷合同解析专家，精通中国银保监会信贷合同监管规则，擅长从合同文本中精准抽取核心条款信息。
+
+# 任务
+请从以下合同分块文本中，抽取【借款核心条款】的4类关键信息，严格按照指定格式输出，禁止遗漏、篡改信息。
+
+# 分块文本
+
+
+# 监管规则约束
+1. 借款利率必须标注“年化综合利率”，禁止仅标注“月利率/日利率”，若未明确标注，需判定为“信息缺失”；
+2. 借款金额需同时抽取“小写金额”与“大写金额”，两者必须一致，若不一致，需判定为“金额逻辑错误”；
+3. 还款期限需明确“起始日期”“终止日期”“总期限（天/月/年）”，符合《贷款通则》相关要求；
+4. 还款方式需明确“等额本息/等额本金/先息后本/一次性还本付息”，禁止模糊表述。
+
+# 输出格式（JSON格式，严格遵守）
+{
+  "借款金额": {
+    "小写金额": "抽取结果/信息缺失/金额逻辑错误",
+    "大写金额": "抽取结果/信息缺失/金额逻辑错误",
+    "金额说明": "抽取结果（如有）"
+  },
+  "年化综合利率": "抽取结果/信息缺失/利率违规",
+  "还款期限": {
+    "起始日期": "YYYY-MM-DD/信息缺失",
+    "终止日期": "YYYY-MM-DD/信息缺失",
+    "总期限": "X年/X月/X天/信息缺失"
+  },
+  "还款方式": "抽取结果/信息缺失/方式违规"
+}
+
+# 示例
+输入分块文本：“借款人向出借人借款人民币壹佰万元整（小写：1000000.00元），借款年化综合利率为8.5%，借款期限自2026年01月01日至2027年01月01日，还款方式为等额本息，按月还款。”
+输出JSON：
+{
+  "借款金额": {
+    "小写金额": "1000000.00元",
+    "大写金额": "壹佰万元整",
+    "金额说明": "无"
+  },
+  "年化综合利率": "8.5%",
+  "还款期限": {
+    "起始日期": "2026-01-01",
+    "终止日期": "2027-01-01",
+    "总期限": "1年"
+  },
+  "还款方式": "等额本息"
+}
+</code></pre></div></div>
+<p><strong>提示词设计核心逻辑</strong>：</p>
+<ul>
+  <li>明确角色与任务，让模型聚焦目标；</li>
+  <li>嵌入监管规则，从源头保证合规性；</li>
+  <li>限定输出格式，便于系统直接解析与入库；</li>
+  <li>提供示例，降低模型理解成本，提升输出一致性；</li>
+  <li>针对易出错字段，明确“信息缺失/违规”的判定标准，减少模糊输出。</li>
+</ul>
+
+<h3 id="5-为什么用redisstream而非kafka消息队列区别">5. 为什么用RedisStream而非Kafka？消息队列区别</h3>
+<h4 id="1选型核心原因">（1）选型核心原因</h4>
+<p>结合放贷业务<strong>高并发、低延迟、轻量级、数据量适中</strong>的特点，选择RedisStream替代Kafka，核心优势集中在4点：</p>
+<ol>
+  <li><strong>部署与运维成本极低</strong>：Redis是业务现有中间件（已用于缓存、分布式锁），RedisStream无需额外部署独立集群，运维团队无需学习新组件，降低技术栈复杂度与运维成本；而Kafka需独立部署、维护集群，依赖ZooKeeper，学习与运维成本高，对中小规模业务冗余度过高。</li>
+  <li><strong>延迟更低</strong>：RedisStream基于内存存储，消息读写延迟控制在1ms以内，满足放贷业务“放款请求分钟级响应”的核心需求；Kafka依赖磁盘存储，即使优化后延迟也在10ms以上，无法匹配业务低延迟要求。</li>
+  <li><strong>数据规模适配</strong>：放贷业务消息峰值为“每秒千级”，单条消息大小≤10KB，RedisStream完全可承载；而Kafka适合“每秒十万级以上、单条消息大（MB级）”的海量数据场景，此处使用Kafka属于“大材小用”，资源浪费严重。</li>
+  <li><strong>消费模式更灵活</strong>：RedisStream支持<strong>消费组+消息确认（ACK）</strong> 模式，与Kafka消费组逻辑一致，同时支持“Stream消费”“消费组广播”“历史消息回溯”，满足业务“多系统同步数据（风控、放款、贷后）”的需求；且RedisStream支持消息持久化（可配置RDB/AOF），兼顾性能与数据安全。</li>
+</ol>
+
+<h4 id="2redisstream-vs-kafka-核心区别表格对比">（2）RedisStream vs Kafka 核心区别（表格对比）</h4>
+
+<table>
+  <thead>
+    <tr>
+      <th>对比维度</th>
+      <th>RedisStream</th>
+      <th>Kafka</th>
+      <th>业务适配性</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>存储介质</td>
+      <td>内存为主，支持持久化</td>
+      <td>磁盘为主，页缓存加速</td>
+      <td>放贷业务（中小数据）：Redis延迟更低</td>
+    </tr>
+    <tr>
+      <td>部署运维复杂度</td>
+      <td>低（复用现有Redis集群）</td>
+      <td>高（独立集群、依赖ZooKeeper）</td>
+      <td>放贷业务：Redis降低运维成本</td>
+    </tr>
+    <tr>
+      <td>消息延迟</td>
+      <td>1ms以内</td>
+      <td>10ms以上</td>
+      <td>放贷业务（低延迟）：Redis更适配</td>
+    </tr>
+    <tr>
+      <td>消息吞吐量</td>
+      <td>万级/秒（单节点）</td>
+      <td>十万级/秒以上（集群）</td>
+      <td>放贷业务（千级/秒）：Redis足够</td>
+    </tr>
+    <tr>
+      <td>单条消息大小</td>
+      <td>建议≤10KB</td>
+      <td>支持MB级以上</td>
+      <td>放贷业务（小消息）：Redis更高效</td>
+    </tr>
+    <tr>
+      <td>消费模式</td>
+      <td>消费组+ACK+历史回溯</td>
+      <td>消费组+ACK+分区分配+偏移量管理</td>
+      <td>放贷业务：两者均满足，Redis更简单</td>
+    </tr>
+    <tr>
+      <td>生态集成</td>
+      <td>与Redis生态（缓存、分布式锁）无缝集成</td>
+      <td>独立生态，需对接多种组件</td>
+      <td>放贷业务：Redis减少系统耦合</td>
+    </tr>
+    <tr>
+      <td>适用场景</td>
+      <td>中小规模、低延迟、轻量级消息队列</td>
+      <td>海量数据、高吞吐、大数据分析场景</td>
+      <td>放贷业务：Redis是最优解</td>
+    </tr>
+  </tbody>
+</table>
+
+<p><strong>补充说明</strong>：若未来业务扩展至“日均千万级合同、单条消息大（如合同全文存储）、跨地域数据同步”，可考虑迁移至Kafka，目前阶段RedisStream是性价比与性能的最优平衡。</p>
+
+<h3 id="6-成功率提升方法放贷业务-高并发放款系统">6. 成功率提升方法（放贷业务-高并发放款系统）</h3>
+<p>放贷业务的“成功率”核心指<strong>放款请求的成功响应率</strong>，需同时解决“并发冲突、数据不一致、系统异常”三大问题，具体提升方法分4个维度落地：</p>
+
+<h4 id="1架构层优化消息队列与分布式事务">（1）架构层：优化消息队列与分布式事务</h4>
+<ol>
+  <li>采用<strong>RedisStream+本地事务</strong>替代传统的“单库单表事务”，将放款请求（扣减额度、生成放款单、调用支付接口）拆分为异步任务，避免同步请求导致的系统阻塞；</li>
+  <li>引入<strong>Seata分布式事务框架</strong>，针对“跨库操作（额度库、放款单库、支付库）”场景，采用AT模式（自动事务），保证数据一致性，同时通过TCC模式（手动补偿）处理支付接口调用异常，提升事务成功率；</li>
+  <li>搭建<strong>多活容灾架构</strong>，将核心系统部署在2个可用区，当某一可用区故障时，自动切换流量，避免单点故障导致的放款失败。</li>
+</ol>
+
+<h4 id="2并发层优化线程模型与锁机制">（2）并发层：优化线程模型与锁机制</h4>
+<ol>
+  <li>针对放款额度扣减的并发冲突问题，采用<strong>Redis分布式锁+分段锁</strong>替代传统的数据库锁：将额度按用户ID哈希分片，每个分片对应一个Redis锁，避免多用户并发扣减时的锁竞争，同时减少锁粒度，提升并发处理能力；</li>
+  <li>采用<strong>线程池优化</strong>：根据业务峰值（每秒千级请求）配置核心线程数200、最大线程数500，拒绝策略为“队列等待+超时重试”，避免线程溢出导致的系统崩溃；</li>
+  <li>引入<strong>CompletableFuture</strong>实现异步并行处理，将放款流程中的“额度校验”“用户信息查询”“风控复核”等非依赖步骤并行执行，单请求耗时从500ms压缩至150ms，提升系统吞吐量。</li>
+</ol>
+
+<h4 id="3流程层优化异常处理与重试机制">（3）流程层：优化异常处理与重试机制</h4>
+<ol>
+  <li>搭建<strong>全链路异常监控</strong>：通过SkyWalking监控每个接口的响应时间、错误率，当某</li>
+</ol>]]></content><author><name>pepper</name></author><category term="interview" /><category term="java" /><summary type="html"><![CDATA[京东面试题目1]]></summary></entry><entry><title type="html">服务器-Xinference管理LLM模型</title><link href="http://localhost:4000/how_to_manageLLM/" rel="alternate" type="text/html" title="服务器-Xinference管理LLM模型" /><published>2026-04-05T00:00:00+08:00</published><updated>2026-04-05T00:00:00+08:00</updated><id>http://localhost:4000/how_to_manageLLM</id><content type="html" xml:base="http://localhost:4000/how_to_manageLLM/"><![CDATA[<p>这篇博客介绍了如何管理本地的LLM，本文将详细梳理使用xinference管理LLM模型的常用命令，以及通过vllm部署LLM模型的核心操作步骤与命令示例，帮助读者快速掌握本地LLM的管理与部署流程。</p>
+
+<!-- more -->
+
+<h3 id="一xinference管理llm模型常用命令">一、xinference管理LLM模型常用命令</h3>
+
+<h4 id="1-安装xinference">1. 安装xinference</h4>
+
+<p>注意版本不要太高，详细安装和配置可以参考官网文档：
+目前本人使用的版本是 <code class="language-plaintext highlighter-rouge">xinference ==1.13.0</code> 以及<code class="language-plaintext highlighter-rouge">torch==2.3.1+cu121</code> 和<code class="language-plaintext highlighter-rouge">transformers==4.57.1</code></p>
+
+<h4 id="2-设置xinference为服务">2. 设置xinference为服务</h4>
+
+<p>找到目标脚本<code class="language-plaintext highlighter-rouge">xinference/run.sh</code>，先给它执行权限：</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">chmod</span> +x ~/xinference/run.sh
+</code></pre></div></div>
+
+<p>创建systemd服务文件：</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">sudo </span>nano /etc/systemd/system/xinference.service
+</code></pre></div></div>
+
+<p>在文件中添加以下内容：</p>
+
+<div class="language-ini highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nn">[Unit]</span>
+<span class="py">Description</span><span class="p">=</span><span class="s">Xinference Service</span>
+<span class="py">After</span><span class="p">=</span><span class="s">network.target</span>
+
+<span class="nn">[Service]</span>
+<span class="py">Type</span><span class="p">=</span><span class="s">simple</span>
+<span class="py">User</span><span class="p">=</span><span class="s">yw</span>
+<span class="py">WorkingDirectory</span><span class="p">=</span><span class="s">/home/yw/xinference</span>
+<span class="py">ExecStart</span><span class="p">=</span><span class="s">/home/yw/xinference/run.sh</span>
+<span class="py">Restart</span><span class="p">=</span><span class="s">on-failure</span>
+
+<span class="nn">[Install]</span>
+<span class="py">WantedBy</span><span class="p">=</span><span class="s">multi-user.target</span>
+</code></pre></div></div>
+
+<p>保存并退出后，执行以下命令启用服务：</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">sudo </span>systemctl daemon-reload
+<span class="nb">sudo </span>systemctl <span class="nb">enable </span>xinference
+<span class="nb">sudo </span>systemctl start xinference
+
+<span class="c"># 查看服务状态</span>
+<span class="nb">sudo </span>systemctl status xinference
+</code></pre></div></div>]]></content><author><name>pepper</name></author><category term="xinference" /><category term="llm" /><category term="server" /><summary type="html"><![CDATA[这篇博客介绍了如何管理本地的LLM，本文将详细梳理使用xinference管理LLM模型的常用命令，以及通过vllm部署LLM模型的核心操作步骤与命令示例，帮助读者快速掌握本地LLM的管理与部署流程。]]></summary></entry><entry><title type="html">服务器-Ollama常用命令</title><link href="http://localhost:4000/how-to-use-ollama/" rel="alternate" type="text/html" title="服务器-Ollama常用命令" /><published>2026-04-02T00:00:00+08:00</published><updated>2026-04-02T00:00:00+08:00</updated><id>http://localhost:4000/how-to-use-ollama</id><content type="html" xml:base="http://localhost:4000/how-to-use-ollama/"><![CDATA[<p>这篇博客介绍了Ollama 常用命令笔记（Ubuntu 终端专用）</p>
+
+<!-- more -->
+
+<h1 id="ollama-常用命令笔记ubuntu-终端专用">Ollama 常用命令笔记（Ubuntu 终端专用）</h1>
+<p>全部为 Ubuntu 下直接可执行的命令，简洁可复制保存。</p>
+
+<h2 id="1-安装与服务">1. 安装与服务</h2>
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># 安装 Ollama（官方一键脚本）</span>
+curl <span class="nt">-fsSL</span> https://ollama.com/install.sh | sh
+
+<span class="c"># 查看 Ollama 服务状态</span>
+systemctl status ollama
+
+<span class="c"># 启动/停止/重启服务</span>
+<span class="nb">sudo </span>systemctl start ollama
+<span class="nb">sudo </span>systemctl stop ollama
+<span class="nb">sudo </span>systemctl restart ollama
+
+<span class="c"># 设置开机自启</span>
+<span class="nb">sudo </span>systemctl <span class="nb">enable </span>ollama
+</code></pre></div></div>
+
+<h2 id="2-基础命令">2. 基础命令</h2>
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># 查看版本</span>
+ollama <span class="nt">--version</span>
+
+<span class="c"># 查看已安装模型</span>
+ollama list
+
+<span class="c"># 查看正在运行的模型</span>
+ollama ps
+
+<span class="c"># 停止所有运行中的模型</span>
+ollama stop
+</code></pre></div></div>
+
+<h2 id="3-模型下载运行删除">3. 模型下载、运行、删除</h2>
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># 下载模型</span>
+ollama pull qwen2.5:7b
+ollama pull llama3.2:3b
+ollama pull gemma2:2b
+
+<span class="c"># 运行并进入对话</span>
+ollama run qwen2.5:7b
+
+<span class="c"># 后台运行（供 API 调用）</span>
+ollama run qwen2.5:7b <span class="nt">--now</span>
+
+<span class="c"># 删除模型</span>
+ollama <span class="nb">rm </span>qwen2.5:7b
+
+<span class="c"># 复制/重命名模型</span>
+ollama <span class="nb">cp </span>原模型名 新模型名
+
+<span class="c"># 查看模型信息</span>
+ollama show qwen2.5:7b
+</code></pre></div></div>
+
+<h2 id="4-交互模式内命令对话中使用">4. 交互模式内命令（对话中使用）</h2>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>/bye        退出
+/help       帮助
+/system     设置系统提示词
+/set        设置参数
+/show       查看当前模型信息
+</code></pre></div></div>
+
+<h2 id="5-日志与排查">5. 日志与排查</h2>
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># 查看 Ollama 日志</span>
+journalctl <span class="nt">-u</span> ollama <span class="nt">-f</span>
+
+<span class="c"># 查看占用端口（默认 11434）</span>
+ss <span class="nt">-tulpn</span> | <span class="nb">grep </span>ollama
+</code></pre></div></div>
+
+<h2 id="6-卸载-ollama如需">6. 卸载 Ollama（如需）</h2>
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">sudo </span>systemctl stop ollama
+<span class="nb">sudo rm</span> /usr/local/bin/ollama
+<span class="nb">sudo rm</span> <span class="nt">-rf</span> /usr/share/ollama
+<span class="nb">rm</span> <span class="nt">-rf</span> ~/.ollama
+</code></pre></div></div>]]></content><author><name>pepper</name></author><category term="ollama" /><category term="llm" /><category term="server" /><summary type="html"><![CDATA[这篇博客介绍了Ollama 常用命令笔记（Ubuntu 终端专用）]]></summary></entry><entry><title type="html">算法-二分查找与LeetCode题解</title><link href="http://localhost:4000/algorithm_BinarySearch/" rel="alternate" type="text/html" title="算法-二分查找与LeetCode题解" /><published>2025-12-20T00:00:00+08:00</published><updated>2025-12-20T00:00:00+08:00</updated><id>http://localhost:4000/algorithm_BinarySearch</id><content type="html" xml:base="http://localhost:4000/algorithm_BinarySearch/"><![CDATA[<p>这篇博客介绍了二分查找法则。</p>
+
+<!-- more -->
+
+<h2 id="42-求开方">4.2 求开方</h2>
+
+<h3 id="69-sqrtx-easy">69. Sqrt(x) (Easy)</h3>
+
+<p><strong>题目描述</strong> 给定一个非负整数 ，求它的开方，结果向下取整。</p>
+
+<p><strong>输入输出样例</strong> 输入一个整数，输出一个整数。</p>
+
+<ul>
+  <li><strong>Input</strong>: 8</li>
+  <li><strong>Output</strong>: 2</li>
+</ul>
+
+<blockquote>
+  <p><strong>解释</strong>：8 的开方结果是 ，向下取整即是 2。</p>
+</blockquote>
+
+<hr />
+
+<p>自己撰写的版本 1 的代码如下。</p>
+
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kt">int</span> <span class="n">l</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">r</span><span class="o">=</span><span class="n">m</span><span class="p">,</span> <span class="n">res</span><span class="o">=</span><span class="mi">0</span><span class="p">;</span>
+<span class="c1">// int mid = l + (r-l)/2;</span>
+<span class="c1">// 1. 如果input m=0；</span>
+<span class="k">if</span><span class="p">(</span><span class="n">m</span><span class="o">==</span><span class="mi">0</span><span class="p">)</span> <span class="k">return</span> <span class="n">res</span><span class="o">=</span><span class="mi">0</span><span class="p">;</span>
+<span class="c1">// 2. 其他正常情况下，注意每一次都要择半查找，直到l&gt;r</span>
+<span class="k">while</span><span class="p">(</span><span class="n">l</span><span class="o">&lt;</span><span class="n">r</span> <span class="o">&amp;&amp;</span> <span class="n">r</span><span class="o">&gt;</span><span class="n">l</span><span class="p">)</span>
+<span class="p">{</span>
+    <span class="n">mid</span> <span class="o">=</span> <span class="n">l</span> <span class="o">+</span> <span class="p">(</span><span class="n">r</span><span class="o">-</span><span class="n">l</span><span class="p">)</span><span class="o">/</span><span class="mi">2</span><span class="p">;</span> <span class="c1">// 每一轮都要更新一下</span>
+    <span class="k">if</span><span class="p">(</span><span class="n">mid</span> <span class="o">*</span> <span class="n">mid</span> <span class="o">==</span> <span class="n">m</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="k">return</span> <span class="n">mid</span><span class="p">;</span>
+    <span class="p">}</span><span class="k">else</span> <span class="nf">if</span><span class="p">(</span><span class="n">mid</span> <span class="o">*</span> <span class="n">mid</span> <span class="o">&gt;</span> <span class="n">m</span> <span class="p">)</span>
+    <span class="p">{</span>
+        <span class="n">r</span> <span class="o">=</span> <span class="n">mid</span><span class="p">;</span>
+    <span class="p">}</span><span class="k">else</span><span class="p">{</span>
+        <span class="n">l</span> <span class="o">=</span> <span class="n">mid</span><span class="p">;</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+<span class="c1">// 这个时候都不满足条件的时候</span>
+<span class="k">return</span> <span class="n">l</span><span class="p">;</span>
+</code></pre></div></div>
+
+<blockquote>
+  <p>分析其存在的问题：</p>
+</blockquote>
+
+<ul>
+  <li>乘法溢出（计算风险）</li>
+</ul>
+
+<p>问题所在：在代码中使用了 if(mid _ mid == m)。如果 m 是 int 的最大值，在二分查找过程中 mid 可能会取到较大值。例如 mid = 100,000 时，mid _ mid 会达到 10,000,000,000，这远超 int 的范围。
+结果： mid * mid 会溢出变成一个乱码数字（可能是负数）。</p>
+
+<p>修改建议： 使用 sqrt = a / mid 的方式，比较 sqrt 是否和和 mid 相等，如果 sqrt &gt; mid，就说明 mid 还需要小一点，往左区间。如果 sqrt &lt; mid，则就说明 mid 可以再大一点点。</p>
+
+<p>修改后的代码如下：</p>
+
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kt">int</span> <span class="nf">mySqrt</span><span class="p">(</span><span class="kt">int</span> <span class="n">a</span><span class="p">){</span>
+    <span class="k">if</span><span class="p">(</span><span class="n">a</span><span class="o">==</span><span class="mi">0</span><span class="p">)</span> <span class="k">return</span> <span class="n">a</span><span class="p">;</span>
+    <span class="kt">int</span> <span class="n">sqrt</span><span class="p">,</span><span class="n">mid</span><span class="p">,</span><span class="n">l</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span><span class="n">r</span><span class="o">=</span><span class="n">a</span><span class="p">;</span>
+    <span class="k">while</span><span class="p">(</span><span class="n">l</span><span class="o">&lt;=</span><span class="n">r</span><span class="p">){</span>
+        <span class="n">mid</span> <span class="o">=</span> <span class="n">l</span> <span class="o">+</span> <span class="p">(</span><span class="n">r</span><span class="o">-</span><span class="n">l</span><span class="p">)</span><span class="o">/</span><span class="mi">2</span> <span class="p">;</span>
+        <span class="n">sqrt</span> <span class="o">=</span> <span class="n">a</span> <span class="o">/</span> <span class="n">mid</span><span class="p">;</span>
+        <span class="k">if</span><span class="p">(</span><span class="n">mid</span> <span class="o">==</span> <span class="n">sqrt</span><span class="p">){</span>
+            <span class="k">return</span> <span class="n">mid</span><span class="p">;</span>
+        <span class="p">}</span><span class="k">else</span> <span class="nf">if</span><span class="p">(</span><span class="n">mid</span> <span class="o">&gt;</span> <span class="n">sqrt</span><span class="p">){</span> <span class="c1">// 因为全文都在赋数值修改左右边界，如果mid大于sqrt了，就说明，mid得再分一点给sqrt，所以要在左区域查找；</span>
+            <span class="n">r</span> <span class="o">=</span> <span class="n">mid</span><span class="o">-</span><span class="mi">1</span><span class="p">;</span>
+        <span class="p">}</span><span class="k">else</span><span class="p">{</span>
+            <span class="n">l</span> <span class="o">=</span> <span class="n">mid</span><span class="o">+</span><span class="mi">1</span><span class="p">;</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+    <span class="k">return</span> <span class="n">r</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<h2 id="详细记录补充">详细记录补充：</h2>
+
+<h4 id="1-中点计算的加法溢出-arithmetic-overflow">1. 中点计算的加法溢出 (Arithmetic Overflow)</h4>
+
+<ul>
+  <li>分析原因：如果使用 $mid = (l + r) / 2$，当 l 和 r 都很大时（例如接近 int 的最大值 $2^{31}-1$），它们的和会瞬间超过 int 的表示范围，导致结果变成负数，从而使 mid 计算错误。</li>
+  <li>解决方法：使用 $mid = l + (r - l) / 2$。这种写法在数学上等价，但在计算机运算中，由于先做了减法，保证了数值始终在 [l, r] 范围内波动，不会溢出。</li>
+</ul>
+
+<p>不是所有情况都会溢出。是否溢出取决于实际数值与所使用的编程语言中该数据类型的最大上限之间的关系。</p>
+
+<p>以下是详细的分类讨论：</p>
+
+<blockquote>
+  <ol>
+    <li>什么时候会发生溢出？</li>
+  </ol>
+</blockquote>
+
+<p>在 C、C++、Java、Go 等静态类型语言中，<code class="language-plaintext highlighter-rouge">int</code> 类型通常是 <strong>32 位有符号整数</strong>。</p>
+
+<ul>
+  <li><strong>安全情况：</strong> 如果 ，那么 <code class="language-plaintext highlighter-rouge">(l + r) / 2</code> 是完全安全的。例如在处理只有 10 万个元素的数组时，索引绝对不会溢出。</li>
+  <li><strong>溢出情况：</strong> 如果 和 都很大，比如 ，。</li>
+  <li>它们的数学和应该是 。</li>
+  <li>但这超过了 <code class="language-plaintext highlighter-rouge">int</code> 的上限，计算机会发生“环绕”（Wrap-around），结果会变成一个<strong>负数</strong>。</li>
+  <li>负数除以 2 还是负数，这会导致你的 <code class="language-plaintext highlighter-rouge">mid</code> 变成一个毫无意义的负索引，程序随后就会报错（数组越界）。</li>
+</ul>
+
+<blockquote>
+  <ol>
+    <li>为什么 <code class="language-plaintext highlighter-rouge">l + (r - l) / 2</code> 永远安全？</li>
+  </ol>
+</blockquote>
+
+<p>我们可以从数学和内存两个角度来看：</p>
+
+<ul>
+  <li><strong>数学等式：</strong> $l + \frac{r - l}{2} = \frac{2l + r - l}{2} = \frac{l + r}{2}$ 。它们在数学上是一模一样的。</li>
+  <li><strong>内存安全：</strong> 在计算 <code class="language-plaintext highlighter-rouge">r - l</code> 时，因为 ，所以结果一定是一个非负数且小于 。在计算 <code class="language-plaintext highlighter-rouge">l + 偏移量</code> 时，因为最终结果是 <code class="language-plaintext highlighter-rouge">mid</code>，而 <code class="language-plaintext highlighter-rouge">mid</code> 始终位于 和 之间，只要 本身没有溢出，整个计算过程中的**任何中间变量都不会超过 **。</li>
+</ul>
+
+<hr />
+
+<blockquote>
+  <ol>
+    <li>不同编程语言的表现不同</li>
+  </ol>
+</blockquote>
+
+<p><strong>Python 3：不会溢出</strong>
+Python 3 的 <code class="language-plaintext highlighter-rouge">int</code> 是<strong>动态精度</strong>的（长整型），它会自动根据数值大小分配内存。只要你的电脑内存够大，Python 可以处理无限大的整数。所以在 Python 中写 <code class="language-plaintext highlighter-rouge">mid = (l + r) // 2</code> 是安全的。</p>
+
+<p><strong>C++ / Java：必须小心</strong>
+在这些语言中，如果你处理的数据规模可能达到 级别（例如 LeetCode 的某些大数题目），就必须使用 <code class="language-plaintext highlighter-rouge">l + (r - l) / 2</code> 或者将变量声明为 <code class="language-plaintext highlighter-rouge">long long</code> / <code class="language-plaintext highlighter-rouge">long</code>。</p>
+
+<ol>
+  <li><strong>在 C++/Java 等语言中：</strong> 永远推荐写 <code class="language-plaintext highlighter-rouge">mid = l + (r - l) / 2;</code>。这是一种职业素养，能避免在处理大规模数据时出现难以排查的 Bug。</li>
+  <li><strong>另一种黑科技写法（仅限 C++/Java）：</strong>
+<code class="language-plaintext highlighter-rouge">mid = (l + r) &gt;&gt; 1;</code> 这种写法在处理正数时和除以 2 等价，但它在 溢出成负数时依然会出错。
+<strong>更高级的写法：</strong> <code class="language-plaintext highlighter-rouge">mid = (l + r) &gt;&gt;&gt; 1;</code>（Java 中的无符号右移），它可以完美处理溢出。</li>
+</ol>
+
+<hr />]]></content><author><name>pepper</name></author><category term="binarysearch" /><category term="algorithm" /><summary type="html"><![CDATA[这篇博客介绍了二分查找法则。]]></summary></entry><entry><title type="html">论文-Traffic-IT交通场景理解</title><link href="http://localhost:4000/TrafficIT_PapperReading-copy/" rel="alternate" type="text/html" title="论文-Traffic-IT交通场景理解" /><published>2025-12-08T00:00:00+08:00</published><updated>2025-12-08T00:00:00+08:00</updated><id>http://localhost:4000/TrafficIT_PapperReading%20copy</id><content type="html" xml:base="http://localhost:4000/TrafficIT_PapperReading-copy/"><![CDATA[<p>这篇博客介绍了清华 Traffic-IT: Enhancing traffic scene understanding for multimodal large language models 论文的阅读笔记。</p>
+
+<!-- more -->
+
+<!-- [代码仓库](https://github.com/TencentCloudADP/youtu-agent/tree/main) -->
+
+<p><a href="https://www.sciencedirect.com/science/article/pii/S0968090X25003298?via%3Dihub">参考论文</a></p>
+
+<!-- [参考论文 2-字节](https://arxiv.org/pdf/2511.06449) -->
+
+<h2 id="摘要">摘要</h2>
+
+<p>近年来，人工智能与城市基础设施的融合，极大地推动了智能交通系统 (ITS) 的转型发展。这些系统利用复杂的神经网络模型，在增强交通管理、道路安全和城市出行方面发挥着关键作用（Zhang et al., 2024a; Yang et al., 2025; Wang et al., 2024; Zhou et al., 2024b; Qu et al., 2023; Zhou et al., 2024; Wang and Yang, 2024）。</p>
+
+<p>尽管神经网络模型在提升 ITS 方面表现出卓越的能力，但一个经常遇到的关键局限是这些模型的泛化能力受限。通常情况下，在一个<u>特定交通场景下</u>训练的模型，在应用于不同场景时，其表现会大打折扣。这种缺乏适应性带来了重大挑战，尤其是在交通环境日益复杂和多样化的背景下。在快速发展的智能交通领域，为每一个独特的场景训练一个新模型既不切实际也不可持续，这与 ITS 发展中追求可扩展性和效率的更广泛目标相悖。</p>
+
+<p>最近，由于多模态大语言模型（MLLMs）的出现（Huang et al., 2023; Zhu et al., 2023; Li et al., 2023a; Liu et al., 2023b; Dai et al., 2023; Zhang et al., 2023b; Zhao et al., 2024; Chen et al., 2023; Liu et al., 2023; OpenAI, 2023; Li et al., 2023b），计算机视觉领域见证了一场新的范式转变。这些模型旨在超越传统的特定任务专家，充当通用基础模型，能够协助人类完成各种视觉任务。因此，这些基础模型也为交通视觉感知与理解领域带来了令人兴奋的潜力。这种适应性不仅增强了模型在不同城市环境中的适用性，也符合开发更稳健、高效和多功能交通系统的目标。</p>
+
+<p>虽然现有的 MLLMs 在理解复杂交通场景方面展示出潜力，但它们主要是在通用文本-图像对上进行训练的，这些数据往往缺乏针对交通背景的特定设计。这种局限性主要归因于专门为<u>交通场景策划的大规模数据集的稀缺性</u>。这意味着这些 MLLMs 在交通场景中的性能可以得到进一步提升。</p>
+
+<p>因此，为了解决这一局限性，在本文中，我们提出了 Traffic-IT 数据集，这是第一个大规模交通指令微调数据集，包含约 *220k 个文本-图像对。此外，为了确保我们提出的数据集能够有效地增强现有 MLLMs 在交通场景中的感知能力，我们设计了一个专用于交通场景的新颖数据收集流程。</p>
+
+<p>收集流程：第一步——图像收集
+第一步是图像收集。为了有效确保所收集的数据能增强 MLLMs，我们从互联网、现有数据集和行车记录仪录像中收集了总计 30k 张、涵盖各种交通状况的高质量图像。此外，为了模拟现实世界的交通场景，我们选择了来自各种环境的图像，例如晴天、雨天和雪天。这种多样性和高质量的图像确保了后续指令微调的有效性。</p>
+
+<p>收集流程：第二步——问题与回答生成
+第二步包括咨询三位交通领域专家，设计 30 个交通场景中常用的问题。随后，我们使用 GPT-4 为每张图像随机选择 6-10 个问题，并获得相应的回答。此外，为了进一步增强我们数据的实用性，我们不仅生成理解性回答，还要求模型对当前场景提供洞察，以提供进一步的驾驶规划。这种方法实际上更符合现实世界智能交通场景的需求，因为理解当前交通场景的目的是为了规划接下来的步骤。</p>
+
+<p>最后，为确保回答的准确性，共有 10 位专家对 GPT-4 生成的回复进行了审查和进一步修正。最终，Traffic-IT 数据集包含了约 220k 个问答对，这些问答对源自 30k 张图像。如此庞大的数据量确保了对各种交通场景的全面和均衡表示，为在真实交通场景分析中训练和评估 MLLMs 提供了广泛的资源。</p>
+
+<p>如图 1 中的词云所示，所提出的 Traffic-IT 数据集特别强调交通场景中与车辆和道路安全相关的问题，从而促进了智能交通系统（ITS）的进步。此外，图 2 表明 Traffic-IT 数据集提供了多样化的图像和广泛的精心设计的问题。这种多样性使数据集能够适应各种交通场景，并进一步促进了交通场景理解领域的发展。</p>
+
+<p>💡 本文的贡献：
+我们引入了一个大规模的<strong>指令微调数据集 Traffic-IT</strong>，该数据集专为交通场景设计。这一举措代表了该领域最早的尝试之一，旨在定制一个数据集来增强 MLLMs 在交通场景分析中的能力。我们提出的数据集不仅推动了 MLLMs 在理解交通场景中的应用，同时也对智能交通系统的发展做出了重大贡献。</p>
+
+<p>为了确保我们提出的数据集能够有效地增强 MLLMs 理解交通场景的能力，我们开发了一个<em>全面的数据收集流程</em>。该流程包含了关于如何收集和标注高质量数据的详细指南，这对于训练稳健和准确的模型至关重要。通过提供一个清晰的数据收集框架，我们不仅用多样化和具有代表性的交通场景丰富了数据集，还树立了一个可以启发进一步研究的标准。</p>
+
+<p>我们通过在三种广泛使用的开源 MLLMs 上进行评估，验证了我们提出的指令微调数据集的有效性。实验结果表明，我们的数据集显著增强了 MLLMs 在理解交通场景中的性能。</p>
+
+<hr />]]></content><author><name>pepper</name></author><category term="traffic" /><category term="llm" /><summary type="html"><![CDATA[这篇博客介绍了清华 Traffic-IT: Enhancing traffic scene understanding for multimodal large language models 论文的阅读笔记。]]></summary></entry><entry><title type="html">论文-Training-Free-GRPO免训练优化</title><link href="http://localhost:4000/Training-Free-GRPO_PapperReading/" rel="alternate" type="text/html" title="论文-Training-Free-GRPO免训练优化" /><published>2025-12-07T00:00:00+08:00</published><updated>2025-12-07T00:00:00+08:00</updated><id>http://localhost:4000/Training-Free%20GRPO_PapperReading</id><content type="html" xml:base="http://localhost:4000/Training-Free-GRPO_PapperReading/"><![CDATA[<p>这篇博客介绍了腾讯Training-Free GRPO论文的阅读笔记。</p>
+
+<!-- more -->
+<p><a href="https://github.com/TencentCloudADP/youtu-agent/tree/main">代码仓库</a>
+<a href="https://arxiv.org/pdf/2510.08191">参考论文1-腾讯</a>
+<a href="https://arxiv.org/pdf/2511.06449">参考论文2-字节</a></p>
+
+<h2 id="摘要">摘要</h2>
+
+<p>大型语言模型 (Large Language Model, LLM) 智能体在近期取得了进展，展现了其有前景的通用能力。然而，由于难以有效集成外部工具和特定的提示策略，它们在专业化的现实世界领域中的性能通常会下降。虽然已经提出了诸如智能体强化学习 (agentic reinforcement learning) 等方法来解决这个问题，但<em>它们通常依赖成本高昂的参数更新</em>，例如通过一个使用监督微调 (Supervised Fine-Tuning, SFT) 随后进行强化学习 (Reinforcement Learning, RL) 阶段（采用群体相对策略优化 (Group Relative Policy Optimization,<strong>GRPO</strong>)）来改变输出分布的过程。</p>
+
+<p>💡然而，我们认为 LLMs 可以通过将经验知识 (experiential knowledge) 作为标记先验 (<strong>token prior</strong>) 来学习，从而对输出分布产生类似的效果，这是一种轻量得多 (far more lightweight) 的方法，它不仅解决了实际<em>数据稀疏性</em> (practical data scarcity) 的问题，而且避免了常见的<em>过拟合</em> (overfitting) 问题。</p>
+
+<p>💡为此，我们提出了<em>免训练群体相对策略优化</em> (Training-Free Group Relative Policy Optimization, Training-Free GRPO)，这是一种<em>成本效益高的解决方案</em>，可以在不进行任何参数更新的情况下增强 LLM 智能体的性能。我们的方法利用每组推演 (rollouts) 内的群体相对语义优势而非数值优势，在<strong>最小量的真实数据</strong> (minimal ground-truth data) 上进行多轮 (multi-epoch) 学习过程中，迭代地提炼 (iteratively distilling) 高质量的经验知识。此类知识作为习得的标记先验，在 LLM API 调用期间被无缝集成以指导模型的行为。</p>
+
+<p>在数学推理 (mathematical reasoning) 和网络搜索 (web searching) 任务上的实验表明，Training-Free GRPO 应用于 DeepSeek-V3.1-Terminus 时，显著改善了域外性能 (out-of-domain performance)。仅凭几十个训练样本 (few dozen training samples)，Training-Free GRPO 的性能就超越了具有少量训练数据和成本的微调小型 LLMs (fine-tuned small LLMs)。</p>
+
+<h2 id="introduction">Introduction</h2>
+
+<p>大型语言模型 (Large Language Models, LLMs) 正在成为强大的通用智能体 (general-purpose agents)，能够与复杂的现实世界环境进行交互。它们在一系列广泛的任务中展现出卓越的能力，包括复杂问题解决 [4, 5, 6]、高级网络研究 [7, 8, 9, 10]、代码生成与调试 [11, 12]，以及熟练的计算机使用 [13, 14, 15]。</p>
+
+<p>尽管它们的能力令人印象深刻，但 LLM 智能体在专业化的现实世界领域中往往表现不佳。这些场景通常要求集成外部工具 （例如，计算器、API、数据库），以及领域特定的任务定义和提示策略 (prompting strategies)。在这样的设置中，开箱即用 (out-of-the-box) 地部署通用智能体，通常由于对领域特定要求的不熟悉或对必要工具的接触不足而导致次优性能 (suboptimal performance)。</p>
+
+<h3 id="challenges-in-agentic-training">Challenges in Agentic Training</h3>
+
+<p>为了弥合这一差距，智能体训练 (agentic training) 已成为促进 LLM 智能体适应特定领域及其相关工具的一种有前景的策略 [4, 7, 8, 16]。最近，智能体强化学习 (Agentic Reinforcement Learning, Agentic RL) 方法的进展采用了 <strong>群体相对策略优化</strong> (Group Relative Policy Optimization, GRPO) [17] 及其变体 [18, 19, 20] 来在参数空间 (parameter space) 中对齐模型行为。尽管这些方法有效地增强了任务特定能力，但它们依赖于调整 LLM 参数，带来了若干实际挑战：</p>
+
+<ul>
+  <li>计算成本 (Computational Cost)： 即使对于较小的模型，微调也需要大量的计算资源，这使其既昂贵又对环境不可持续。对于更大的模型，成本变得令人望而却步 (prohibitive)。此外，微调后的模型需要<strong>专用部署</strong> (dedicated deployment)，并且通常局限于特定应用，相对于更通用的模型而言，对于低频用例 (low-frequency use cases) 效率低下。</li>
+  <li>泛化能力差 (Poor Generalization)： 通过参数调整优化的模型通常会遭受不尽如人意的跨域泛化 (unsatisfactory cross-domain generalization)，限制了它们的适用范围仅限于狭窄的任务。因此，必须部署多个专业化模型 (multiple specialized models) 来处理一套全面的任务，这显著增加了系统复杂性 (system complexity) 和维护开销 (maintenance overhead)。</li>
+  <li>数据稀缺性 (Data Scarcity)： 微调 LLMs 通常需要大量高质量、精心标注的数据，而这些数据在专业领域往往稀缺 且获取成本极高 (prohibitively expensive)。此外，样本有限时，模型极易受到过拟合 (overfitting) 的影响，导致泛化能力差。</li>
+  <li>回报递减 (Diminishing Returns)： 令人望而却步的训练成本通常迫使现有方法微调参数少于 320 亿的较小 LLMs，这是由于资源限制而非最优设计选择。虽然更大型的模型会更受青睐，但微调的计算开销迫使了这种妥协。矛盾的是，基于 API 或开源的更大型 LLMs 通常通过可扩展性和持续的模型更新提供更好的成本-性能比 (cost-performance ratios)。然而，这些通用模型在需要微调的专业领域表现不佳，从而产生了成本-性能困境 (cost-performance dilemma)。</li>
+</ul>
+
+<h3 id="proposed-solution">Proposed Solution</h3>
+
+<blockquote>
+  <p>参数调整固有的这些限制促使了一个基础性的研究问题：应用 RL 在参数空间中是唯一可行的途径吗？我们能否以非参数方式，用更低的数据和计算成本来增强 LLM 智能体的性能？</p>
+</blockquote>
+
+<p>我们通过提出<strong>免训练群体相对策略优化</strong> (Training-Free Group Relative Policy Optimization, Training-Free GRPO)，肯定地回答了这个问题。这是一种新颖且高效 的方法，它以类似于原始 GRPO 的方式改进 LLM 智能体的行为，同时保持原始模型参数不变 (preserving the original model parameters unchanged)。</p>
+
+<p>我们的方法源于一个洞察：LLMs 已经拥有适应新场景的基本能力，<strong>只需通过有限样本进行最小量的实践 即可达到强大的性能</strong>。因此，与其通过参数调整来调整它们的输出分布，不如利用<strong>轻量级标记先验 (lightweight token prior)</strong> 的上下文学习 (in-context learning) 也能封装从最小训练数据集中学到的经验知识。</p>
+
+<p>Taining-Free GRPO 保留了原始 GRPO (vanilla GRPO) 的<strong>多轮学习机制</strong> (multi-epoch learning mechanism)。💡在每一轮中，<strong>系统会为每个查询生成多个输出</strong>，以提供一组推演 (group of <strong>rollouts</strong>)，这有助于探索<strong>策略空间</strong> (explore the <strong>policy</strong> space) 和<strong>评估潜在策略</strong> (evaluate <strong>potential</strong> <strong>strategies</strong>)。</p>
+
+<p>然而，原始 GRPO 依赖基于<strong>梯度的参数更新</strong> (gradient-based parameter updates) 来迭代改进策略性能，而 Training-Free GRPO 通过💡使用 LLMs（大型语言模型）的仅推理操作 (inference-only operations) 消除了这一要求。在每个优化步骤中，我们的方法不是为每组推演中的梯度上升 (gradient ascent) 计算数值优势 (numerical advantage)，而是利用 LLMs 对每组进行内省 (introspect) 并提炼出语义优势 (semantic advantage)。</p>
+
+<p>这种优势精炼了外部经验知识 (experiential knowledge)，并基于不断演变的上下文先验 (contextual priors) 来指导策略输出，从而在不修改任何模型参数的情况下实现了策略优化效果。</p>
+
+<p>通过评估富有挑战性的数学推理和交互式网络搜索任务，我们证明了该方法能够显著<strong>增强冻结策略模型</strong> (frozen policy models)，例如 DeepSeek-V3.1-Terminus [3] 的性能，<strong>仅需数十个训练样</strong>本。它在性能上超越了<strong>经过微调</strong>的 32B 模型，而所需的计算资源仅占其一小部分，为传统微调技术提供了一种更简单、效率更高的替代方案。</p>
+
+<p>我们的主要贡献有以下三方面：</p>
+
+<ul>
+  <li>一种新的免训练 RL 范式 (A New <strong>Training-Free</strong> RL Paradigm)：我们引入了 Training-Free GRPO，它通过利用不断演变的经验知识作为标记先验 (token priors)，将<strong>策略优化</strong>从<strong>参数空间</strong>转移到<strong>上下文空间</strong> (context space)，无需梯度更新。</li>
+  <li>语义群体优势 (Semantic Group Advantage)：我们用语义群体优势取代了原始 GRPO 中的数值群体优势，使 LLMs 能够内省自身的推演，并在多个优化步骤中持续更新经验知识。</li>
+  <li>数据和计算效率 (Data and Computational Efficiency)：实验证实，Training-Free GRPO 能用最少的训练样本有效提升冻结策略的性能，为不同领域提供了一种实用且成本效益高的替代方案。</li>
+  <li>卓越的泛化能力 (Superior Generalization)：通过保持模型参数冻结并插入不同的标记先验，我们的方法完全保留了泛化能力，消除了部署多个微调专家模型的成本和复杂性。</li>
+</ul>
+
+<p><img src="https://images.weserv.nl/?url=cdn.nlark.com/yuque/0/2025/png/40742019/1765115609308-0106c8a6-68e6-47ff-9065-504fecf54408.png?x-oss-process=image%2Fformat%2Cwebp" width="85%" /></p>
+
+<h2 id="2-training-free-grpo">2 Training-Free GRPO</h2>
+
+<p>本节介绍我们的免训练 GRPO (Training-Free GRPO)，该方法旨在复制 GRPO 算法的对齐效益，而无需对策略模型的参数执行任何基于梯度的更新。</p>
+
+<h3 id="原始-grpo-vanilla-grpo">原始 GRPO (Vanilla GRPO)</h3>
+
+<p>原始 GRPO 过程首先使用当前策略 LLM $\pi_{\theta}$ 为给定查询 $q$ 生成一组 $G$ 个输出 ${o_1, o_2, \ldots, o_G}$，即 $\pi_{\theta}(o_i | q)$。然后，每个输出 $o_i$ 通过一个奖励模型 $R$ 进行独立评分。随后，利用奖励 $r = {r_1, \ldots, r_G}$，它为每个输出 $o_i$ 计算一个群体相对优势 (group-relative advantage)：</p>
+
+\[\hat{A}_i = \frac{r_i - \text{mean}(r)}{\text{std}(r)}\]
+
+<p>通过结合针对参考模型 (reference model) 的 KL 散度惩罚 (KL-divergence penalty)，它构建了一个 PPO 裁剪目标函数 (PPO-clipped objective function)：</p>
+
+\[J_{\text{GRPO}}(\theta)\]
+
+<p>然后通过最大化该函数来更新 LLM 参数 $\theta$。</p>
+
+<h3 id="training-free-grpo-的核心逻辑">Training-Free GRPO 的核心逻辑</h3>
+
+<p>Training-Free GRPO 重新利用了这种基于群体的相对评估的核心逻辑，但将其转化为非参数化 (non-parametric) 的推理时过程 (inference-time process)。我们永久冻结参数 $\theta$，并维护一个外部经验知识 (external experiential knowledge) $E$，其初始化为 $\emptyset$，而不是更新参数 $\theta$。</p>
+
+<h4 id="推演与奖励-rollout-and-reward">推演与奖励 (Rollout and Reward)</h4>
+
+<p>我们的推演和奖励过程与 GRPO 完全一致。给定一个查询 $q$，我们执行一个并行推演 (parallel rollout)，使用 LLM 生成一组 $G$ 个输出 ${o_1, o_2, \ldots, o_G}$。值得注意的是，虽然 GRPO 使用当前的可训练策略 $\pi_{\theta}$，但我们的策略以经验知识 $E$ 为条件，即 $\pi_{\theta}(o_i | q, E)$。与标准 GRPO 设置相同，我们通过奖励模型 $R$ 对每个输出 $o_i$ 进行评分，以获得一个标量奖励 (scalar reward) $r_i = R(q, o_i)$。</p>
+
+<h4 id="群体优势计算-group-advantage-computation">群体优势计算 (Group Advantage Computation)</h4>
+
+<p>为了为策略参数提供优化方向，原始 GRPO 计算一个数值优势 $\hat{A}_i$，用于<strong>量化每个输出 $o_i$ 在其群体内的相对质量</strong>。类似地，Training-Free GRPO 在每个群体内执行类似的比较，但会以自然语言经验的形式产生群体相对语义优势 (group relative semantic advantage)。</p>
+
+<blockquote>
+  <p>📌 <strong>注意</strong>：在原始 GRPO 中，当所有 $G$ 个输出获得相同奖励（即 $\text{std}(r) = 0$）时，$\hat{A}_i = 0$，因此我们仅对存在明确赢家和输家的群体生成这种语义优势。</p>
+</blockquote>
+
+<p>具体来说，对于每个输出 $o_i$，我们首先询问同一个 LLM $M$ 分别提供一个相应的总结：</p>
+
+\[s_i = M(p_{summary}, q, o_i)\]
+
+<p>其中 $p_{summary}$ 是一个提示模板，它结合了查询 $q$ 和输出 $o_i$ 来形成一个结构化的总结请求。给定总结 ${s_1, s_2, \ldots, s_G}$ 和当前的经验知识 $E$，LLM $M$ 阐明了输出相对成功或失败的原因，然后提取一个简洁的自然语言经验：</p>
+
+\[A_{\text{text}} = M(p_{extract}, q, s_i, E)\]
+
+<p>其中 $p_{extract}$ 是另一个用于经验提取的提示模板。</p>
+
+<p>这种自然语言经验 $A_{\text{text}}$ 作为我们的语义优势，在功能上等同于原始 GRPO 的 $\hat{A}_i$，它编码了什么行动导致高奖励的关键经验知识。</p>
+
+<h4 id="优化-optimization">优化 (Optimization)</h4>
+
+<p>原始 GRPO（vanilla GRPO）通过在单个批次中计算得到的所有优势 (all advantages) 对 $J_{\text{GRPO}}(\theta)$ 进行梯度上升 (gradient ascent) 来更新其模型参数 $\theta$。</p>
+
+<blockquote>
+  <p>📌 <strong>而我们则使用当前批次中的所有语义优势 $A_{\text{text}}$ 来更新我们的经验库 (experience library) $E$</strong>。</p>
+</blockquote>
+
+<p>具体来说，给定现有的经验库 $E$，我们提示 LLM 根据所有这些 $A_{\text{text}}$ 生成一个操作列表 (list of operations)，其中每个操作可以是：</p>
+
+<ul>
+  <li><strong>添加 (Add)</strong>：将 $A_{\text{text}}$ 中描述的经验直接附加到经验库 $E$ 中。</li>
+  <li><strong>删除 (Delete)</strong>：基于 $A_{\text{text}}$，从经验库 $E$ 中移除一条低质量经验。</li>
+  <li><strong>修改 (Modify)</strong>：基于 $A_{\text{text}}$ 中的见解，对经验库 $E$ 中现有的经验进行精炼或改进。</li>
+  <li><strong>保留 (Keep)</strong>：经验库 $E$ 保持不变。</li>
+</ul>
+
+<h3 id="案例研究-a-case-study">案例研究 (A Case Study)</h3>
+
+<p>在数学推理和网络搜索场景中，我们提供了示例，说明 Training-Free GRPO (免训练群体相对策略优化) 如何使用 DeepSeek-V3.1-Terminus 和相应的工具来增强 ReAct [1]。</p>
+
+<h4 id="a1-经验引导的工具集成数学推理">A.1 经验引导的工具集成数学推理</h4>
+<blockquote>
+  <p>Experience-Guided Tool-Integrated Math Reasoning</p>
+</blockquote>
+
+<p><img src="https://images.weserv.nl/?url=cdn.nlark.com/yuque/0/2025/png/40742019/1765117594966-b3fce48c-accb-43ef-a086-a79f16daf7a9.png?x-oss-process=image%2Fformat%2Cwebp" width="85%" /></p>
+
+<p>我们考虑一个包含两个矩形 ABCD 和 EFGH 的几何配置，其中 D、E、C、F 依次共线，并且 A、D、H、G 共圆 (concyclic)。已知 $BC = 16$，$AB = 107$，$FG = 17$，$EF = 184$，任务是确定 $CE$ 的长度。</p>
+
+<h5 id="工具集成数学推理无经验">📌工具集成数学推理（无经验）</h5>
+
+<hr />
+<p><strong>问题 (Question)</strong><br />
+矩形 ABCD 和 EFGH 被绘制，使得 D、E、C、F 共线。此外，A、D、H、G 四点位于同一个圆上。如果 $BC = 16$，$AB = 107$，$FG = 17$，$EF = 184$，那么 $CE$ 的长度是多少？</p>
+
+<p><strong>轨迹 (Trajectory)</strong></p>
+<ol>
+  <li><strong>[Agent]</strong> 我将点 D 放置在原点 $(0, 0)$，并使用一条水平线表示 D、E、C、F。对于矩形 ABCD，设置 $A = (0, 16)$，$B = (107, 16)$，$C = (107, 0)$，$D = (0, 0)$。</li>
+  <li><strong>[Tool]</strong> 相应地设置坐标。</li>
+  <li><strong>[Agent]</strong> 由于 EFGH 是一个矩形，$EF$ 水平且 $FG = 17$，设置 $F = (x_f, 0)$，$E = (x_f - 184, 0)$，并初步设置 $G = (x_f, +17)$，$H = (x_f - 184, +17)$。</li>
+  <li><strong>[Agent]</strong> 使用四点行列式条件 (4-point determinant condition)，强制执行 $A(0, 16)$、$D(0, 0)$、$G(x_f, 17)$、$H(x_f - 184, 17)$ 的共圆性 (concyclicity)，推导出关于 $x_f$ 的方程。</li>
+  <li><strong>[Tool]</strong> 解出所得的二次方程 $x_f$；得到 $x_f \approx 184.092$，因此 $x_e = x_f - 184 \approx 0.092$。</li>
+  <li><strong>[Agent]</strong> 计算 $CE = |107 - x_e | \approx 106.9076$。</li>
+  <li><strong>[Agent]</strong> 计算 $CE = |107 - x_e| \approx 106.9076$。</li>
+  <li><strong>[Agent]</strong> 交换点顺序 (D–C–E–F, E–D–C–F) 并重新推导。在某一点，使用角度-正弦关系 (angle-sine relation)，得到 $x_e(x_e + 184) = 17$，从而得出 $x_e = -92 + \sqrt{8481} \approx 0.0923$，因此 $CE \approx 106.9076$。</li>
+  <li><strong>[Agent]</strong> 呈现一个“精确形式” $CE = 199 - \sqrt{8481}$ 作为最终答案。</li>
+</ol>
+
+<p><strong>结果 (Outcome)</strong><br />
+不正确：$CE \approx 106.9076$ (报告为 $199 - \sqrt{8481}$)。</p>
+
+<hr />
+
+<p>🌟 未受辅助的智能体初始化一个坐标系，将 $D = (0, 0)$ 并将 $ABCD$ 建模为与坐标轴对齐。对于 $EFGH$，它设置 $E = (x_f - 184, 0)$，$F = (x_f, 0)$，并且关键地设置 $G = (x_f, +17)$，$H = (x_f - 184, +17)$，即短边具有正向垂直方向 (positive vertical orientation)。然后，它通过行列式条件 (determinant condition) 强制执行 $A(0, 16)$、$D(0, 0)$、$G$、$H$ 的四点共圆性 (four-point concyclicity) 并求解 $x_f$，得到 $x_f \approx 184.092$，因此 $x_e = x_f - 184 \approx 0.092$。由此，它报告 $CE \approx 106.9076$ 以及一个“精确”表达式 $199 - \sqrt{8481}$。</p>
+
+<p>这条轨迹表现出三个系统性问题：</p>
+<ol>
+  <li><strong>对垂直方向的误解</strong>（$G$、$H$ 的 $y$ 坐标符号错误）。</li>
+  <li><strong>对 $D–E–C–F$ 顺序的不一致处理</strong>以及缺乏对线段关系的统一参数化。</li>
+  <li><strong>缺乏系统、全面的解后验证</strong>——即没有集成检查最终坐标是否同时满足矩形尺寸。</li>
+</ol>
+
+<p>在没有经验辅助的轨迹中，智能体<strong>接受了一个虚假的解</strong>，因为它<strong>缺乏完整的几何验证</strong>。请注意，虽然 $CE \approx 106.91$ 满足 $0 &lt; CE &lt; 107$，但这本身并不能验证该解；关键的失败在于<strong>缺乏对所有问题约束的整体一致性检查 (holistic consistency checks)</strong>。</p>
+
+<h5 id="工具集成数学推理有经验">📌工具集成数学推理（有经验）</h5>
+
+<hr />
+<p><strong>问题 (Question)</strong><br />
+矩形 ABCD 和 EFGH 被绘制，使得 D、E、C、F 依次共线。此外，A、D、H、G 四点位于同一个圆上。如果 $BC = 16$，$AB = 107$，$FG = 17$，$EF = 184$，那么 $CE$ 的长度是多少？</p>
+
+<p><strong>经验 (Experiences)</strong></p>
+<ul>
+  <li><strong>[G1]</strong> 在解决涉及交点的几何问题时，验证解是否位于<strong>有界区域 (bounded regions)</strong> 或<strong>线段 (segments)</strong> 内，而非<strong>延长线 (extensions)</strong> 上，以避免<strong>无关解 (extraneous answers)</strong>。</li>
+  <li><strong>[G7]</strong> 在解决带有约束（例如，梯形）的几何问题时，验证所有条件：通过斜率验证平行边，通过叉积验证凸性，以避免无关解。</li>
+  <li><strong>[G29]</strong> 在线段延长线上构造点时，仔细解释诸如“超出 B”之类的<strong>方向性短语 (directional phrases)</strong>。</li>
+  <li><strong>[G37]</strong> 在几何问题中，如果点位于三角形的边上并给定了线段长度，首先通过求和适当的线段来确定所有三条边长。例如，如果给定 $AB, AC, BC$ 上的点，以及 $AM, MB, AN, NC, BP, PC$，则 $AB = AM + MB, AC = AN + NC, BC = BP + PC$。这确保了在放置坐标或计算面积之前，三角形是被一致定义的。</li>
+</ul>
+
+<p><strong>轨迹 (Trajectory)</strong></p>
+<ol>
+  <li><strong>[Agent]</strong> 在一条水平线上固定顺序 $D–E–C–F$。设置 $CE = x$，并设置线段约束 $0 &lt; x &lt; 107$。（依据 [G29], [G1]）</li>
+  <li><strong>[Tool]</strong> 记录关系：$DE = 107 - x$ 和 $CF = 184 - x$（依据 [G37]）。放置 $D = (0, 0)$, $E = (107 - x, 0)$, $C = (107, 0)$, $F = (291 - x, 0)$，确保 $EF = 184$。</li>
+  <li><strong>[Agent]</strong> 保持垂直方向一致：由于 $A = (0, 16)$ 且 $D = (0, 0)$，设置短边 $FG = 17$ <strong>向下</strong>，即 $H = (107 - x, -17)$ 和 $G = (291 - x, -17)$。（这纠正了无经验路径中的符号错误）</li>
+  <li><strong>[Agent]</strong> 使用<strong>圆方程</strong> $x^2 + y^2 + Dx + Ey + F = 0$ 强制执行<strong>共圆性 (concyclicity)</strong>。利用 $A(0, 16)$ 和 $D(0, 0)$，得到 $F = 0$, $E = -16$。</li>
+  <li><strong>[Tool]</strong> 代入 $H(107- x, -17)$ 和 $G(291- x, -17)$，得到两个方程。相减以消除常数并得到 $D = 2x - 398$。</li>
+  <li><strong>[Agent]</strong> 代入，得到二次方程 $x^2 - 398x + 30576 = 0$。</li>
+  <li><strong>[Tool]</strong> 计算判别式：$398^2 - 4 \cdot 30576 = 36100 = 190^2$。根为 $x = 294$ 和 $x = 104$。</li>
+  <li><strong>[Agent]</strong> 应用线段约束 $0 &lt; x &lt; 107$ 来<strong>舍弃</strong> $x = 294$ 并<strong>选择</strong> $x = 104$（依据 [G1]）。</li>
+  <li><strong>[Agent]</strong> （依据 [G7] 进行<strong>完整验证</strong>）$DE = 107 - 104 = 3$, $CF = 184 - 104 = 80$, $EF = 184$, $FG = 17$。圆 $x^2 + y^2 - 190x - 16y = 0$ 通过 $A = (0, 16)$, $D = (0, 0)$, $H = (3, -17)$, $G = (187, -17)$。<strong>所有约束均满足</strong>。</li>
+</ol>
+
+<p><strong>结果 (Outcome)</strong><br />
+<strong>正确 (Correct)</strong>：$CE = 104$。</p>
+
+<hr />
+
+<p>🌟 借助精心策划的经验池 (curated experience pool)，智能体遵循一个结构化的流程：</p>
+
+<ul>
+  <li><strong>方向性排序和有界性验证 ([29], [1])：</strong> 它在线上固定了顺序 $D–E–C–F$，并设置 $CE = x$ 且 $0 &lt; x &lt; 107$，确保 $E$ 位于线段 $DC$ 上且 $F$ 位于 $C$ 之外。</li>
+  <li><strong>线段相加参数化 ([37])：</strong> 它使用 $DE + EC = DC = AB = 107$ 和 $EC + CF = EF = 184$ 来获得 $DE = 107 - x$，$CF = 184 - x$，并放置 $D = (0, 0)$, $E = (107 - x, 0)$, $C = (107, 0)$, $F = (291 - x, 0)$。</li>
+  <li><strong>一致的垂直方向和循环建模：</strong> 注意到 $A = (0, 16)$, $D = (0, 0)$，它将短边向下定向（$FG = 17$），从而 $H = (107 - x, -17)$, $G = (291 - x, -17)$。使用圆方程 $x^2 + y^2 + Dx + Ey + F = 0$ 并代入 $A$ 和 $D$ 得到 $F = 0, E = -16$。代入 $H$ 和 $G$，两方程相减得到 $D = 2x - 398$；回代后简化为二次方程 $x^2 - 398x + 30576 = 0$，其判别式为 $398^2 - 4 \cdot 30576 = 36100 = 190^2$，根为 $x = 104, 294$。</li>
+  <li><strong>根选择和完整验证 ([1], [7])：</strong> 应用 $0 &lt; x &lt; 107$ 过滤掉 $x = 294$，选择 $x = 104$。智能体随后验证所有约束：$DE = 107 - 104 = 3$, $CF = 184 - 104 = 80$, $EF = 184$, $FG = 17$，并确认圆 $x^2 + y^2 - 190x - 16y = 0$ 通过 $A = (0, 16)$, $D = (0, 0)$, $H = (3, -17)$, $G = (187, -17)$。</li>
+</ul>
+
+<h4 id="对比分析">对比分析</h4>
+<p>这个案例揭示了经验引导的行为与正确性之间清晰的因果关系。</p>
+
+<ul>
+  <li>经验 [G29] 消除了方向性模糊，并强制执行了正确的共线性顺序，直接解决了基线中 $G, H$ 的错误放置。</li>
+  <li>经验 [G37] 引导了简洁的单变量参数化 ($DE = 107 - x, CF = 184 - x$)，将循环约束简化为一个可解的二次方程。</li>
+  <li>经验 [G1] 施加了必要的有界性过滤器 ($0 &lt; x &lt; 107$)，以丢弃无关根。</li>
+  <li>最后，经验 [G7] 强制要求全面解后验证（矩形尺寸、共线性、共圆性），防止接受虚假解。</li>
+</ul>
+
+<p>与未受辅助的轨迹相比，经验知情的推理纠正了垂直方向，解决了排序和参数化不一致，并安装了有原则的验证关卡。此案例证明了在工具集成数学推理中，集成领域特定经验对可靠性和准确性的积极影响。</p>
+
+<h3 id="4-代码-prompt">4 代码 Prompt</h3>
+
+<h4 id="1-problem_with_experience_template">1. PROBLEM_WITH_EXPERIENCE_TEMPLATE</h4>
+
+<p>问题解决与经验加载：解决问题前的标准格式。核心要求是必须先阅读和理解提供的帮助性指令和经验 (<code class="language-plaintext highlighter-rouge">{experiences}</code>)，然后解决问题 (<code class="language-plaintext highlighter-rouge">{problem}</code>)。</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">PROBLEM_WITH_EXPERIENCE_TEMPLATE</span> <span class="o">=</span> <span class="sh">"""</span><span class="s">请解决以下问题：
+{problem}
+在解决问题时，您必须首先仔细阅读并理解以下有用的指令和经验：
+{experiences}</span><span class="sh">"""</span>
+</code></pre></div></div>
+
+<h4 id="2-single_rollout_summary_template">2. SINGLE_ROLLOUT_SUMMARY_TEMPLATE</h4>
+
+<p>单次轨迹总结：详细回顾一次解决问题的轨迹（已知答案和评分）。</p>
+
+<ul>
+  <li><strong>步骤 1</strong>：描述采取的行动以及每一步使用的经验。</li>
+  <li><strong>步骤 2</strong>：根据评分和正确答案，识别并解释弯路、错误或回溯，分析其发生原因和影响。</li>
+  <li><strong>步骤 3</strong>：保持每一步所有核心结果的完整性，即使过程有缺陷。</li>
+</ul>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">SINGLE_ROLLOUT_SUMMARY_TEMPLATE</span> <span class="o">=</span> <span class="sh">"""</span><span class="s">一个智能体系统可能会被提供一些经验，然后它会产生以下轨迹来解决给定的问题。请逐步总结该轨迹：
+1. 对于每一步，描述**采取了什么行动**，以及在哪一步中使用了哪条经验。
+2. 根据该次运行的评分和正确答案，识别并解释任何**代表弯路、错误或回溯**的步骤，强调它们可能发生的原因以及它们对轨迹进度的影响。
+3. 保持**每一步的所有核心结果**，即使该过程存在缺陷。
+&lt;trajectory&gt;
+{trajectory}
+&lt;/trajectory&gt;
+
+&lt;evaluation&gt;
+{grade}
+&lt;/evaluation&gt;
+
+&lt;groundtruth&gt;
+{answer}
+&lt;/groundtruth&gt;
+只返回每一步的轨迹摘要，例如：
+1. 第一步发生了什么及其核心结果
+2. 第二步发生了什么及其核心结果
+3. ...</span><span class="sh">"""</span>
+</code></pre></div></div>
+
+<h4 id="3-single_query_critique_template">3. SINGLE_QUERY_CRITIQUE_TEMPLATE</h4>
+
+<p>经验批评与更新（学习阶段）：审查多次尝试的轨迹，提取可推广经验，并更新经验库（已知答案）。</p>
+
+<ul>
+  <li><strong>更新选项</strong>：<code class="language-plaintext highlighter-rouge">modify</code> (修改), <code class="language-plaintext highlighter-rouge">add</code> (添加)。</li>
+  <li><strong>输出格式</strong>：详细推理后，返回 JSON 列表。</li>
+</ul>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">SINGLE_QUERY_CRITIQUE_TEMPLATE</span> <span class="o">=</span> <span class="sh">"""</span><span class="s">一个智能体系统被提供了一组经验，并多次尝试解决该问题，其中既有成功的解决方案，也有错误的解决方案。请审查这些解决问题的尝试，并提取可推广的经验。遵循以下步骤：
+
+1. 轨迹分析：
+    - 对于成功的步骤：识别关键的正确决策和见解。
+    - 对于错误：确定推理在哪里以及为什么出错。
+    - 注意任何使用/遗漏的重要模式或策略。
+    - 审查为什么有些轨迹会失败？是否有现有的经验被遗漏，或者经验没有提供足够的指导？
+2. 更新现有经验：
+    - 有些轨迹可能是正确的，有些可能是错误的，您应该确保有经验可以帮助正确运行。
+    - 您有两种选择：[修改 (modify), 添加 (add)]：
+        * 修改：您可以修改当前的经验使其更有帮助。
+        * 添加：您可以引入可能需要的新经验。
+    - 对于此案例，您最多可以更新 {max_operations} 条清晰、可推广的经验教训。
+    - 在更新每条经验之前，您需要：
+        * 指定它最相关的时机。
+        * 列出使该经验适用的关键问题特征。
+        * 识别该建议适用于的类似问题模式。
+3. 对每条被修改或添加的经验的要求：
+    - 以经验中包含的几个词的一般背景开头。
+    - 专注于战略性思维模式，而非具体的计算。
+    - 强调可应用于类似问题的决策点。
+请在上述 3 个步骤的指导下提供详细的推理。
+在分步推理之后，您将以如下 JSON 格式返回：
+{ json
+[
+    {
+        </span><span class="sh">"</span><span class="s">option</span><span class="sh">"</span><span class="s">: </span><span class="sh">"</span><span class="s">modify</span><span class="sh">"</span><span class="s">,
+        </span><span class="sh">"</span><span class="s">experience</span><span class="sh">"</span><span class="s">: </span><span class="sh">"</span><span class="s">the modified experience</span><span class="sh">"</span><span class="s">,
+        </span><span class="sh">"</span><span class="s">modified_from</span><span class="sh">"</span><span class="s">: </span><span class="sh">"</span><span class="s">G17</span><span class="sh">"</span><span class="s"> # 指定被修改经验的 ID
+    },
+    {
+        </span><span class="sh">"</span><span class="s">option</span><span class="sh">"</span><span class="s">: </span><span class="sh">"</span><span class="s">add</span><span class="sh">"</span><span class="s">,
+        </span><span class="sh">"</span><span class="s">experience</span><span class="sh">"</span><span class="s">: </span><span class="sh">"</span><span class="s">the added experience</span><span class="sh">"</span><span class="s">
+    },
+</span><span class="gp">    ...</span>
+<span class="p">]</span> <span class="p">}</span>
+<span class="n">请注意</span><span class="err">，</span><span class="n">您更新的经验可能不需要涵盖所有两种选项</span><span class="err">。</span><span class="n">只使用一种更新类型也是可以的</span><span class="err">。</span>
+<span class="o">&lt;</span><span class="n">problem</span><span class="o">&gt;</span>
+<span class="p">{</span><span class="n">problem</span><span class="p">}</span>
+<span class="o">&lt;/</span><span class="n">problem</span><span class="o">&gt;</span>
+
+<span class="s">&lt;trajectories&gt;
+{trajectories}
+&lt;/trajectories&gt;
+
+&lt;groundtruth&gt;
+{answer}
+&lt;/groundtruth&gt;
+
+&lt;experience&gt;
+{experiences}
+&lt;/experience&gt;</span><span class="sh">"""</span>
+</code></pre></div></div>
+
+<h4 id="4-batch_experience_update_template">4. BATCH_EXPERIENCE_UPDATE_TEMPLATE</h4>
+
+<p>目的：收集并整合多轮建议，形成最终的经验库修订计划。</p>
+
+<ul>
+  <li><strong>更新选项</strong>：<code class="language-plaintext highlighter-rouge">modify</code> (修改), <code class="language-plaintext highlighter-rouge">merge</code> (合并)。</li>
+  <li><strong>经验要求</strong>：最终经验必须不超过 32 个词，专注于战略性思维，避免重复。</li>
+</ul>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">BATCH_EXPERIENCE_UPDATE_TEMPLATE</span> <span class="o">=</span> <span class="sh">"""</span><span class="s">一个智能体系统被提供了一组经验，并多次尝试解决该问题。根据反思，对现有经验提出了一些建议。您的任务是收集并思考最终的经验修订计划。每条最终经验必须满足以下要求：
+1. 它必须是针对此案例的清晰、可推广的经验教训，不超过 32 个词。
+2. 以经验中包含的几个词的一般背景开头。
+3. 专注于战略性思维模式，而非具体的计算。
+4. 强调可应用于类似问题的决策点。
+5. 避免在多个不同的经验中重复类似的说法。
+&lt;existing_experiences&gt;
+{experiences}
+&lt;/existing_experiences&gt;
+
+&lt;suggested_updates&gt;
+{updates}
+&lt;/suggested_updates&gt;
+请对每条建议提供推理，并思考如何更新现有经验。
+您有两种更新选项：[修改 (modify), 合并 (merge)]：
+  * 修改：您可以修改当前的经验使其更有帮助。
+  * 合并：您可以将一些相似的经验合并成更通用的形式以减少重复。
+在生成分步推理之后，您需要以如下 JSON 格式返回最终的经验修订细节：
+{json
+[
+    {
+        </span><span class="sh">"</span><span class="s">option</span><span class="sh">"</span><span class="s">: </span><span class="sh">"</span><span class="s">modify</span><span class="sh">"</span><span class="s">,
+        </span><span class="sh">"</span><span class="s">experience</span><span class="sh">"</span><span class="s">: </span><span class="sh">"</span><span class="s">the modified experience</span><span class="sh">"</span><span class="s">,
+        </span><span class="sh">"</span><span class="s">modified_from</span><span class="sh">"</span><span class="s">: </span><span class="sh">"</span><span class="s">C1</span><span class="sh">"</span><span class="s"> # 指定被修改经验的字符串 ID
+    },
+    {
+        </span><span class="sh">"</span><span class="s">option</span><span class="sh">"</span><span class="s">: </span><span class="sh">"</span><span class="s">merge</span><span class="sh">"</span><span class="s">,
+        </span><span class="sh">"</span><span class="s">experience</span><span class="sh">"</span><span class="s">: </span><span class="sh">"</span><span class="s">the merged experience</span><span class="sh">"</span><span class="s">,
+        </span><span class="sh">"</span><span class="s">merged_from</span><span class="sh">"</span><span class="s">: [</span><span class="sh">"</span><span class="s">C1</span><span class="sh">"</span><span class="s">, </span><span class="sh">"</span><span class="s">C3</span><span class="sh">"</span><span class="s">, </span><span class="sh">"</span><span class="s">S4</span><span class="sh">"</span><span class="s">, ...] # 指定被合并经验的字符串 ID 列表，至少需要 2 个 ID
+    },
+</span><span class="gp">    ...</span>
+<span class="p">]}</span>
+</code></pre></div></div>
+
+<h4 id="5-single_rollout_summary_no_gt_template">5. SINGLE_ROLLOUT_SUMMARY_NO_GT_TEMPLATE</h4>
+
+<p>无标准答案的单次运行总结。</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">SINGLE_ROLLOUT_SUMMARY_NO_GT_TEMPLATE</span> <span class="o">=</span> <span class="sh">"""</span><span class="s">一个智能体系统可能会被提供一些经验，然后它会产生以下轨迹来解决给定的问题。请逐步总结该轨迹：
+1. 对于每一步，描述**采取了什么行动**，以及在哪一步中使用了哪条经验。
+2. 根据该次运行的评分和正确答案，识别并解释任何**代表弯路、错误或回溯**的步骤，强调它们可能发生的原因以及它们对轨迹进度的影响。
+3. 保持**每一步的所有核心结果**，即使该过程存在缺陷。
+&lt;trajectory&gt;
+{trajectory}
+&lt;/trajectory&gt;
+只返回每一步的轨迹摘要，例如：
+1. 第一步发生了什么及其核心结果
+2. 第二步发生了什么及其核心结果
+3. ...</span><span class="sh">"""</span>
+</code></pre></div></div>
+
+<h4 id="6-single_query_critique_no_gt_template">6. SINGLE_QUERY_CRITIQUE_NO_GT_TEMPLATE</h4>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">SINGLE_QUERY_CRITIQUE_NO_GT_TEMPLATE</span> <span class="o">=</span> <span class="sh">"""</span><span class="s">一个智能体系统被提供了一组经验，并多次尝试解决该问题。请审查这些解决问题的尝试，并提取可推广的经验。遵循以下步骤：
+1. 轨迹分析：
+    - 识别关键的正确决策和见解。
+    - 确定推理在哪里以及为什么出错。
+    - 注意任何重要模式或策略的使用/遗漏。
+    - 审查为什么有些轨迹看似失败？是否有现有的经验被遗漏，或者经验没有提供足够的指导？
+2. 更新现有经验：
+    - 确保有经验可以帮助正确运行。
+    - 您有两种选择：[修改 (modify), 添加 (add)]：
+        * 修改：您可以修改当前的经验使其更有帮助。
+        * 添加：您可以引入可能需要的新经验。
+    - 对于此案例，您最多可以更新 {max_operations} 条清晰、可推广的经验教训。
+    - 在更新每条经验之前，您需要：
+        * 指定它最相关的时机。
+        * 列出使该经验适用的关键问题特征。
+        * 识别该建议适用于的类似问题模式。
+3. 对每条被修改或添加的经验的要求：
+    - 以经验中包含的几个词的一般背景开头。
+    - 专注于战略性思维模式，而非具体的计算。
+    - 强调可应用于类似问题的决策点。
+请在上述 3 个步骤的指导下提供详细的推理。
+在分步推理之后，您将以如下 JSON 格式返回：
+{json
+[
+    {
+        </span><span class="sh">"</span><span class="s">option</span><span class="sh">"</span><span class="s">: </span><span class="sh">"</span><span class="s">modify</span><span class="sh">"</span><span class="s">,
+        </span><span class="sh">"</span><span class="s">experience</span><span class="sh">"</span><span class="s">: </span><span class="sh">"</span><span class="s">the modified experience</span><span class="sh">"</span><span class="s">,
+        </span><span class="sh">"</span><span class="s">modified_from</span><span class="sh">"</span><span class="s">: </span><span class="sh">"</span><span class="s">G17</span><span class="sh">"</span><span class="s"> # 指定被修改经验的 ID
+    },
+    {
+        </span><span class="sh">"</span><span class="s">option</span><span class="sh">"</span><span class="s">: </span><span class="sh">"</span><span class="s">add</span><span class="sh">"</span><span class="s">,
+        </span><span class="sh">"</span><span class="s">experience</span><span class="sh">"</span><span class="s">: </span><span class="sh">"</span><span class="s">the added experience</span><span class="sh">"</span><span class="s">
+    },
+</span><span class="gp">    ...</span>
+<span class="p">]</span>
+<span class="p">}</span>
+<span class="n">请注意</span><span class="err">，</span><span class="n">您更新的经验可能不需要涵盖所有两种选项</span><span class="err">。</span><span class="n">只使用一种更新类型也是可以的</span><span class="err">。</span>
+<span class="o">&lt;</span><span class="n">problem</span><span class="o">&gt;</span>
+<span class="p">{</span><span class="n">problem</span><span class="p">}</span>
+<span class="o">&lt;/</span><span class="n">problem</span><span class="o">&gt;</span>
+
+<span class="s">&lt;trajectories&gt;
+{trajectories}
+&lt;/trajectories&gt;
+
+&lt;experience&gt;
+{experiences}
+&lt;/experience&gt;</span><span class="sh">"""</span>
+</code></pre></div></div>
+<hr />]]></content><author><name>pepper</name></author><category term="grpo" /><category term="llm" /><summary type="html"><![CDATA[这篇博客介绍了腾讯Training-Free GRPO论文的阅读笔记。]]></summary></entry><entry><title type="html">工具-Pandoc将LaTeX转Word</title><link href="http://localhost:4000/latex2word_fastly/" rel="alternate" type="text/html" title="工具-Pandoc将LaTeX转Word" /><published>2025-11-22T00:00:00+08:00</published><updated>2025-11-22T00:00:00+08:00</updated><id>http://localhost:4000/latex2word_fastly</id><content type="html" xml:base="http://localhost:4000/latex2word_fastly/"><![CDATA[<p>这篇博客关于使用 Pandoc 将 LaTeX 转换为 Word (DOCX) 的指南整理.</p>
+
+<!-- more -->
+
+<h2 id="-使用-pandoc-将-latex-tex-转换为-word-docx">🚀 使用 Pandoc 将 LaTeX (TEX) 转换为 Word (DOCX)</h2>
+
+<hr />
+
+<h3 id="️-前置条件安装-pandoc">🛠️ 前置条件：安装 Pandoc</h3>
+
+<p>首先，您需要下载并安装 Pandoc 工具。</p>
+
+<p>请在官方 GitHub Release 页面下载：
+<a href="https://github.com/jgm/pandoc/releases/tag/3.4">Pandoc 3.4 Release</a></p>
+
+<p>安装完成后，打开命令行工具（如 Command Prompt, PowerShell 或 Terminal），输入以下命令进行验证：</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>pandoc <span class="nt">-v</span>
+</code></pre></div></div>
+
+<p>如果出现类似的版本信息（如截图所示），则说明安装成功。</p>
+
+<h3 id="️-基础用法">✍️ 基础用法：</h3>
+
+<p>简单的文件转换</p>
+
+<ol>
+  <li>打开命令行工具。</li>
+  <li>切换到您的 <code class="language-plaintext highlighter-rouge">.tex</code> 文件（例如 <code class="language-plaintext highlighter-rouge">main.tex</code>）所在的目录。</li>
+  <li>输入以下命令：</li>
+</ol>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>pandoc main.tex <span class="nt">-o</span> main.docx
+</code></pre></div></div>
+
+<p>如果命令执行后没有报错，说明转换成功。您可以直接在当前文件夹下找到生成的 <code class="language-plaintext highlighter-rouge">main.docx</code> 文件。</p>
+
+<h4 id="格式进阶">格式进阶：</h4>
+
+<p>附带预设样式的转换如果您希望转换后的 <code class="language-plaintext highlighter-rouge">.docx</code> 文件（例如投稿论文）具有特定的预设样式（如期刊模板样式），您需要使用一个<strong>参考文档</strong> (<code class="language-plaintext highlighter-rouge">reference-doc</code>) 来指定样式。</p>
+
+<p>步骤一：生成自定义参考文件首先，在您的 <code class="language-plaintext highlighter-rouge">.tex</code> 所在目录，输入以下命令生成一个基础的 <code class="language-plaintext highlighter-rouge">custom-reference.docx</code> 文件：</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>pandoc <span class="nt">-o</span> custom-reference.docx <span class="nt">--print-default-data-file</span> reference.docx
+</code></pre></div></div>
+
+<p>步骤二：修改样式接下来，您需要修改新生成的 <code class="language-plaintext highlighter-rouge">custom-reference.docx</code> 文件中的样式（标题、正文、列表等），使其符合您目标模板的要求。</p>
+
+<ul>
+  <li>如果您已经有一个模板，您需要将 <code class="language-plaintext highlighter-rouge">custom-reference.docx</code> 文件的<strong>样式</strong>更改为与目标模板一致。</li>
+  <li>关于如何修改 DOCX 样式，可以参考此外部链接（例如，将样式从一个文件导入到另一个文件）：
+<a href="https://blog.csdn.net/symoriaty/article/details/80290838">CSDN 博客：Word 样式修改参考</a></li>
+</ul>
+
+<p>步骤三：使用参考文件进行转换修改完成后，使用 <code class="language-plaintext highlighter-rouge">--reference-doc</code> 参数将 <code class="language-plaintext highlighter-rouge">.tex</code> 文件转换为带有预设样式的 <code class="language-plaintext highlighter-rouge">.docx</code> 文件：</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>pandoc main.tex <span class="nt">--reference-doc</span><span class="o">=</span>custom-reference.docx <span class="nt">-o</span> main.docx
+</code></pre></div></div>
+
+<blockquote>
+  <p><strong>💡 注意：</strong>
+Pandoc 官方推荐的方案是<strong>新建</strong>一个 <code class="language-plaintext highlighter-rouge">custom-reference.docx</code> 并在此文件上修改样式，而不是直接使用期刊给的模板文件作为参考文档。在实际使用中，直接使用模板通常无法达到修改格式的目的。</p>
+</blockquote>
+
+<h3 id="参考文献处理">参考文献处理</h3>
+
+<p>（附带 <code class="language-plaintext highlighter-rouge">bib</code> 文件）
+如果您的 LaTeX 文件使用了 <code class="language-plaintext highlighter-rouge">bib</code> 文件（例如 <code class="language-plaintext highlighter-rouge">ref.bib</code>）来管理参考文献，并希望转换时自动生成参考文献列表，您需要使用 <code class="language-plaintext highlighter-rouge">--bibliography</code>、<code class="language-plaintext highlighter-rouge">--citeproc</code> 和 <code class="language-plaintext highlighter-rouge">--csl</code> 参数。</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>pandoc <span class="nt">--bibliography</span><span class="o">=</span>ref.bib <span class="nt">-o</span> main.docx main.tex <span class="nt">--citeproc</span> <span class="nt">--csl</span><span class="o">=</span>nature.csl
+</code></pre></div></div>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">--bibliography=ref.bib</code>: 指定您的参考文献数据库文件。</li>
+  <li><code class="language-plaintext highlighter-rouge">--citeproc</code>: 启用 Pandoc 的引文处理器。</li>
+  <li><code class="language-plaintext highlighter-rouge">--csl=[style.csl]</code>: 指定引文样式文件（CSL，Citation Style Language），例如 <code class="language-plaintext highlighter-rouge">nature.csl</code>。</li>
+</ul>
+
+<hr />
+
+<p>📚 更多资源* <strong>Pandoc 官方手册：</strong> 查阅更多命令行参数和用法
+<a href="https://pandoc.org/MANUAL.html">https://pandoc.org/MANUAL.html</a></p>
+
+<ul>
+  <li><strong>关键参考博客：</strong>
+<a href="https://medium.com/@zhelinchen91/how-to-convert-from-latex-to-ms-word-with-pandoc-f2045a762293">Medium: How to convert from LaTeX to MS Word with Pandoc</a></li>
+</ul>
+
+<h2 id="常见报错总结">常见报错总结</h2>
+
+<ul>
+  <li>
+    <p>Pandoc 内置的数学公式转换引擎（texmath）不支持 <code class="language-plaintext highlighter-rouge">\xrightarrow</code> 这个命令</p>
+
+    <p><code class="language-plaintext highlighter-rouge">\xrightarrow</code> 是 LaTeX 中 amsmath 宏包提供的增强型箭头（可以随文字长度伸缩），但在转换为 Word 的 Office Math 格式（OMML）时，Pandoc 无法识别它。</p>
+
+    <p>解决方法：使用兼容性更好的替代方案。将包含 <code class="language-plaintext highlighter-rouge">\xrightarrow</code> 替换成<code class="language-plaintext highlighter-rouge">\overset</code>。</p>
+  </li>
+</ul>
+
+<div class="language-latex highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">\hat</span><span class="p">{</span>G<span class="p">}</span> = <span class="k">\{</span>e<span class="p">_</span>0 <span class="k">\xrightarrow</span><span class="p">{</span>r<span class="p">_</span>1<span class="p">}</span> e<span class="p">_</span>1 <span class="k">\xrightarrow</span><span class="p">{</span>r<span class="p">_</span>2<span class="p">}</span> <span class="k">\dots</span> <span class="k">\xrightarrow</span><span class="p">{</span>r<span class="p">_</span>k<span class="p">}</span> e<span class="p">_</span>k<span class="k">\}</span> <span class="k">\in</span> G
+</code></pre></div></div>
+
+<p>修改为：</p>
+
+<div class="language-latex highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">\hat</span><span class="p">{</span>G<span class="p">}</span> = <span class="k">\{</span>e<span class="p">_</span>0 <span class="k">\overset</span><span class="p">{</span>r<span class="p">_</span>1<span class="p">}{</span><span class="k">\rightarrow</span><span class="p">}</span> e<span class="p">_</span>1 <span class="k">\overset</span><span class="p">{</span>r<span class="p">_</span>2<span class="p">}{</span><span class="k">\rightarrow</span><span class="p">}</span> <span class="k">\dots</span> <span class="k">\overset</span><span class="p">{</span>r<span class="p">_</span>k<span class="p">}{</span><span class="k">\rightarrow</span><span class="p">}</span> e<span class="p">_</span>k<span class="k">\}</span> <span class="k">\in</span> G
+</code></pre></div></div>
+
+<hr />]]></content><author><name>pepper</name></author><category term="pandoc" /><category term="latex" /><summary type="html"><![CDATA[这篇博客关于使用 Pandoc 将 LaTeX 转换为 Word (DOCX) 的指南整理.]]></summary></entry></feed>

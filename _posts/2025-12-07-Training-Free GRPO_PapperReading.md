@@ -1,9 +1,9 @@
 ---
 layout: post
-title: 'Training_Free_GRPO'
+title: '论文-Training-Free-GRPO免训练优化'
 date: 2025-12-07
 author: pepper
-tags: [papperReading]
+tags: [grpo, llm]
 comments: true
 toc: true
 pinned: false

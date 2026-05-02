@@ -1,9 +1,9 @@
 ---
 layout: post
-title: "latex2word_fastly"
+title: '工具-Pandoc将LaTeX转Word'
 date: 2025-11-22
 author: pepper
-tags: [tool]
+tags: [pandoc, latex]
 comments: true
 toc: true
 pinned: false

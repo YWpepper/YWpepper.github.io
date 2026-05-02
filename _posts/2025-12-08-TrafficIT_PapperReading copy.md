@@ -1,9 +1,9 @@
 ---
 layout: post
-title: "TrafficIT_PapperReading"
+title: '论文-Traffic-IT交通场景理解'
 date: 2025-12-08
 author: pepper
-tags: [papperReading]
+tags: [traffic, llm]
 comments: true
 toc: true
 pinned: false

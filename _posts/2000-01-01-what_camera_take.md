@@ -1,9 +1,9 @@
 ---
 layout: post
-title: "what_camera_take"
+title: '生活-摄影杂记'
 date: 2000-01-01
 author: pepper
-tags: [camera]
+tags: [camera, daily]
 comments: true
 toc: true
 pinned: false

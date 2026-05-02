@@ -1,9 +1,9 @@
 ---
 layout: post
-title: "how_to_manageLLM"
+title: '服务器-Xinference管理LLM模型'
 date: 2026-04-05
 author: pepper
-tags: [server]
+tags: [xinference, llm, server]
 comments: true
 toc: true
 pinned: false

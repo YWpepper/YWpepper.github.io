@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html>
+  <head>
+  <title>算法-二分查找与LeetCode题解 – Pepper – 一个随心记录的地方</title>
+
+      <meta charset="utf-8" />
+    <meta content='text/html; charset=utf-8' http-equiv='Content-Type'>
+    <meta http-equiv='X-UA-Compatible' content='IE=edge'>
+    <meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1.0'>
+
+    
+    <meta name="description" content="这篇博客介绍了二分查找法则。
+
+" />
+    <meta property="og:description" content="这篇博客介绍了二分查找法则。
+
+" />
+    
+    <meta name="author" content="Pepper" />
+
+    
+    <meta property="og:title" content="算法-二分查找与LeetCode题解" />
+    <meta property="twitter:title" content="算法-二分查找与LeetCode题解" />
+    
+  <!-- Async font loading -->
+<script>
+  window.WebFontConfig = {
+      custom: {
+          families: ['Spoqa Han Sans:100,300,400,700'],
+          urls: ['https://spoqa.github.io/spoqa-han-sans/css/SpoqaHanSans-kr.css']
+      },
+      timeout: 60000
+  };
+  (function(d) {
+      var wf = d.createElement('script'), s = d.scripts[0];
+      wf.src = 'https://ajax.googleapis.com/ajax/libs/webfont/1.5.18/webfont.js';
+      s.parentNode.insertBefore(wf, s);
+  })(document);
+</script>
+
+<!--adobe fonts-->
+<script>
+    (function(d) {
+      var config = {
+        kitId: 'vbt3gjx',
+        scriptTimeout: 3000,
+        async: true
+      },
+      h=d.documentElement,t=setTimeout(function(){h.className=h.className.replace(/\bwf-loading\b/g,"")+" wf-inactive";},config.scriptTimeout),tk=d.createElement("script"),f=false,s=d.getElementsByTagName("script")[0],a;h.className+=" wf-loading";tk.src='https://use.typekit.net/'+config.kitId+'.js';tk.async=true;tk.onload=tk.onreadystatechange=function(){a=this.readyState;if(f||a&&a!="complete"&&a!="loaded")return;f=true;clearTimeout(t);try{Typekit.load(config)}catch(e){}};s.parentNode.insertBefore(tk,s)
+    })(document);
+</script> 
+
+  <!--[if lt IE 9]>
+    <script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+  <![endif]-->
+
+  <link rel="stylesheet" type="text/css" href="/style.css" />
+  <link rel="alternate" type="application/rss+xml" title="Pepper - 一个随心记录的地方" href="/feed.xml" />
+  <link rel="shortcut icon" href="https://images.weserv.nl/?url=cdn.nlark.com/yuque/0/2025/png/40742019/1766300112246-d1fc30f4-d036-46b5-98b0-073628c06a88.png?x-oss-process=image%2Fformat%2Cwebp">
+  <script src="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js"></script>
+  <script src="https://unpkg.com/feather-icons"></script>
+  <script type="text/javascript" async
+  src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+  </script>
+  <script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+      tex2jax: {
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre'],
+        inlineMath: [['$','$']]
+      }
+    });
+  </script>
+
+  <!-- Created with Jekyll Now - http://github.com/barryclark/jekyll-now -->
+
+</head>
+
+  <body>
+    
+
+
+    
+      <aside class="toc">
+        <ul>
+  <li><a href="#">算法-二分查找与LeetCode题解</a>
+    <ul>
+      <li><a href="#42-求开方">4.2 求开方</a>
+        <ul>
+          <li><a href="#69-sqrtx-easy">69. Sqrt(x) (Easy)</a></li>
+        </ul>
+      </li>
+      <li><a href="#详细记录补充">详细记录补充：</a>
+        <ul>
+          <li><a href="#1-中点计算的加法溢出-arithmetic-overflow">1. 中点计算的加法溢出 (Arithmetic Overflow)</a></li>
+        </ul>
+      </li>
+    </ul>
+  </li>
+</ul>
+      </aside>
+    
+
+    <div id="main" role="main" class="wrapper-content">
+      <div class="container">
+        <article class="posts">
+  <div class="back-to-home">
+    <a href="/" class="btn-home">← 返回主页</a>
+  </div>
+  
+  <h1>算法-二分查找与LeetCode题解</h1>
+  
+
+  <div clsss="meta">
+    <span class="author">
+      pepper
+    </span>
+
+    <span class="date">
+      2025-12-20
+    </span>
+
+    <ul class="tag">
+      
+      <li>
+        <a href="http://localhost:4000/tags#binarysearch">
+          binarysearch
+        </a>
+      </li>
+      
+      <li>
+        <a href="http://localhost:4000/tags#algorithm">
+          algorithm
+        </a>
+      </li>
+      
+    </ul>
+  </div>
+
+  <div class="entry">
+    <p>这篇博客介绍了二分查找法则。</p>
+
+<!-- more -->
+
+<h2 id="42-求开方">4.2 求开方</h2>
+
+<h3 id="69-sqrtx-easy">69. Sqrt(x) (Easy)</h3>
+
+<p><strong>题目描述</strong> 给定一个非负整数 ，求它的开方，结果向下取整。</p>
+
+<p><strong>输入输出样例</strong> 输入一个整数，输出一个整数。</p>
+
+<ul>
+  <li><strong>Input</strong>: 8</li>
+  <li><strong>Output</strong>: 2</li>
+</ul>
+
+<blockquote>
+  <p><strong>解释</strong>：8 的开方结果是 ，向下取整即是 2。</p>
+</blockquote>
+
+<hr />
+
+<p>自己撰写的版本 1 的代码如下。</p>
+
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kt">int</span> <span class="n">l</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">r</span><span class="o">=</span><span class="n">m</span><span class="p">,</span> <span class="n">res</span><span class="o">=</span><span class="mi">0</span><span class="p">;</span>
+<span class="c1">// int mid = l + (r-l)/2;</span>
+<span class="c1">// 1. 如果input m=0；</span>
+<span class="k">if</span><span class="p">(</span><span class="n">m</span><span class="o">==</span><span class="mi">0</span><span class="p">)</span> <span class="k">return</span> <span class="n">res</span><span class="o">=</span><span class="mi">0</span><span class="p">;</span>
+<span class="c1">// 2. 其他正常情况下，注意每一次都要择半查找，直到l&gt;r</span>
+<span class="k">while</span><span class="p">(</span><span class="n">l</span><span class="o">&lt;</span><span class="n">r</span> <span class="o">&amp;&amp;</span> <span class="n">r</span><span class="o">&gt;</span><span class="n">l</span><span class="p">)</span>
+<span class="p">{</span>
+    <span class="n">mid</span> <span class="o">=</span> <span class="n">l</span> <span class="o">+</span> <span class="p">(</span><span class="n">r</span><span class="o">-</span><span class="n">l</span><span class="p">)</span><span class="o">/</span><span class="mi">2</span><span class="p">;</span> <span class="c1">// 每一轮都要更新一下</span>
+    <span class="k">if</span><span class="p">(</span><span class="n">mid</span> <span class="o">*</span> <span class="n">mid</span> <span class="o">==</span> <span class="n">m</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="k">return</span> <span class="n">mid</span><span class="p">;</span>
+    <span class="p">}</span><span class="k">else</span> <span class="nf">if</span><span class="p">(</span><span class="n">mid</span> <span class="o">*</span> <span class="n">mid</span> <span class="o">&gt;</span> <span class="n">m</span> <span class="p">)</span>
+    <span class="p">{</span>
+        <span class="n">r</span> <span class="o">=</span> <span class="n">mid</span><span class="p">;</span>
+    <span class="p">}</span><span class="k">else</span><span class="p">{</span>
+        <span class="n">l</span> <span class="o">=</span> <span class="n">mid</span><span class="p">;</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+<span class="c1">// 这个时候都不满足条件的时候</span>
+<span class="k">return</span> <span class="n">l</span><span class="p">;</span>
+</code></pre></div></div>
+
+<blockquote>
+  <p>分析其存在的问题：</p>
+</blockquote>
+
+<ul>
+  <li>乘法溢出（计算风险）</li>
+</ul>
+
+<p>问题所在：在代码中使用了 if(mid _ mid == m)。如果 m 是 int 的最大值，在二分查找过程中 mid 可能会取到较大值。例如 mid = 100,000 时，mid _ mid 会达到 10,000,000,000，这远超 int 的范围。
+结果： mid * mid 会溢出变成一个乱码数字（可能是负数）。</p>
+
+<p>修改建议： 使用 sqrt = a / mid 的方式，比较 sqrt 是否和和 mid 相等，如果 sqrt &gt; mid，就说明 mid 还需要小一点，往左区间。如果 sqrt &lt; mid，则就说明 mid 可以再大一点点。</p>
+
+<p>修改后的代码如下：</p>
+
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kt">int</span> <span class="nf">mySqrt</span><span class="p">(</span><span class="kt">int</span> <span class="n">a</span><span class="p">){</span>
+    <span class="k">if</span><span class="p">(</span><span class="n">a</span><span class="o">==</span><span class="mi">0</span><span class="p">)</span> <span class="k">return</span> <span class="n">a</span><span class="p">;</span>
+    <span class="kt">int</span> <span class="n">sqrt</span><span class="p">,</span><span class="n">mid</span><span class="p">,</span><span class="n">l</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span><span class="n">r</span><span class="o">=</span><span class="n">a</span><span class="p">;</span>
+    <span class="k">while</span><span class="p">(</span><span class="n">l</span><span class="o">&lt;=</span><span class="n">r</span><span class="p">){</span>
+        <span class="n">mid</span> <span class="o">=</span> <span class="n">l</span> <span class="o">+</span> <span class="p">(</span><span class="n">r</span><span class="o">-</span><span class="n">l</span><span class="p">)</span><span class="o">/</span><span class="mi">2</span> <span class="p">;</span>
+        <span class="n">sqrt</span> <span class="o">=</span> <span class="n">a</span> <span class="o">/</span> <span class="n">mid</span><span class="p">;</span>
+        <span class="k">if</span><span class="p">(</span><span class="n">mid</span> <span class="o">==</span> <span class="n">sqrt</span><span class="p">){</span>
+            <span class="k">return</span> <span class="n">mid</span><span class="p">;</span>
+        <span class="p">}</span><span class="k">else</span> <span class="nf">if</span><span class="p">(</span><span class="n">mid</span> <span class="o">&gt;</span> <span class="n">sqrt</span><span class="p">){</span> <span class="c1">// 因为全文都在赋数值修改左右边界，如果mid大于sqrt了，就说明，mid得再分一点给sqrt，所以要在左区域查找；</span>
+            <span class="n">r</span> <span class="o">=</span> <span class="n">mid</span><span class="o">-</span><span class="mi">1</span><span class="p">;</span>
+        <span class="p">}</span><span class="k">else</span><span class="p">{</span>
+            <span class="n">l</span> <span class="o">=</span> <span class="n">mid</span><span class="o">+</span><span class="mi">1</span><span class="p">;</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+    <span class="k">return</span> <span class="n">r</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<h2 id="详细记录补充">详细记录补充：</h2>
+
+<h4 id="1-中点计算的加法溢出-arithmetic-overflow">1. 中点计算的加法溢出 (Arithmetic Overflow)</h4>
+
+<ul>
+  <li>分析原因：如果使用 $mid = (l + r) / 2$，当 l 和 r 都很大时（例如接近 int 的最大值 $2^{31}-1$），它们的和会瞬间超过 int 的表示范围，导致结果变成负数，从而使 mid 计算错误。</li>
+  <li>解决方法：使用 $mid = l + (r - l) / 2$。这种写法在数学上等价，但在计算机运算中，由于先做了减法，保证了数值始终在 [l, r] 范围内波动，不会溢出。</li>
+</ul>
+
+<p>不是所有情况都会溢出。是否溢出取决于实际数值与所使用的编程语言中该数据类型的最大上限之间的关系。</p>
+
+<p>以下是详细的分类讨论：</p>
+
+<blockquote>
+  <ol>
+    <li>什么时候会发生溢出？</li>
+  </ol>
+</blockquote>
+
+<p>在 C、C++、Java、Go 等静态类型语言中，<code class="language-plaintext highlighter-rouge">int</code> 类型通常是 <strong>32 位有符号整数</strong>。</p>
+
+<ul>
+  <li><strong>安全情况：</strong> 如果 ，那么 <code class="language-plaintext highlighter-rouge">(l + r) / 2</code> 是完全安全的。例如在处理只有 10 万个元素的数组时，索引绝对不会溢出。</li>
+  <li><strong>溢出情况：</strong> 如果 和 都很大，比如 ，。</li>
+  <li>它们的数学和应该是 。</li>
+  <li>但这超过了 <code class="language-plaintext highlighter-rouge">int</code> 的上限，计算机会发生“环绕”（Wrap-around），结果会变成一个<strong>负数</strong>。</li>
+  <li>负数除以 2 还是负数，这会导致你的 <code class="language-plaintext highlighter-rouge">mid</code> 变成一个毫无意义的负索引，程序随后就会报错（数组越界）。</li>
+</ul>
+
+<blockquote>
+  <ol>
+    <li>为什么 <code class="language-plaintext highlighter-rouge">l + (r - l) / 2</code> 永远安全？</li>
+  </ol>
+</blockquote>
+
+<p>我们可以从数学和内存两个角度来看：</p>
+
+<ul>
+  <li><strong>数学等式：</strong> $l + \frac{r - l}{2} = \frac{2l + r - l}{2} = \frac{l + r}{2}$ 。它们在数学上是一模一样的。</li>
+  <li><strong>内存安全：</strong> 在计算 <code class="language-plaintext highlighter-rouge">r - l</code> 时，因为 ，所以结果一定是一个非负数且小于 。在计算 <code class="language-plaintext highlighter-rouge">l + 偏移量</code> 时，因为最终结果是 <code class="language-plaintext highlighter-rouge">mid</code>，而 <code class="language-plaintext highlighter-rouge">mid</code> 始终位于 和 之间，只要 本身没有溢出，整个计算过程中的**任何中间变量都不会超过 **。</li>
+</ul>
+
+<hr />
+
+<blockquote>
+  <ol>
+    <li>不同编程语言的表现不同</li>
+  </ol>
+</blockquote>
+
+<p><strong>Python 3：不会溢出</strong>
+Python 3 的 <code class="language-plaintext highlighter-rouge">int</code> 是<strong>动态精度</strong>的（长整型），它会自动根据数值大小分配内存。只要你的电脑内存够大，Python 可以处理无限大的整数。所以在 Python 中写 <code class="language-plaintext highlighter-rouge">mid = (l + r) // 2</code> 是安全的。</p>
+
+<p><strong>C++ / Java：必须小心</strong>
+在这些语言中，如果你处理的数据规模可能达到 级别（例如 LeetCode 的某些大数题目），就必须使用 <code class="language-plaintext highlighter-rouge">l + (r - l) / 2</code> 或者将变量声明为 <code class="language-plaintext highlighter-rouge">long long</code> / <code class="language-plaintext highlighter-rouge">long</code>。</p>
+
+<ol>
+  <li><strong>在 C++/Java 等语言中：</strong> 永远推荐写 <code class="language-plaintext highlighter-rouge">mid = l + (r - l) / 2;</code>。这是一种职业素养，能避免在处理大规模数据时出现难以排查的 Bug。</li>
+  <li><strong>另一种黑科技写法（仅限 C++/Java）：</strong>
+<code class="language-plaintext highlighter-rouge">mid = (l + r) &gt;&gt; 1;</code> 这种写法在处理正数时和除以 2 等价，但它在 溢出成负数时依然会出错。
+<strong>更高级的写法：</strong> <code class="language-plaintext highlighter-rouge">mid = (l + r) &gt;&gt;&gt; 1;</code>（Java 中的无符号右移），它可以完美处理溢出。</li>
+</ol>
+
+<hr />
+
+  </div>
+
+  
+  
+<script src="https://utteranc.es/client.js"
+        repo="ywpepper/ywpepper.github.io"
+        issue-term="issue-term"
+        label="comment"
+        theme="github-light"
+        crossorigin="anonymous"
+        async>
+</script>
+
+
+  
+</article>
+
+<div class="pagination">
+  
+    <span class="prev" >
+      <a href="http://localhost:4000../../../TrafficIT_PapperReading-copy/">
+        ← 上一篇
+      </a>
+    </span>
+  
+  
+    <span class="next" >
+      <a href="http://localhost:4000../../../how-to-use-ollama/">
+        下一篇 →
+      </a>
+    </span>
+  
+</div>
+
+      </div>
+    </div>
+
+    
+
+  </body>
+
+  
+  <script>
+    document.getElementById("main").classList.add("withtoc");
+  </script>
+  
+
+  <div class="wrapper-footer-mobile">
+    <footer class="footer">
+      <!-- Refer to https://codepen.io/ruandre/pen/howFi -->
+<ul class="svg-icon">
+
+  
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</ul>
+
+
+
+<p>Copyright © 2025 ywpepper. All Rights Reserved.</p>
+
+    </footer>
+
+
+</html>

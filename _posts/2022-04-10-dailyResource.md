@@ -1,12 +1,11 @@
 ---
-title: '快速查阅手册'
+title: '工具-快速查阅手册'
 lang: zh-CN
 date: 2022-04-10
 author: pepper
 pinned: true
 toc: true
-tags:
-  - daily
+tags: [tool, daily]
 ---
 归纳分类整理
 <!-- more -->

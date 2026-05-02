@@ -1,0 +1,232 @@
+<p>这篇博客介绍了如何在Ubuntu系统和路由器的局域网连接中，配置路由器的端口转发服务，实现远程SSH访问。</p>
+
+<!-- more -->
+
+<h2 id="1-配置路由器的端口转发服务">1. 配置路由器的端口转发服务</h2>
+
+<h3 id="11-网络拓扑说明">1.1 网络拓扑说明</h3>
+
+<p>Ubuntu电脑通过路由器连接到局域网,路由器会分配一个内网IP(通常是<code class="language-plaintext highlighter-rouge">192.168.xx.xx</code>)。</p>
+
+<ul>
+  <li><strong>实验室内访问</strong>: 同一路由器局域网下,可直接使用内网IP(<code class="language-plaintext highlighter-rouge">192.168.xx.xx</code>)访问</li>
+  <li><strong>校园网访问</strong>: 路由器本身也在学校更大的局域网中,需要使用路由器的公网IP(<code class="language-plaintext highlighter-rouge">58.xx.xx.xx</code>)访问</li>
+</ul>
+
+<h3 id="12-配置步骤">1.2 配置步骤</h3>
+
+<ol>
+  <li><strong>登录路由器管理页面</strong>
+    <ul>
+      <li>访问华为路由器管理地址: <code class="language-plaintext highlighter-rouge">http://192.168.3.1/</code></li>
+      <li>使用WiFi密码登录</li>
+    </ul>
+
+    <p align="center">
+   <img src="https://virginia-pepper.oss-cn-guangzhou.aliyuncs.com/img/blog/202503111029348.png" style="zoom:23%;" />
+</p>
+  </li>
+  <li>
+    <p><strong>查看终端信息</strong></p>
+
+    <p>查看连接到路由器的设备及其内网IP地址(支持有线和WiFi设备)</p>
+
+    <p align="center">
+   <img src="https://virginia-pepper.oss-cn-guangzhou.aliyuncs.com/img/blog/202503111029748.png" alt="终端信息" style="zoom:30%;" />
+</p>
+  </li>
+  <li>
+    <p><strong>配置端口转发</strong></p>
+
+    <p>端口转发的作用是将路由器下某个设备的指定端口映射到路由器的公网端口,使得外网可以访问内网设备。</p>
+
+    <p align="center">
+   <img src="https://virginia-pepper.oss-cn-guangzhou.aliyuncs.com/img/blog/202503111031263.png" alt="端口映射" width="400" style="display: inline-block; margin-right: 10px;" />
+   <img src="https://virginia-pepper.oss-cn-guangzhou.aliyuncs.com/img/blog/202503111031402.png" alt="端口触发" width="500" style="display: inline-block;" />
+</p>
+  </li>
+  <li>
+    <p><strong>配置详细信息</strong></p>
+
+    <p><strong>重要提示</strong>:</p>
+    <ul>
+      <li>需要在Ubuntu防火墙中开放SSH端口(22)或远程桌面端口(3389)</li>
+      <li>否则会导致连接失败</li>
+    </ul>
+
+    <p align="center">
+   <img src="https://virginia-pepper.oss-cn-guangzhou.aliyuncs.com/img/blog/202503111031182.png" alt="端口配置" style="zoom:20%;" />
+</p>
+  </li>
+</ol>
+
+<h3 id="13-端口开放实例-tensorboard可视化">1.3 端口开放实例: TensorBoard可视化</h3>
+
+<p>在模型训练时,TensorBoard默认运行在<code class="language-plaintext highlighter-rouge">localhost:6006</code>,需要通过以下方式远程访问:</p>
+
+<p><strong>方法1: 局域网内访问</strong></p>
+
+<p>在同一路由器WiFi下,使用命令开放端口:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>tensorboard <span class="nt">--logdir</span> libcity/ <span class="nt">--host</span> 0.0.0.0
+</code></pre></div></div>
+
+<p>然后通过内网IP(<code class="language-plaintext highlighter-rouge">192.168.xx.xx:6006</code>)访问</p>
+
+<p align="center">
+   <img src="https://virginia-pepper.oss-cn-guangzhou.aliyuncs.com/img/blog/202503122135974.png" alt="局域网访问" style="zoom:35%;" />
+</p>
+
+<p><strong>方法2: 校园网访问</strong></p>
+
+<p>在路由器管理页面配置端口映射,将内网6006端口映射到路由器公网端口,然后通过路由器公网IP(<code class="language-plaintext highlighter-rouge">59.xx.xx.xx:6006</code>)访问</p>
+
+<p align="center">
+   <img src="https://virginia-pepper.oss-cn-guangzhou.aliyuncs.com/img/blog/202503122128505.png" alt="校园网访问" style="zoom: 25%;" />
+</p>
+
+<h2 id="2-vscode远程ssh配置">2. VSCode远程SSH配置</h2>
+
+<h3 id="21-权限配置">2.1 权限配置</h3>
+
+<p>确保远程用户具有足够的读写权限,否则无法编辑文件。</p>
+
+<h3 id="22-配置步骤">2.2 配置步骤</h3>
+
+<ol>
+  <li>
+    <p><strong>安装插件</strong></p>
+
+    <p>在VSCode中安装<code class="language-plaintext highlighter-rouge">Remote - SSH</code>插件</p>
+  </li>
+  <li>
+    <p><strong>编辑SSH配置文件</strong></p>
+
+    <p>编辑<code class="language-plaintext highlighter-rouge">~/.ssh/config</code>文件(注意是config文件,不是config.txt):</p>
+
+    <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">touch </span>config  <span class="c"># 创建文件</span>
+vim config    <span class="c"># 编辑文件</span>
+</code></pre></div>    </div>
+
+    <p>配置内容示例:</p>
+
+    <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Host 59.xx.xx.xx
+      HostName 59.xx.xx.xx
+      User root
+      Port 8001
+</code></pre></div>    </div>
+
+    <p><strong>参数说明</strong>:</p>
+    <ul>
+      <li><code class="language-plaintext highlighter-rouge">Host</code>: 连接别名</li>
+      <li><code class="language-plaintext highlighter-rouge">HostName</code>: 路由器公网IP</li>
+      <li><code class="language-plaintext highlighter-rouge">User</code>: 远程用户名</li>
+      <li><code class="language-plaintext highlighter-rouge">Port</code>: 映射后的路由器端口</li>
+    </ul>
+
+    <p align="center">
+   <img src="https://virginia-pepper.oss-cn-guangzhou.aliyuncs.com/img/blog/202503111032822.png" alt="SSH配置" style="zoom:30%;" />
+</p>
+  </li>
+</ol>
+
+<h2 id="3-常见报错">3. 常见报错</h2>
+
+<h3 id="31-wsl与windows无法镜像">3.1 wsl与windows无法镜像</h3>
+
+<p>【自我描述问题版本：】 正常情况下，比如<code class="language-plaintext highlighter-rouge">ssh</code>运行在<code class="language-plaintext highlighter-rouge">wsl</code>内部的<code class="language-plaintext highlighter-rouge">2222</code>端口，<code class="language-plaintext highlighter-rouge">win</code>应该是和<code class="language-plaintext highlighter-rouge">wsl</code>是镜像模式，但是不知道什么原因导致他们不是镜像了。我在路由器管理页面配置了<code class="language-plaintext highlighter-rouge">win</code>的<code class="language-plaintext highlighter-rouge">2222</code>端口映射到路由器上的<code class="language-plaintext highlighter-rouge">10022</code>端口，但是我还是无法通过路由器<code class="language-plaintext highlighter-rouge">ip -p100022</code>,因为<code class="language-plaintext highlighter-rouge">win</code>的端口<code class="language-plaintext highlighter-rouge">2222</code>根本不是<code class="language-plaintext highlighter-rouge">wsl</code>中的<code class="language-plaintext highlighter-rouge">ssh</code>服务。</p>
+
+<p>【官方ai总结问题版本：】用户在 <code class="language-plaintext highlighter-rouge">.wslconfig</code> 中配置了 <code class="language-plaintext highlighter-rouge">networkingMode=mirrored</code>（镜像网络模式），预期 <code class="language-plaintext highlighter-rouge">WSL</code> 内部监听的 <code class="language-plaintext highlighter-rouge">2222</code> 端口应自动映射至 <code class="language-plaintext highlighter-rouge">Windows</code> 宿主机的 <code class="language-plaintext highlighter-rouge">2222</code> 端口。然而，实际测试发现 <code class="language-plaintext highlighter-rouge">Windows </code>侧并未同步监听该端口，导致路由器即便配置了“公网 <code class="language-plaintext highlighter-rouge">10022 -&gt; Win 2222</code>”的转发规则，流量也无法到达 <code class="language-plaintext highlighter-rouge">WSL</code> 内部的 <code class="language-plaintext highlighter-rouge">SSH</code> 服务。</p>
+
+<h3 id="31-问题解决">3.1 问题解决：</h3>
+
+<h4 id="1-wsl-内部环境准备-ubuntu">1. WSL 内部环境准备 (Ubuntu)</h4>
+
+<p>确保 WSL 内部的 SSH 服务正常运行，并监听指定端口。</p>
+
+<ul>
+  <li><strong>修改配置</strong>：<code class="language-plaintext highlighter-rouge">sudo nano /etc/ssh/sshd_config</code>
+    <ul>
+      <li><code class="language-plaintext highlighter-rouge">Port 2222</code> (建议避开默认 22 端口)</li>
+      <li><code class="language-plaintext highlighter-rouge">ListenAddress 0.0.0.0</code></li>
+      <li><code class="language-plaintext highlighter-rouge">PasswordAuthentication yes</code></li>
+    </ul>
+  </li>
+  <li><strong>安装工具</strong>：<code class="language-plaintext highlighter-rouge">sudo apt update &amp;&amp; sudo apt install net-tools -y</code></li>
+  <li><strong>启动服务</strong>：<code class="language-plaintext highlighter-rouge">sudo service ssh restart</code></li>
+  <li><strong>检查监听</strong>：<code class="language-plaintext highlighter-rouge">sudo netstat -tlnp | grep 2222</code>
+    <ul>
+      <li><em>预期输出：<code class="language-plaintext highlighter-rouge">0.0.0.0:2222 LISTEN</code></em></li>
+    </ul>
+  </li>
+</ul>
+
+<hr />
+
+<h4 id="2-windows-宿主机接力配置">2. Windows 宿主机“接力”配置</h4>
+
+<p>由于 WSL2 架构原因，外部流量到达 Windows 后需要手动映射。</p>
+
+<h5 id="a-端口转发-port-proxy">A. 端口转发 (Port Proxy)</h5>
+
+<p>在 <strong>Windows PowerShell (管理员)</strong> 执行，建立 Windows 与 WSL 之间的桥梁：</p>
+
+<div class="language-powershell highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># 建立转发：将 Windows 的 11126 端口流量传给 WSL 的 2222</span><span class="w">
+</span><span class="n">netsh</span><span class="w"> </span><span class="nx">interface</span><span class="w"> </span><span class="nx">portproxy</span><span class="w"> </span><span class="nx">add</span><span class="w"> </span><span class="nx">v4tov4</span><span class="w"> </span><span class="nx">listenport</span><span class="o">=</span><span class="mi">10022</span><span class="w"> </span><span class="n">listenaddress</span><span class="o">=</span><span class="mf">0.0</span><span class="o">.</span><span class="nf">0</span><span class="o">.</span><span class="nf">0</span><span class="w"> </span><span class="n">connectport</span><span class="o">=</span><span class="mi">2222</span><span class="w"> </span><span class="n">connectaddress</span><span class="o">=</span><span class="mf">127.0</span><span class="o">.</span><span class="nf">0</span><span class="o">.</span><span class="nf">1</span><span class="w">
+
+</span><span class="c">## 记得然后去路由器的控制面板设置:</span><span class="w">
+   </span><span class="c"># win的10022转发到路由器上的10022</span><span class="w">
+
+</span><span class="c"># 检查当前转发规则</span><span class="w">
+</span><span class="n">netsh</span><span class="w"> </span><span class="nx">interface</span><span class="w"> </span><span class="nx">portproxy</span><span class="w"> </span><span class="nx">show</span><span class="w"> </span><span class="nx">all</span><span class="w">
+
+</span><span class="c"># 如果你刚刚设定的端口还是没有被监听，那就换一个端口，或者再检查一下错误</span><span class="w">
+
+</span><span class="c"># 如果需要重置所有规则</span><span class="w">
+</span><span class="n">netsh</span><span class="w"> </span><span class="nx">interface</span><span class="w"> </span><span class="nx">portproxy</span><span class="w"> </span><span class="nx">reset</span><span class="w">
+</span></code></pre></div></div>
+
+<h5 id="b-防火墙放行">B. 防火墙放行</h5>
+
+<p>必须手动允许外部端口入站：</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>New-NetFirewallRule <span class="nt">-DisplayName</span> <span class="s2">"WSL_SSH_External"</span> <span class="nt">-Direction</span> Inbound <span class="nt">-Action</span> Allow <span class="nt">-Protocol</span> TCP <span class="nt">-LocalPort</span> 10022
+</code></pre></div></div>
+
+<h4 id="3-官方wsl镜像排查">3. 官方wsl镜像排查</h4>
+
+<p>核心原因： <code class="language-plaintext highlighter-rouge">.wslconfig</code> 镜像配置可能未生效，或者被系统层面的防火墙/其他服务占用了端口，导致自动映射“断层”。</p>
+
+<p>修复步骤：</p>
+
+<ul>
+  <li>验证 <code class="language-plaintext highlighter-rouge">.wslconfig</code>：确保文件位于 <code class="language-plaintext highlighter-rouge">%UserProfile%\.wslconfig </code>且格式正确：</li>
+</ul>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Ini, TOML
+<span class="o">[</span>wsl2]
+<span class="nv">networkingMode</span><span class="o">=</span>mirrored
+</code></pre></div></div>
+
+<ul>
+  <li>强制重启：<code class="language-plaintext highlighter-rouge">PowerShell</code> 执行 <code class="language-plaintext highlighter-rouge">wsl --shutdown</code>。</li>
+</ul>
+
+<h4 id="4-完整链路检查清单">4. 完整链路检查清单</h4>
+
+<ul>
+  <li>
+    <p>客户端 <code class="language-plaintext highlighter-rouge">-&gt;</code> 识别真实公网 <code class="language-plaintext highlighter-rouge">IP</code> (非 198.18 段)。</p>
+  </li>
+  <li>
+    <p>路由器 <code class="language-plaintext highlighter-rouge">-&gt;</code> 转发 外部端口 至 <code class="language-plaintext highlighter-rouge">Windows</code>局域网<code class="language-plaintext highlighter-rouge">IP:</code>内部端口。</p>
+  </li>
+  <li>
+    <p><code class="language-plaintext highlighter-rouge">Windows -&gt; netsh</code> 转发 内部端口 至 <code class="language-plaintext highlighter-rouge">127.0.0.1:2222</code>。</p>
+  </li>
+  <li>
+    <p><code class="language-plaintext highlighter-rouge">WSL -&gt; sshd</code> 服务在 <code class="language-plaintext highlighter-rouge">2222</code> 正常工作。</p>
+  </li>
+</ul>
+
+<hr />

@@ -1,9 +1,9 @@
 ---
 layout: post
-title: 'What_accidentLLM'
+title: '论文-交通场景大模型研究'
 date: 2025-11-13
 author: pepper
-tags: [papperReading]
+tags: [llm, traffic]
 comments: true
 toc: true
 pinned: false

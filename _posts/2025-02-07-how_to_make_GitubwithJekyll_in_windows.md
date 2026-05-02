@@ -1,14 +1,12 @@
 ---
-title: 'how_to_make_GitubwithJekyllInWindows'
+title: '工具-GitHub-Pages与Jekyll搭建'
 lang: zh-CN
 date: 2025-02-07
 author: pepper
 permalink: /posts/2025/02/how_to_make_GitubwithJekyll_in_windows/
 toc: true
 pinned: false
-tags:
-  - Server
-  - Windows
+tags: [jekyll, github]
 ---
 
 这篇博客介绍了如何在gitubPage上的学术网站（个人学术页面）。

@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html>
+  <head>
+  <title>工具-Pandoc将LaTeX转Word – Pepper – 一个随心记录的地方</title>
+
+      <meta charset="utf-8" />
+    <meta content='text/html; charset=utf-8' http-equiv='Content-Type'>
+    <meta http-equiv='X-UA-Compatible' content='IE=edge'>
+    <meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1.0'>
+
+    
+    <meta name="description" content="这篇博客关于使用 Pandoc 将 LaTeX 转换为 Word (DOCX) 的指南整理.
+
+" />
+    <meta property="og:description" content="这篇博客关于使用 Pandoc 将 LaTeX 转换为 Word (DOCX) 的指南整理.
+
+" />
+    
+    <meta name="author" content="Pepper" />
+
+    
+    <meta property="og:title" content="工具-Pandoc将LaTeX转Word" />
+    <meta property="twitter:title" content="工具-Pandoc将LaTeX转Word" />
+    
+  <!-- Async font loading -->
+<script>
+  window.WebFontConfig = {
+      custom: {
+          families: ['Spoqa Han Sans:100,300,400,700'],
+          urls: ['https://spoqa.github.io/spoqa-han-sans/css/SpoqaHanSans-kr.css']
+      },
+      timeout: 60000
+  };
+  (function(d) {
+      var wf = d.createElement('script'), s = d.scripts[0];
+      wf.src = 'https://ajax.googleapis.com/ajax/libs/webfont/1.5.18/webfont.js';
+      s.parentNode.insertBefore(wf, s);
+  })(document);
+</script>
+
+<!--adobe fonts-->
+<script>
+    (function(d) {
+      var config = {
+        kitId: 'vbt3gjx',
+        scriptTimeout: 3000,
+        async: true
+      },
+      h=d.documentElement,t=setTimeout(function(){h.className=h.className.replace(/\bwf-loading\b/g,"")+" wf-inactive";},config.scriptTimeout),tk=d.createElement("script"),f=false,s=d.getElementsByTagName("script")[0],a;h.className+=" wf-loading";tk.src='https://use.typekit.net/'+config.kitId+'.js';tk.async=true;tk.onload=tk.onreadystatechange=function(){a=this.readyState;if(f||a&&a!="complete"&&a!="loaded")return;f=true;clearTimeout(t);try{Typekit.load(config)}catch(e){}};s.parentNode.insertBefore(tk,s)
+    })(document);
+</script> 
+
+  <!--[if lt IE 9]>
+    <script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+  <![endif]-->
+
+  <link rel="stylesheet" type="text/css" href="/style.css" />
+  <link rel="alternate" type="application/rss+xml" title="Pepper - 一个随心记录的地方" href="/feed.xml" />
+  <link rel="shortcut icon" href="https://images.weserv.nl/?url=cdn.nlark.com/yuque/0/2025/png/40742019/1766300112246-d1fc30f4-d036-46b5-98b0-073628c06a88.png?x-oss-process=image%2Fformat%2Cwebp">
+  <script src="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js"></script>
+  <script src="https://unpkg.com/feather-icons"></script>
+  <script type="text/javascript" async
+  src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+  </script>
+  <script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+      tex2jax: {
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre'],
+        inlineMath: [['$','$']]
+      }
+    });
+  </script>
+
+  <!-- Created with Jekyll Now - http://github.com/barryclark/jekyll-now -->
+
+</head>
+
+  <body>
+    
+
+
+    
+      <aside class="toc">
+        <ul>
+  <li><a href="#">工具-Pandoc将LaTeX转Word</a>
+    <ul>
+      <li><a href="#-使用-pandoc-将-latex-tex-转换为-word-docx">🚀 使用 Pandoc 将 LaTeX (TEX) 转换为 Word (DOCX)</a>
+        <ul>
+          <li><a href="#️-前置条件安装-pandoc">🛠️ 前置条件：安装 Pandoc</a></li>
+          <li><a href="#️-基础用法">✍️ 基础用法：</a>
+            <ul>
+              <li><a href="#格式进阶">格式进阶：</a></li>
+            </ul>
+          </li>
+          <li><a href="#参考文献处理">参考文献处理</a></li>
+        </ul>
+      </li>
+      <li><a href="#常见报错总结">常见报错总结</a></li>
+    </ul>
+  </li>
+</ul>
+      </aside>
+    
+
+    <div id="main" role="main" class="wrapper-content">
+      <div class="container">
+        <article class="posts">
+  <div class="back-to-home">
+    <a href="/" class="btn-home">← 返回主页</a>
+  </div>
+  
+  <h1>工具-Pandoc将LaTeX转Word</h1>
+  
+
+  <div clsss="meta">
+    <span class="author">
+      pepper
+    </span>
+
+    <span class="date">
+      2025-11-22
+    </span>
+
+    <ul class="tag">
+      
+      <li>
+        <a href="http://localhost:4000/tags#pandoc">
+          pandoc
+        </a>
+      </li>
+      
+      <li>
+        <a href="http://localhost:4000/tags#latex">
+          latex
+        </a>
+      </li>
+      
+    </ul>
+  </div>
+
+  <div class="entry">
+    <p>这篇博客关于使用 Pandoc 将 LaTeX 转换为 Word (DOCX) 的指南整理.</p>
+
+<!-- more -->
+
+<h2 id="-使用-pandoc-将-latex-tex-转换为-word-docx">🚀 使用 Pandoc 将 LaTeX (TEX) 转换为 Word (DOCX)</h2>
+
+<hr />
+
+<h3 id="️-前置条件安装-pandoc">🛠️ 前置条件：安装 Pandoc</h3>
+
+<p>首先，您需要下载并安装 Pandoc 工具。</p>
+
+<p>请在官方 GitHub Release 页面下载：
+<a href="https://github.com/jgm/pandoc/releases/tag/3.4">Pandoc 3.4 Release</a></p>
+
+<p>安装完成后，打开命令行工具（如 Command Prompt, PowerShell 或 Terminal），输入以下命令进行验证：</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>pandoc <span class="nt">-v</span>
+</code></pre></div></div>
+
+<p>如果出现类似的版本信息（如截图所示），则说明安装成功。</p>
+
+<h3 id="️-基础用法">✍️ 基础用法：</h3>
+
+<p>简单的文件转换</p>
+
+<ol>
+  <li>打开命令行工具。</li>
+  <li>切换到您的 <code class="language-plaintext highlighter-rouge">.tex</code> 文件（例如 <code class="language-plaintext highlighter-rouge">main.tex</code>）所在的目录。</li>
+  <li>输入以下命令：</li>
+</ol>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>pandoc main.tex <span class="nt">-o</span> main.docx
+</code></pre></div></div>
+
+<p>如果命令执行后没有报错，说明转换成功。您可以直接在当前文件夹下找到生成的 <code class="language-plaintext highlighter-rouge">main.docx</code> 文件。</p>
+
+<h4 id="格式进阶">格式进阶：</h4>
+
+<p>附带预设样式的转换如果您希望转换后的 <code class="language-plaintext highlighter-rouge">.docx</code> 文件（例如投稿论文）具有特定的预设样式（如期刊模板样式），您需要使用一个<strong>参考文档</strong> (<code class="language-plaintext highlighter-rouge">reference-doc</code>) 来指定样式。</p>
+
+<p>步骤一：生成自定义参考文件首先，在您的 <code class="language-plaintext highlighter-rouge">.tex</code> 所在目录，输入以下命令生成一个基础的 <code class="language-plaintext highlighter-rouge">custom-reference.docx</code> 文件：</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>pandoc <span class="nt">-o</span> custom-reference.docx <span class="nt">--print-default-data-file</span> reference.docx
+</code></pre></div></div>
+
+<p>步骤二：修改样式接下来，您需要修改新生成的 <code class="language-plaintext highlighter-rouge">custom-reference.docx</code> 文件中的样式（标题、正文、列表等），使其符合您目标模板的要求。</p>
+
+<ul>
+  <li>如果您已经有一个模板，您需要将 <code class="language-plaintext highlighter-rouge">custom-reference.docx</code> 文件的<strong>样式</strong>更改为与目标模板一致。</li>
+  <li>关于如何修改 DOCX 样式，可以参考此外部链接（例如，将样式从一个文件导入到另一个文件）：
+<a href="https://blog.csdn.net/symoriaty/article/details/80290838">CSDN 博客：Word 样式修改参考</a></li>
+</ul>
+
+<p>步骤三：使用参考文件进行转换修改完成后，使用 <code class="language-plaintext highlighter-rouge">--reference-doc</code> 参数将 <code class="language-plaintext highlighter-rouge">.tex</code> 文件转换为带有预设样式的 <code class="language-plaintext highlighter-rouge">.docx</code> 文件：</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>pandoc main.tex <span class="nt">--reference-doc</span><span class="o">=</span>custom-reference.docx <span class="nt">-o</span> main.docx
+</code></pre></div></div>
+
+<blockquote>
+  <p><strong>💡 注意：</strong>
+Pandoc 官方推荐的方案是<strong>新建</strong>一个 <code class="language-plaintext highlighter-rouge">custom-reference.docx</code> 并在此文件上修改样式，而不是直接使用期刊给的模板文件作为参考文档。在实际使用中，直接使用模板通常无法达到修改格式的目的。</p>
+</blockquote>
+
+<h3 id="参考文献处理">参考文献处理</h3>
+
+<p>（附带 <code class="language-plaintext highlighter-rouge">bib</code> 文件）
+如果您的 LaTeX 文件使用了 <code class="language-plaintext highlighter-rouge">bib</code> 文件（例如 <code class="language-plaintext highlighter-rouge">ref.bib</code>）来管理参考文献，并希望转换时自动生成参考文献列表，您需要使用 <code class="language-plaintext highlighter-rouge">--bibliography</code>、<code class="language-plaintext highlighter-rouge">--citeproc</code> 和 <code class="language-plaintext highlighter-rouge">--csl</code> 参数。</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>pandoc <span class="nt">--bibliography</span><span class="o">=</span>ref.bib <span class="nt">-o</span> main.docx main.tex <span class="nt">--citeproc</span> <span class="nt">--csl</span><span class="o">=</span>nature.csl
+</code></pre></div></div>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">--bibliography=ref.bib</code>: 指定您的参考文献数据库文件。</li>
+  <li><code class="language-plaintext highlighter-rouge">--citeproc</code>: 启用 Pandoc 的引文处理器。</li>
+  <li><code class="language-plaintext highlighter-rouge">--csl=[style.csl]</code>: 指定引文样式文件（CSL，Citation Style Language），例如 <code class="language-plaintext highlighter-rouge">nature.csl</code>。</li>
+</ul>
+
+<hr />
+
+<p>📚 更多资源* <strong>Pandoc 官方手册：</strong> 查阅更多命令行参数和用法
+<a href="https://pandoc.org/MANUAL.html">https://pandoc.org/MANUAL.html</a></p>
+
+<ul>
+  <li><strong>关键参考博客：</strong>
+<a href="https://medium.com/@zhelinchen91/how-to-convert-from-latex-to-ms-word-with-pandoc-f2045a762293">Medium: How to convert from LaTeX to MS Word with Pandoc</a></li>
+</ul>
+
+<h2 id="常见报错总结">常见报错总结</h2>
+
+<ul>
+  <li>
+    <p>Pandoc 内置的数学公式转换引擎（texmath）不支持 <code class="language-plaintext highlighter-rouge">\xrightarrow</code> 这个命令</p>
+
+    <p><code class="language-plaintext highlighter-rouge">\xrightarrow</code> 是 LaTeX 中 amsmath 宏包提供的增强型箭头（可以随文字长度伸缩），但在转换为 Word 的 Office Math 格式（OMML）时，Pandoc 无法识别它。</p>
+
+    <p>解决方法：使用兼容性更好的替代方案。将包含 <code class="language-plaintext highlighter-rouge">\xrightarrow</code> 替换成<code class="language-plaintext highlighter-rouge">\overset</code>。</p>
+  </li>
+</ul>
+
+<div class="language-latex highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">\hat</span><span class="p">{</span>G<span class="p">}</span> = <span class="k">\{</span>e<span class="p">_</span>0 <span class="k">\xrightarrow</span><span class="p">{</span>r<span class="p">_</span>1<span class="p">}</span> e<span class="p">_</span>1 <span class="k">\xrightarrow</span><span class="p">{</span>r<span class="p">_</span>2<span class="p">}</span> <span class="k">\dots</span> <span class="k">\xrightarrow</span><span class="p">{</span>r<span class="p">_</span>k<span class="p">}</span> e<span class="p">_</span>k<span class="k">\}</span> <span class="k">\in</span> G
+</code></pre></div></div>
+
+<p>修改为：</p>
+
+<div class="language-latex highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">\hat</span><span class="p">{</span>G<span class="p">}</span> = <span class="k">\{</span>e<span class="p">_</span>0 <span class="k">\overset</span><span class="p">{</span>r<span class="p">_</span>1<span class="p">}{</span><span class="k">\rightarrow</span><span class="p">}</span> e<span class="p">_</span>1 <span class="k">\overset</span><span class="p">{</span>r<span class="p">_</span>2<span class="p">}{</span><span class="k">\rightarrow</span><span class="p">}</span> <span class="k">\dots</span> <span class="k">\overset</span><span class="p">{</span>r<span class="p">_</span>k<span class="p">}{</span><span class="k">\rightarrow</span><span class="p">}</span> e<span class="p">_</span>k<span class="k">\}</span> <span class="k">\in</span> G
+</code></pre></div></div>
+
+<hr />
+
+  </div>
+
+  
+  
+<script src="https://utteranc.es/client.js"
+        repo="ywpepper/ywpepper.github.io"
+        issue-term="issue-term"
+        label="comment"
+        theme="github-light"
+        crossorigin="anonymous"
+        async>
+</script>
+
+
+  
+</article>
+
+<div class="pagination">
+  
+    <span class="prev" >
+      <a href="http://localhost:4000../../../What_is_meavn/">
+        ← 上一篇
+      </a>
+    </span>
+  
+  
+    <span class="next" >
+      <a href="http://localhost:4000../../../Training-Free-GRPO_PapperReading/">
+        下一篇 →
+      </a>
+    </span>
+  
+</div>
+
+      </div>
+    </div>
+
+    
+
+  </body>
+
+  
+  <script>
+    document.getElementById("main").classList.add("withtoc");
+  </script>
+  
+
+  <div class="wrapper-footer-mobile">
+    <footer class="footer">
+      <!-- Refer to https://codepen.io/ruandre/pen/howFi -->
+<ul class="svg-icon">
+
+  
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</ul>
+
+
+
+<p>Copyright © 2025 ywpepper. All Rights Reserved.</p>
+
+    </footer>
+
+
+</html>

@@ -1,0 +1,623 @@
+<!-- markdownlint-disable -->
+
+<hr />
+
+<p>title: ‘工具-Git常用命令与笔记润色’
+lang: zh-CN
+date: 2024-02-07
+author: pepper
+toc: true
+pinned: false
+tags: [git, tool]</p>
+
+<hr />
+
+<h1 id="个人常用指令">个人常用指令</h1>
+
+<h3 id="1-切换分支直接关联远程并提交">1. 切换分支直接关联远程并提交：</h3>
+
+<pre><code class="language-Shell">git init
+git remote add origin git@github.com:YWpepper/zhuanli_shijue.git
+git checkout -b new_branch
+git add .
+git commit -m "your message"
+git push -u origin new_branch
+
+#若远程已有内容导致 push 失败，可先执行：
+git pull origin main --allow-unrelated-histories
+</code></pre>
+
+<h3 id="2-强制覆盖本地文件用于同步仓库">2. 强制覆盖本地文件，用于同步仓库：</h3>
+
+<p>您可以使用以下命令放弃本地所有修改并强制同步远程版本：</p>
+
+<pre><code class="language-Shell">git reset --hard origin/master
+</code></pre>
+
+<p>执行结果：
+1） 放弃所有未提交的本地修改 2） 将本地分支强制重置为远程 origin/master 的状态
+ 3） 之后可以正常执行 git pull</p>
+
+<p>操作步骤：</p>
+
+<ol>
+  <li>执行重置命令：
+    <pre><code class="language-Shell">git reset --hard origin/master
+</code></pre>
+  </li>
+  <li>验证结果：
+    <pre><code class="language-Shell"> git status
+ ## 如果发现未跟踪的文件
+ # 1. 方案一： 删除不需要的文件
+ rm -rf _site/
+ rm -rf assets/
+ # 如何需要删除的太多 -d 删除未跟踪的目录  -f ：强制删除
+ git clean -df 
+ # 2. 方案二：如果确实需要跟踪这些文件 
+ git add _site/ assets/
+ git commit -m "Add site files"
+ git push
+</code></pre>
+  </li>
+  <li>现在可以正常拉取更新：
+    <pre><code class="language-Shell">git pull
+</code></pre>
+  </li>
+</ol>
+
+<p>注意： 此操作会永久删除所有未提交的本地修改，请确保这些修改确实不需要保留！</p>
+
+<h3 id="3-回退到指定提交版本">3. 回退到指定提交版本</h3>
+
+<p><strong>步骤1：查看提交历史</strong></p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>git log <span class="nt">--oneline</span>
+</code></pre></div></div>
+
+<ul>
+  <li>该命令会以简洁的方式显示提交历史，包含提交哈希值和提交信息</li>
+  <li>找到你想要回退到的目标提交的哈希值（如：c3c1e06）</li>
+</ul>
+
+<p><strong>步骤2：执行回退操作</strong></p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>git reset <span class="nt">--hard</span> c3c1e06
+</code></pre></div></div>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">--hard</code> 参数：彻底回退，重置工作区、暂存区和HEAD指针到指定提交</li>
+  <li><code class="language-plaintext highlighter-rouge">c3c1e06</code>：你想要回退到的目标提交的哈希值</li>
+</ul>
+
+<p><strong>步骤3：推送到远程仓库</strong></p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>git push <span class="nt">-f</span> origin master
+</code></pre></div></div>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">-f</code> 或 <code class="language-plaintext highlighter-rouge">--force</code>：强制推送，因为本地分支历史已被修改</li>
+  <li><code class="language-plaintext highlighter-rouge">origin</code>：远程仓库名</li>
+  <li><code class="language-plaintext highlighter-rouge">master</code>：分支名</li>
+</ul>
+
+<p><strong>注意事项</strong>：</p>
+
+<ul>
+  <li>强制推送会覆盖远程仓库的历史记录，可能影响其他协作者</li>
+  <li>回退操作前建议备份重要代码</li>
+  <li>回退成功后，本地分支会比远程分支落后n个提交，需要强制推送才能同步</li>
+</ul>
+
+<p><br /></p>
+
+<h1 id="git-note">Git note<a href="https://lightblues.github.io/techNotes/code/CS/git-note/#git-note" title="Permanent link">¶</a></h1>
+
+<ul>
+  <li>图解 <a href="https://marklodato.github.io/visual-git-guide/index-zh-cn.html">https://marklodato.github.io/visual-git-guide/index-zh-cn.html</a> 利用图示讲解了 <code class="language-plaintext highlighter-rouge">checkout, reset, merge, cherry-pick, rebase</code> 等指令到底做了什么，可惜没有涉及到远程仓库的命令。Cheatsheet 性质的 👍</li>
+  <li>Git Pro ebook: <a href="http://iissnan.com/progit/">http://iissnan.com/progit/</a> 写得非常详细，图示也很赞
+    <ul>
+      <li>看了其中的远程分支和 <a href="http://iissnan.com/progit/html/zh/ch3_6.html">分支的rebase</a> 章节，才算懂了 rebase 的使用。</li>
+    </ul>
+  </li>
+  <li>来自廖雪峰的 <a href="https://www.liaoxuefeng.com/wiki/896043488029600">Git教程</a>；</li>
+  <li>另外，官方还有个中文的文档，写得很细 <a href="https://git-scm.com/book/zh/v2">https://git-scm.com/book/zh/v2</a></li>
+  <li>廖雪峰老师推荐的一张 <a href="https://gitee.com/liaoxuefeng/learn-java/raw/master/teach/git-cheatsheet.pdf">Cheatsheet</a>；</li>
+  <li>再推荐一篇进阶的文章 <a href="https://blog.daraw.cn/2019/12/21/you-dont-know-git/">你可能不知道的 Git</a>；</li>
+</ul>
+
+<p><a href="https://ohshitgit.com/zh">Oh Shit, Git!?!</a></p>
+
+<p>![](<a href="https://lightblues.github.io/techNotes/code/CS/media/git-note/16348994455801.jpg">https://lightblues.github.io/techNotes/code/CS/media/git-note/16348994455801.jpg</a> null)</p>
+
+<ul>
+  <li>Workspace：工作区</li>
+  <li>Index / Stage：暂存区</li>
+  <li>Repository：仓库区（或本地仓库）</li>
+  <li>Remote：远程仓库</li>
+</ul>
+
+<p>工作流程</p>
+
+<ol>
+  <li>将远程仓库克隆为本地仓库 git clone ssh://git\@git.sankuai.com/dapp/poi_search_rerank.git</li>
+  <li>在本地创建和远程分支对应的分支 git checkout -b <本地分支名> origin/<远程分支名>，本地和远程分支的名称最好一致</远程分支名></本地分支名></li>
+  <li>在本地分支完成任务后，可以试图用git push <远程主机名> <本地分支名>推送自己的修改</本地分支名></远程主机名></li>
+  <li>如果推送失败，则表明远程分支比本地更新，需要先用git pull试图合并；</li>
+  <li>如果pull失败并提示“no tracking information”，则说明本地分支和远程分支的链接关系没有创建，用命令git branch –set-upstream-to=<远程主机名>/<远程分支名> <本地分支名>创建链接</本地分支名></远程分支名></远程主机名></li>
+  <li>如果合并有冲突，则解决冲突，并在本地提交（add =&gt; commit）</li>
+  <li>没有冲突或者解决掉冲突后，再用git push <远程主机名> <本地分支名>推送就能成功</本地分支名></远程主机名></li>
+  <li>提交到远程仓库以后，就可以发出 Pull Request 到staging分支，然后请求别人进行代码review，确认可以合并到staging
+    <ol>
+      <li>操作之前务必获取staging/master最新代码（pull 或者 fetch+merge）</li>
+    </ol>
+  </li>
+</ol>
+
+<h2 id="常用语法">常用语法<a href="https://lightblues.github.io/techNotes/code/CS/git-note/#_1" title="Permanent link">¶</a></h2>
+
+<div class="language-markdown highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="gu">######### Status, Add, Commit, Remove, Diff, Log, Checkout, Reset ##########</span>
+<span class="p">
+-</span> 查看状态：
+    <span class="p">```</span><span class="nl">bash
+</span>    git status
+    <span class="p">```</span>
+<span class="p">
+-</span> 添加文件到暂存区：
+    <span class="p">```</span><span class="nl">bash
+</span>    git add file1.txt file2.txt  <span class="c"># 添加指定文件</span>
+    git add <span class="nt">-A</span>                  <span class="c"># 添加当前目录下的所有修改</span>
+    git add <span class="nb">.</span>                   <span class="c"># 添加修改和新建文件</span>
+    git add <span class="nt">-u</span>                  <span class="c"># 添加修改和删除文件</span>
+    <span class="p">```</span>
+<span class="p">
+-</span> 提交更改：
+    <span class="p">```</span><span class="nl">bash
+</span>    git commit <span class="nt">-m</span> <span class="s2">"comment"</span>  <span class="c"># 提交时的说明，必须要有</span>
+    <span class="p">```</span>
+<span class="p">
+-</span> 删除文件：
+    <span class="p">```</span><span class="nl">bash
+</span>    git <span class="nb">rm </span>file.txt          <span class="c"># 从版本库中删除文件</span>
+    git <span class="nb">rm</span> <span class="nt">-r</span> filebook       <span class="c"># 删除文件夹</span>
+    <span class="p">```</span>
+<span class="p">
+-</span> 查看未提交的修改：
+    <span class="p">```</span><span class="nl">bash
+</span>    git diff HEAD^
+    git diff HEAD <span class="nt">--</span> readme.txt  <span class="c"># 查看工作区和版本库最新版本的区别</span>
+    <span class="p">```</span>
+<span class="p">
+-</span> 查看提交历史：
+    <span class="p">```</span><span class="nl">bash
+</span>    git log       <span class="c"># 提交历史</span>
+    git reflog    <span class="c"># 查看命令历史（包括回退修改等）</span>
+    <span class="p">```</span>
+<span class="p">
+-</span> 回滚到某个具体历史版本：
+    <span class="p">```</span><span class="nl">bash
+</span>    git reset <span class="nt">--hard</span> 提交id
+    <span class="p">```</span>
+<span class="p">
+-</span> 撤销更改：
+    <span class="p">```</span><span class="nl">bash
+</span>    git checkout <span class="nt">--</span> 文件名  <span class="c"># 退回到最近一次 add 或 commit 的状态</span>
+    git reset HEAD readme.txt  <span class="c"># 暂存区撤销</span>
+    <span class="p">```</span>
+
+<span class="gu">######### Remote ##########</span>
+<span class="p">
+-</span> 查看远程仓库信息：
+    <span class="p">```</span><span class="nl">bash
+</span>    git remote <span class="nt">-v</span>
+    git remote show xxx
+    <span class="p">```</span>
+<span class="p">
+-</span> 添加远程仓库：
+    <span class="p">```</span><span class="nl">bash
+</span>    git remote add xxx git@server-name:path/repo-name.git
+    <span class="p">```</span>
+<span class="p">
+-</span> 删除远程仓库：
+    <span class="p">```</span><span class="nl">bash
+</span>    git remote <span class="nb">rm </span>xxx
+    <span class="p">```</span>
+
+<span class="gu">######### Clone ##########</span>
+<span class="p">
+-</span> 克隆远程仓库：
+    <span class="p">```</span><span class="nl">bash
+</span>    git clone ssh://git@git.sankuai.com/dapp/poi_search_rerank.git
+    git clone <span class="nt">-b</span> branch-name git@server-name:path/repo.git  <span class="c"># 克隆指定分支</span>
+    <span class="p">```</span>
+
+<span class="gu">######### Pull ##########</span>
+<span class="p">
+-</span> 拉取远程分支：
+    <span class="p">```</span><span class="nl">bash
+</span>    git pull &lt;远程主机名&gt; &lt;远程分支名&gt;:&lt;本地分支名&gt;
+    git pull origin next:master
+    <span class="p">```</span>
+<span class="p">
+-</span> 手动建立追踪关系：
+    <span class="p">```</span><span class="nl">bash
+</span>    git branch <span class="nt">--set-upstream-to</span><span class="o">=</span>远程主机名/&lt;远程分支名&gt; &lt;本地分支名&gt;
+    <span class="p">```</span>
+<span class="p">
+-</span> 使用 rebase 模式拉取：
+    <span class="p">```</span><span class="nl">bash
+</span>    git pull <span class="nt">--rebase</span> &lt;远程主机名&gt; &lt;远程分支名&gt;:&lt;本地分支名&gt;
+    <span class="p">```</span>
+
+<span class="gu">######### Push ##########</span>
+<span class="p">
+-</span> 推送本地分支到远程：
+    <span class="p">```</span><span class="nl">bash
+</span>    git push &lt;远程主机名&gt; &lt;本地分支名&gt;:&lt;远程分支名&gt;
+    git push <span class="nt">-u</span> origin master  <span class="c"># 设置默认主机</span>
+    <span class="p">```</span>
+
+<span class="gu">######### Branch and Checkout ##########</span>
+<span class="p">
+-</span> 分支操作：
+    <span class="p">```</span><span class="nl">bash
+</span>    git branch          <span class="c"># 查看当前分支</span>
+    git branch <span class="nt">-a</span>       <span class="c"># 查看远程分支</span>
+    git branch &lt;name&gt;   <span class="c"># 创建分支</span>
+    git checkout &lt;name&gt; <span class="c"># 切换分支</span>
+    git checkout <span class="nt">-b</span> &lt;name&gt;  <span class="c"># 创建并切换到分支</span>
+    git branch <span class="nt">-d</span> &lt;name&gt;    <span class="c"># 删除分支</span>
+    git branch <span class="nt">-D</span> &lt;name&gt;    <span class="c"># 强制删除未合并的分支</span>
+    <span class="p">```</span>
+
+<span class="gu">######### Merge ##########</span>
+<span class="p">
+-</span> 合并分支：
+    <span class="p">```</span><span class="nl">bash
+</span>    git merge &lt;branch-name&gt;  <span class="c"># 合并分支</span>
+    git merge <span class="nt">--no-ff</span> <span class="nt">-m</span> <span class="s2">"comment"</span>  <span class="c"># 禁用 Fast forward 模式，生成新的 commit</span>
+    <span class="p">```</span>
+</code></pre></div></div>
+
+<h2 id="具体应用">具体应用<a href="https://lightblues.github.io/techNotes/code/CS/git-note/#_2" title="Permanent link">¶</a></h2>
+
+<h3 id="撤销修改">撤销修改<a href="https://lightblues.github.io/techNotes/code/CS/git-note/#_3" title="Permanent link">¶</a></h3>
+
+<p>撤销修改的操作可以根据文件是否已被 <code class="language-plaintext highlighter-rouge">add</code> 到暂存区来选择不同的命令：</p>
+
+<ul>
+  <li>未 <code class="language-plaintext highlighter-rouge">add</code> 的文件：
+    <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>git restore &lt;file&gt;...
+</code></pre></div>    </div>
+  </li>
+  <li>已 <code class="language-plaintext highlighter-rouge">add</code> 的文件：
+    <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>git restore <span class="nt">--staged</span> &lt;file&gt;...
+git restore &lt;file&gt;
+</code></pre></div>    </div>
+  </li>
+</ul>
+
+<h3 id="代码回滚git-resetgit-checkout-和-git-revert">代码回滚：git reset、git checkout 和 git revert<a href="https://lightblues.github.io/techNotes/code/CS/git-note/#git-resetgit-checkoutgit-revert" title="Permanent link">¶</a></h3>
+
+<blockquote>
+  <p><strong>注意</strong>：虽然以下内容使用了 <code class="language-plaintext highlighter-rouge">reset</code> 和 <code class="language-plaintext highlighter-rouge">checkout</code> 来恢复文件，但按照 Git 的指示，<code class="language-plaintext highlighter-rouge">restore</code> 是更加规范的选择。</p>
+</blockquote>
+
+<h4 id="git-reset"><code class="language-plaintext highlighter-rouge">git reset</code></h4>
+
+<p><code class="language-plaintext highlighter-rouge">git reset</code> 用于撤销未被提交到远程的改动，即撤销本地的修改。它不仅会移动当前分支的 <code class="language-plaintext highlighter-rouge">HEAD</code>，还可以更改工作区（workspace）和暂存区（index）：</p>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">--soft</code>：修改 <code class="language-plaintext highlighter-rouge">HEAD</code>，不修改 <code class="language-plaintext highlighter-rouge">index</code> 和 <code class="language-plaintext highlighter-rouge">workspace</code>。</li>
+  <li><code class="language-plaintext highlighter-rouge">--mixed</code>：修改 <code class="language-plaintext highlighter-rouge">HEAD</code> 和 <code class="language-plaintext highlighter-rouge">index</code>，不修改 <code class="language-plaintext highlighter-rouge">workspace</code>。（默认行为）</li>
+  <li><code class="language-plaintext highlighter-rouge">--hard</code>：修改 <code class="language-plaintext highlighter-rouge">HEAD</code>、<code class="language-plaintext highlighter-rouge">index</code> 和 <code class="language-plaintext highlighter-rouge">workspace</code>。</li>
+</ul>
+
+<p>示例：</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># 修改 HEAD 和 index</span>
+git checkout hotfix
+git reset HEAD~2
+
+<span class="c"># reset 恢复文件</span>
+git reset HEAD filename  <span class="c"># 默认是 --mixed，修改 HEAD 和 index，不修改 workspace</span>
+</code></pre></div></div>
+
+<h4 id="git-checkout"><code class="language-plaintext highlighter-rouge">git checkout</code></h4>
+
+<p><code class="language-plaintext highlighter-rouge">git checkout</code> 作用于提交级别时，只是移动 <code class="language-plaintext highlighter-rouge">HEAD</code> 到不同的提交。如果有未暂存的文件，Git 会阻止操作并提示。</p>
+
+<ul>
+  <li>使用 <code class="language-plaintext highlighter-rouge">commit id</code> 作为参数可能会导致野指针。</li>
+  <li><code class="language-plaintext highlighter-rouge">git checkout -- file</code> 中的 <code class="language-plaintext highlighter-rouge">--</code> 很重要，没有 <code class="language-plaintext highlighter-rouge">--</code> 会变成“切换到另一个分支”的命令。</li>
+</ul>
+
+<p>示例：</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># 修改 workspace 去匹配某次 commit</span>
+git checkout HEAD
+
+<span class="c"># 抹掉文件在 workspace 的修改（即使已 add 也行）</span>
+git checkout HEAD filename
+
+<span class="c"># 若已 add，则恢复为 index 的结果；若未 add，则恢复为 HEAD 的结果</span>
+git checkout <span class="nt">--</span> file
+</code></pre></div></div>
+
+<h4 id="git-revert"><code class="language-plaintext highlighter-rouge">git revert</code></h4>
+
+<p><code class="language-plaintext highlighter-rouge">git revert</code> 用于“反做”某一个版本，以达到撤销该版本修改的目的。它会生成一个新的提交，而不是直接修改历史记录。</p>
+
+<p>例如：我们提交了三个版本（版本一、版本二、版本三），发现版本二有问题（如：存在 bug），想要撤销版本二的修改，但又不想影响版本三的提交。此时可以使用 <code class="language-plaintext highlighter-rouge">git revert</code> 来反做版本二，生成一个新的版本四。版本四会保留版本三的内容，但撤销版本二的修改。</p>
+
+<p>示例：</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>git checkout hotfix
+git revert HEAD^^
+</code></pre></div></div>
+
+<h3 id="查看文件的修改记录">查看文件的修改记录<a href="https://lightblues.github.io/techNotes/code/CS/git-note/#_4" title="Permanent link">¶</a></h3>
+
+<p>先查看在哪些提交中修改了这个文件。<code class="language-plaintext highlighter-rouge">--pretty=oneline</code> 使得 log 更加简洁，<code class="language-plaintext highlighter-rouge">--</code> 可省略：</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>git log <span class="nt">--pretty</span><span class="o">=</span>oneline <span class="nt">--</span> 文件名
+</code></pre></div></div>
+
+<p>然后从 log 中找到要查看的那一次提交所对应的 id，用 <code class="language-plaintext highlighter-rouge">git show _id</code> 进行查看：</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>git show 356f6def9d <span class="nt">--</span> 文件名
+</code></pre></div></div>
+
+<h3 id="合并远程分支">合并远程分支<a href="https://lightblues.github.io/techNotes/code/CS/git-note/#_5" title="Permanent link">¶</a></h3>
+
+<p>有的时候我们需要跟别人合作进行开发，然后分别使用不同的 Git 分支。等项目完成时，需要进行代码合并，就需要知道如何合并远程分支。</p>
+
+<p>假设你本地在使用的分支为 <code class="language-plaintext highlighter-rouge">a</code>（master 也是一样的），需要合并的远程分支为 <code class="language-plaintext highlighter-rouge">b</code>：</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># 在本地新建一个与远程分支 b 相同的分支 b</span>
+git checkout <span class="nt">-b</span> b origin/b
+
+<span class="c"># 将远程代码 pull 到本地</span>
+git pull origin b
+
+<span class="c"># 切换回分支 a</span>
+git checkout a
+
+<span class="c"># 合并分支 a 与分支 b</span>
+git merge b
+</code></pre></div></div>
+
+<h3 id="删除文件恢复">删除文件恢复<a href="https://lightblues.github.io/techNotes/code/CS/git-note/#_6" title="Permanent link">¶</a></h3>
+
+<p>如果删除了文件并且已经提交了，可以尝试以下操作恢复文件：</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># 回退到上一次提交的状态</span>
+git reset HEAD^ 文件名
+
+<span class="c"># 恢复文件到暂存区</span>
+git restore <span class="nt">--staged</span> &lt;file&gt;
+</code></pre></div></div>
+
+<h3 id="取消文件跟踪">取消文件跟踪<a href="https://lightblues.github.io/techNotes/code/CS/git-note/#_7" title="Permanent link">¶</a></h3>
+
+<p>一些需要添加到 <code class="language-plaintext highlighter-rouge">.gitignore</code> 中的文件，如果之前已经建立了索引，需要取消跟踪：</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># 单个文件</span>
+git <span class="nb">rm</span> <span class="nt">--cached</span> readme1.txt
+
+<span class="c"># 所有文件（不删除本地文件）</span>
+git <span class="nb">rm</span> <span class="nt">-r</span> <span class="nt">--cached</span> <span class="nb">.</span>
+
+<span class="c"># 所有文件（删除本地文件）</span>
+git <span class="nb">rm</span> <span class="nt">-r</span> <span class="nt">--f</span> <span class="nb">.</span>
+</code></pre></div></div>
+
+<blockquote>
+  <p>以下内容来自廖雪峰教程</p>
+</blockquote>
+
+<h2 id="版本库">版本库<a href="https://lightblues.github.io/techNotes/code/CS/git-note/#_8" title="Permanent link">¶</a></h2>
+
+<h3 id="创建版本库">创建版本库<a href="https://lightblues.github.io/techNotes/code/CS/git-note/#_9" title="Permanent link">¶</a></h3>
+
+<p>初始化一个 Git 仓库，使用以下命令：</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>git init
+</code></pre></div></div>
+
+<p>添加文件到 Git 仓库，分两步：</p>
+
+<ol>
+  <li>使用命令 <code class="language-plaintext highlighter-rouge">git add &lt;file&gt;</code>，注意，可反复多次使用，添加多个文件；</li>
+  <li>使用命令 <code class="language-plaintext highlighter-rouge">git commit -m &lt;message&gt;</code>，完成提交。</li>
+</ol>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>git add &lt;file&gt;
+git commit <span class="nt">-m</span> <span class="s2">"提交说明"</span>
+</code></pre></div></div>
+
+<h3 id="版本回退">版本回退<a href="https://lightblues.github.io/techNotes/code/CS/git-note/#_10" title="Permanent link">¶</a></h3>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">HEAD</code> 指向的版本就是当前版本，因此，Git 允许我们在版本的历史之间穿梭，使用命令 <code class="language-plaintext highlighter-rouge">git reset --hard commit_id</code>。</li>
+  <li>穿梭前，用 <code class="language-plaintext highlighter-rouge">git log</code> 可以查看提交历史，以便确定要回退到哪个版本。</li>
+  <li>要重返未来，用 <code class="language-plaintext highlighter-rouge">git reflog</code> 查看命令历史，以便确定要回到未来的哪个版本。</li>
+</ul>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># 查看提交历史</span>
+git log
+
+<span class="c"># 回退到指定版本</span>
+git reset <span class="nt">--hard</span> commit_id
+
+<span class="c"># 查看命令历史</span>
+git reflog
+</code></pre></div></div>
+
+<h4 id="版本命名">版本命名<a href="https://lightblues.github.io/techNotes/code/CS/git-note/#_11" title="Permanent link">¶</a></h4>
+
+<p>首先，Git必须知道当前版本是哪个版本，在Git中，用<code class="language-plaintext highlighter-rouge">HEAD</code>表示当前版本，也就是最新的提交<code class="language-plaintext highlighter-rouge">1094adb...</code>（注意我的提交ID和你的肯定不一样），上一个版本就是<code class="language-plaintext highlighter-rouge">HEAD^</code>，上上一个版本就是<code class="language-plaintext highlighter-rouge">HEAD^^</code>，当然往上100个版本写100个<code class="language-plaintext highlighter-rouge">^</code>比较容易数不过来，所以写成<code class="language-plaintext highlighter-rouge">HEAD~100</code>。</p>
+
+<h3 id="工作区和暂存区">工作区和暂存区<a href="https://lightblues.github.io/techNotes/code/CS/git-note/#_12" title="Permanent link">¶</a></h3>
+
+<p>暂存区是Git非常重要的概念，弄明白了暂存区，就弄明白了Git的很多操作到底干了什么。</p>
+
+<h3 id="管理修改">管理修改<a href="https://lightblues.github.io/techNotes/code/CS/git-note/#_13" title="Permanent link">¶</a></h3>
+
+<p>注意，<code class="language-plaintext highlighter-rouge">git diff readme.txt</code> 是与暂存区的文件比较；而 <code class="language-plaintext highlighter-rouge">git diff HEAD -- readme.txt</code> 则是与 HEAD 版本下的文件进行比较。因此，若在修改 readme.txt 后，已经 add 而尚未 commit ，则前者不会显示差异后者会显示出修改内容。</p>
+
+<h3 id="撤销修改-checkout-">撤销修改 checkout –<a href="https://lightblues.github.io/techNotes/code/CS/git-note/#checkout" title="Permanent link">¶</a></h3>
+
+<p>场景1：当你改乱了工作区某个文件的内容，想直接丢弃工作区的修改时，用命令 <code class="language-plaintext highlighter-rouge">git checkout -- file</code>。</p>
+
+<p>场景2：当你不但改乱了工作区某个文件的内容，还添加到了暂存区时，想丢弃修改，分两步，第一步用命令 <code class="language-plaintext highlighter-rouge">git reset HEAD &lt;file&gt;</code>，就回到了场景1，第二步按场景1操作。</p>
+
+<p>场景3：已经提交了不合适的修改到版本库时，想要撤销本次提交，参考<a href="https://www.liaoxuefeng.com/wiki/896043488029600/897013573512192">版本回退</a>一节，不过前提是没有推送到远程库。</p>
+
+<h3 id="删除文件">删除文件<a href="https://lightblues.github.io/techNotes/code/CS/git-note/#_14" title="Permanent link">¶</a></h3>
+
+<p>命令 <code class="language-plaintext highlighter-rouge">git rm</code> 用于删除一个文件。如果一个文件已经被提交到版本库，那么你永远不用担心误删，但是要小心，你只能恢复文件到最新版本，你会丢失<strong>最近一次提交后你修改的内容</strong>。</p>
+
+<p>为了恢复删除的文件，：</p>
+
+<p>场景 1：删除了文件，但没有 <code class="language-plaintext highlighter-rouge">git rm test.txt</code>，这时可以用 <code class="language-plaintext highlighter-rouge">git checkout -- test.txt</code> 找回；</p>
+
+<p>场景 2：删除文件并且执行了 rm 操作，但没有 commit（这时候缓存区已经没有该文件了），则可以用 <code class="language-plaintext highlighter-rouge">git reset -- test.txt</code> 提取版本库中文件到缓存区，再使用 <code class="language-plaintext highlighter-rouge">git checkout -- test.txt</code> 从缓存区取回工作区；</p>
+
+<p>场景 3：删除文件并且已经提交到版本库，可以用 <code class="language-plaintext highlighter-rouge">git reset HEAD^ -- test.txt</code> 提取该文件到缓存区；再使用 <code class="language-plaintext highlighter-rouge">git checkout -- test.txt</code> 提取回本地。</p>
+
+<h2 id="远程仓库">远程仓库<a href="https://lightblues.github.io/techNotes/code/CS/git-note/#_15" title="Permanent link">¶</a></h2>
+
+<p>【总结一下】在 GitHub 上新建一个 repo，然后 1. clone 下来；2. 或者用类似 <code class="language-plaintext highlighter-rouge">git remote add origin git@github.com:michaelliao/learngit.git</code> 的命令。（这里的 origin 只是定义了远程仓库的名字）</p>
+
+<h3 id="案例类似-github-提示">案例：类似 GitHub 提示<a href="https://lightblues.github.io/techNotes/code/CS/git-note/#github" title="Permanent link">¶</a></h3>
+
+<p>首先需要现在远程创建一个分支，比如地址为 <code class="language-plaintext highlighter-rouge">https://xxxxxxx/wangdong/helloworld.git</code></p>
+
+<p><code class="language-plaintext highlighter-rouge"># 从本地新建一个分支，关联到 remote touch README.md git init git add README.md git commit -m "first commit" git branch -M main git remote add origin https://xxxxxxx/wangdong/helloworld.git git push -u origin main  # 本来就有了，直接关联 remote git remote add origin https://xxxxxxx/wangdong/helloworld.git git branch -M main git push -u origin main  # 若已有一个关联的 remote，则可取消后重新关联一个新的远程分支 git remote remove origin git remote add origin https://dev.33.cn/wangdong/alioss-file.git</code></p>
+
+<h3 id="添加远程库">添加远程库<a href="https://lightblues.github.io/techNotes/code/CS/git-note/#_16" title="Permanent link">¶</a></h3>
+
+<p>要关联一个远程库，使用命令<code class="language-plaintext highlighter-rouge">git remote add origin git@server-name:path/repo-name.git</code>；</p>
+
+<p>关联后，使用命令<code class="language-plaintext highlighter-rouge">git push -u origin master</code>第一次推送master分支的所有内容；</p>
+
+<p>此后，每次本地提交后，只要有必要，就可以使用命令<code class="language-plaintext highlighter-rouge">git push origin master</code>推送最新修改；</p>
+
+<p>分布式版本系统的最大好处之一是在本地工作完全不需要考虑远程库的存在，也就是有没有联网都可以正常工作，而SVN在没有联网的时候是拒绝干活的！当有网络的时候，再把本地提交推送一下就完成了同步，真是太方便了！</p>
+
+<h3 id="从远程库克隆">从远程库克隆<a href="https://lightblues.github.io/techNotes/code/CS/git-note/#_17" title="Permanent link">¶</a></h3>
+
+<p>要克隆一个仓库，首先必须知道仓库的地址，然后使用<code class="language-plaintext highlighter-rouge">git clone</code>命令克隆。</p>
+
+<p>Git支持多种协议，包括<code class="language-plaintext highlighter-rouge">https</code>，但<code class="language-plaintext highlighter-rouge">ssh</code>协议速度最快。</p>
+
+<h2 id="分支管理">分支管理<a href="https://lightblues.github.io/techNotes/code/CS/git-note/#_18" title="Permanent link">¶</a></h2>
+
+<h3 id="创建与合并">创建与合并<a href="https://lightblues.github.io/techNotes/code/CS/git-note/#_19" title="Permanent link">¶</a></h3>
+
+<p>Git鼓励大量使用分支：</p>
+
+<p>查看分支：<code class="language-plaintext highlighter-rouge">git branch</code></p>
+
+<p>创建分支：<code class="language-plaintext highlighter-rouge">git branch &lt;name&gt;</code></p>
+
+<p>切换分支：<code class="language-plaintext highlighter-rouge">git checkout &lt;name&gt;</code>或者<code class="language-plaintext highlighter-rouge">git switch &lt;name&gt;</code></p>
+
+<p>创建+切换分支：<code class="language-plaintext highlighter-rouge">git checkout -b &lt;name&gt;</code>或者<code class="language-plaintext highlighter-rouge">git switch -c &lt;name&gt;</code></p>
+
+<p>合并某分支到当前分支：<code class="language-plaintext highlighter-rouge">git merge &lt;name&gt;</code></p>
+
+<p>删除分支：<code class="language-plaintext highlighter-rouge">git branch -d &lt;name&gt;</code></p>
+
+<h3 id="解决冲突">解决冲突<a href="https://lightblues.github.io/techNotes/code/CS/git-note/#_20" title="Permanent link">¶</a></h3>
+
+<p>当Git无法自动合并分支时，就必须首先解决冲突。解决冲突后，再提交，合并完成。</p>
+
+<p>解决冲突就是把Git合并失败的文件手动编辑为我们希望的内容，再提交。</p>
+
+<p>用<code class="language-plaintext highlighter-rouge">git log --graph</code>命令可以看到分支合并图。</p>
+
+<h3 id="分支管理策略">分支管理策略<a href="https://lightblues.github.io/techNotes/code/CS/git-note/#_21" title="Permanent link">¶</a></h3>
+
+<p>Git分支十分强大，在团队开发中应该充分应用。</p>
+
+<p>合并分支时，加上<code class="language-plaintext highlighter-rouge">--no-ff</code>参数就可以用普通模式合并，合并后的历史有分支，能看出来曾经做过合并，而<code class="language-plaintext highlighter-rouge">fast forward</code>合并就看不出来曾经做过合并。</p>
+
+<p>在实际开发中，我们应该按照几个基本原则进行分支管理：</p>
+
+<ul>
+  <li>首先，<code class="language-plaintext highlighter-rouge">master</code>分支应该是非常稳定的，也就是仅用来发布新版本，平时不能在上面干活；</li>
+  <li>那在哪干活呢？干活都在<code class="language-plaintext highlighter-rouge">dev</code>分支上，也就是说，<code class="language-plaintext highlighter-rouge">dev</code>分支是不稳定的，到某个时候，比如1.0版本发布时，再把<code class="language-plaintext highlighter-rouge">dev</code>分支合并到<code class="language-plaintext highlighter-rouge">master</code>上，在<code class="language-plaintext highlighter-rouge">master</code>分支发布1.0版本；</li>
+  <li>你和你的小伙伴们每个人都在<code class="language-plaintext highlighter-rouge">dev</code>分支上干活，每个人都有自己的分支，时不时地往<code class="language-plaintext highlighter-rouge">dev</code>分支上合并就可以了。</li>
+</ul>
+
+<h3 id="bug-分支">Bug 分支<a href="https://lightblues.github.io/techNotes/code/CS/git-note/#bug" title="Permanent link">¶</a></h3>
+
+<p>修复bug时，我们会通过创建新的bug分支进行修复，然后合并，最后删除；</p>
+
+<p>当手头工作没有完成时，先把工作现场<code class="language-plaintext highlighter-rouge">git stash</code>一下，然后去修复bug，修复后，再<code class="language-plaintext highlighter-rouge">git stash pop</code>，回到工作现场；</p>
+
+<p>在master分支上修复的bug，想要合并到当前dev分支，可以用<code class="language-plaintext highlighter-rouge">git cherry-pick &lt;commit&gt;</code>命令，把bug提交的修改“复制”到当前分支，避免重复劳动。</p>
+
+<h3 id="feature-分支">Feature 分支<a href="https://lightblues.github.io/techNotes/code/CS/git-note/#feature" title="Permanent link">¶</a></h3>
+
+<p>开发一个新feature，最好新建一个分支；</p>
+
+<p>如果要丢弃一个没有被合并过的分支，可以通过<code class="language-plaintext highlighter-rouge">git branch -D &lt;name&gt;</code>强行删除。</p>
+
+<h3 id="多人协作">多人协作<a href="https://lightblues.github.io/techNotes/code/CS/git-note/#_22" title="Permanent link">¶</a></h3>
+
+<ul>
+  <li>查看远程库信息，使用<code class="language-plaintext highlighter-rouge">git remote -v</code>；</li>
+  <li>本地新建的分支如果不推送到远程，对其他人就是不可见的；</li>
+  <li>从本地推送分支，使用<code class="language-plaintext highlighter-rouge">git push origin branch-name</code>，如果推送失败，先用<code class="language-plaintext highlighter-rouge">git pull</code>抓取远程的新提交；</li>
+  <li>在本地创建和远程分支对应的分支，使用<code class="language-plaintext highlighter-rouge">git checkout -b branch-name origin/branch-name</code>，本地和远程分支的名称最好一致；</li>
+  <li>建立本地分支和远程分支的关联，使用<code class="language-plaintext highlighter-rouge">git branch --set-upstream branch-name origin/branch-name</code>；</li>
+  <li>从远程抓取分支，使用<code class="language-plaintext highlighter-rouge">git pull</code>，如果有冲突，要先处理冲突。</li>
+</ul>
+
+<p>因此，多人协作的工作模式通常是这样：</p>
+
+<ol>
+  <li>首先，可以试图用<code class="language-plaintext highlighter-rouge">git push origin &lt;branch-name&gt;</code>推送自己的修改；</li>
+  <li>如果推送失败，则因为远程分支比你的本地更新，需要先用<code class="language-plaintext highlighter-rouge">git pull</code>试图合并；</li>
+  <li>如果合并有冲突，则解决冲突，并在本地提交；</li>
+  <li>没有冲突或者解决掉冲突后，再用<code class="language-plaintext highlighter-rouge">git push origin &lt;branch-name&gt;</code>推送就能成功！</li>
+</ol>
+
+<p>如果<code class="language-plaintext highlighter-rouge">git pull</code>提示<code class="language-plaintext highlighter-rouge">no tracking information</code>，则说明本地分支和远程分支的链接关系没有创建，用命令<code class="language-plaintext highlighter-rouge">git branch --set-upstream-to &lt;branch-name&gt; origin/&lt;branch-name&gt;</code>。</p>
+
+<h2 id="标签管理">标签管理<a href="https://lightblues.github.io/techNotes/code/CS/git-note/#_23" title="Permanent link">¶</a></h2>
+
+<ul>
+  <li>命令<code class="language-plaintext highlighter-rouge">git tag &lt;tagname&gt;</code>用于新建一个标签，默认为<code class="language-plaintext highlighter-rouge">HEAD</code>，也可以指定一个commit id；</li>
+  <li>命令<code class="language-plaintext highlighter-rouge">git tag -a &lt;tagname&gt; -m "blablabla..."</code>可以指定标签信息；</li>
+  <li>命令<code class="language-plaintext highlighter-rouge">git tag</code>可以查看所有标签。</li>
+  <li>命令<code class="language-plaintext highlighter-rouge">git push origin &lt;tagname&gt;</code>可以推送一个本地标签；</li>
+  <li>命令<code class="language-plaintext highlighter-rouge">git push origin --tags</code>可以推送全部未推送过的本地标签；</li>
+  <li>命令<code class="language-plaintext highlighter-rouge">git tag -d &lt;tagname&gt;</code>可以删除一个本地标签；</li>
+  <li>命令<code class="language-plaintext highlighter-rouge">git push origin :refs/tags/&lt;tagname&gt;</code>可以删除一个远程标签。</li>
+</ul>
+
+<blockquote>
+  <p>以下 from 美团</p>
+</blockquote>
+
+<h3 id="git状态含义">git状态含义<a href="https://lightblues.github.io/techNotes/code/CS/git-note/#git" title="Permanent link">¶</a></h3>
+
+<p>M 表示改动 A 表示添加 D 表示删除 R 表示重命名 C 表示拷贝 U 表示已更新到索引区但是未合并 ? 表示还没添加到git库中的文件 ! 表示已被忽略的文件 AU 我们添加了文件 UD 他们删除了文件 DD 双方都删除了文件 UU 双方都修改了文件</p>
+
+<h3 id="配置别名">配置别名<a href="https://lightblues.github.io/techNotes/code/CS/git-note/#_24" title="Permanent link">¶</a></h3>
+
+<p>命令可以简写，用git st表示git status</p>
+
+<p><code class="language-plaintext highlighter-rouge">git config --global alias.co checkout git config --global alias.ci commit git config --global alias.br branch git config --global alias.last 'log -1' git config --global alias.lg "log --color --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)&lt;%an&gt;%Creset' --abbrev-commit"</code></p>
+
+<p>当前用户的Git配置文件存放在 <code class="language-plaintext highlighter-rouge">～/.gitconfig</code> 文件中；当前仓库的配置文件在 <code class="language-plaintext highlighter-rouge">.git/config</code></p>
+
+<h3 id="设置ui颜色">设置UI颜色<a href="https://lightblues.github.io/techNotes/code/CS/git-note/#ui" title="Permanent link">¶</a></h3>
+
+<p><code class="language-plaintext highlighter-rouge">git config --global color.ui true</code></p>
+
+<hr />
+

@@ -1,9 +1,9 @@
 ---
 layout: post
-title: 'how_many_bugs_nov'
+title: '开发-十一月Bug排查记录'
 date: 2025-11-11
 author: pepper
-tags: [bug]
+tags: [bug, springboot]
 comments: true
 toc: true
 pinned: false

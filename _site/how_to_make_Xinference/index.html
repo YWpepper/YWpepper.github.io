@@ -1,0 +1,249 @@
+<p>这篇博客介绍了选用Xinference作为RAGFlow的模型推理框架的技术说明。
+<!-- more --></p>
+
+<h2 id="xinference部署">Xinference部署</h2>
+
+<p><a href="https://pqyiz16he9g.feishu.cn/docx/WbcMdyvcjob4vLxbLNgcdv8cnDb">langchain</a>
+<a href="https://inference.readthedocs.io/zh-cn/latest/index.html">参考教程</a></p>
+
+<p>在本地使用RAGFlow搭建知识库时，为了数据不泄露至互联网,需要先安装模型推理框架从而便捷的部署LLM、Embeding Model和Reranke Model等模型。由于Ollama对模型只支持LLM和Embeding Model部署。而Xinferce支持不仅各种模型,还支持各种模型格式。所以选用Xinference作为RAGFlow的模型推理框架。</p>
+
+<h3 id="xinference安装">Xinference安装</h3>
+
+<p>Xinference有两种安装方式：Docker和pip。本篇主要讲pip安装方式,如果想了解Xinerence的话建议去中文版文档地址：<a href="https://inference.readthedocs.io/zh-cn/latest/index.html。">https://inference.readthedocs.io/zh-cn/latest/index.html。</a></p>
+
+<h4 id="使用conda创建虚拟环境">使用conda创建虚拟环境</h4>
+
+<p>conda简介和使用在这里就不详细说明了,需要注意的是使用conda时,最好改一下conda源和pip源</p>
+
+<div class="language-latex highlighter-rouge"><div class="highlight"><pre class="highlight"><code># 创建环境
+conda create --name xinfer python=3.12
+# 进入环境
+conda activate xinfer
+</code></pre></div></div>
+
+<h4 id="安装xinference">安装Xinference</h4>
+
+<p>Xinference支持多种推理引擎,我目前只使用了Transformers和vLLM这两个引擎后端</p>
+
+<h5 id="1-transformers引擎">1. Transformers引擎</h5>
+
+<div class="language-latex highlighter-rouge"><div class="highlight"><pre class="highlight"><code>pip install "xinference[transformers]"
+</code></pre></div></div>
+
+<h5 id="2-vllm引擎">2. vLLM引擎</h5>
+
+<div class="language-latex highlighter-rouge"><div class="highlight"><pre class="highlight"><code>pip install "xinference[vllm]"
+
+# 一些模型可能需要用到FlashInfer
+pip install flashinfer -i https://flashinfer.ai/whl/cu124/torch2.4
+# 此处的镜像可以上aliyun
+# https://mirrors.aliyun.com/pytorch-wheels/cu124/?userCode=okjhlpr5
+方法 1：使用 wget
+wget https://mirrors.aliyun.com/pytorch-wheels/cu128/flashinfer/flashinfer<span class="p">_</span>python-0.2.5+cu128torch2.7-cp38-abi3-linux<span class="p">_</span>x86<span class="p">_</span>64.whl
+方法 2：使用 curl
+curl -O https://mirrors.aliyun.com/pytorch-wheels/cu128/flashinfer/flashinfer<span class="p">_</span>python-0.2.5+cu128torch2.7-cp38-abi3-linux<span class="p">_</span>x86<span class="p">_</span>64.whl
+下载完成后,确认文件已下载：
+ls | grep flashinfer<span class="p">_</span>python
+
+安装 .whl 文件：
+pip install flashinfer<span class="p">_</span>python-0.2.5+cu128torch2.7-cp38-abi3-linux<span class="p">_</span>x86<span class="p">_</span>64.whl
+确保当前 Python 环境与 .whl 文件的依赖（如 Python 3.8 和 CUDA 12.8）兼容。
+
+
+# 对于不同的Cuda和torch版本可以查看https://docs.flashinfer.ai/installation.html 这个网页进行安装
+</code></pre></div></div>
+
+<p><img src="https://cdn.nlark.com/yuque/0/2025/png/40742019/1762771075613-992509dc-4466-48cf-b43d-ffa15c1c68c0.png" alt="" /></p>
+
+<p>注：<a href="https://blog.csdn.net/qq_40999403/article/details/141678567">flashinfer的介绍</a> 也可同时安装 Transformer和vLLM引擎</p>
+
+<div class="language-latex highlighter-rouge"><div class="highlight"><pre class="highlight"><code>pip install "xinference[transformers, vllm]"
+</code></pre></div></div>
+
+<h5 id="3-安装所有引擎可选">3. 安装所有引擎（可选）</h5>
+
+<div class="language-latex highlighter-rouge"><div class="highlight"><pre class="highlight"><code>pip install "xinference[all]"
+</code></pre></div></div>
+
+<p>注：我在其他教程上看到<a href="https://zhuanlan.zhihu.com/p/685224526">在 Xinference 安装过程中,有可能会安装 PyTorch 的其他版本（其依赖的vllm组件需要安装）,从而导致 GPU 服务器无法正常使用</a>,因此在安装完 Xinference 之后,可以执行以下命令看 PyTorch 是否正常：</p>
+
+<div class="language-latex highlighter-rouge"><div class="highlight"><pre class="highlight"><code>python -c "import torch; print(torch.cuda.is<span class="p">_</span>available())"
+</code></pre></div></div>
+
+<p>但实际上笔者没有试过,因为笔者是新创了一个conda虚拟环境安装,从来没有遇到过这个问题,所以笔者猜测是在已有的conda环境安装才会遇到这个问题。</p>
+
+<h2 id="部署模型">部署模型</h2>
+
+<h3 id="1-设置环境变量可选">1. 设置环境变量（可选）</h3>
+
+<ol>
+  <li>设置<code class="language-plaintext highlighter-rouge">XINFERENCE_HOME</code>、 是Xinference用来存储信息或数据的（比如模型文件）。在Linux系统中一般位于<code class="language-plaintext highlighter-rouge">/home/用户/.xinference</code>目录下。可以通过配置环境变量修改。</li>
+  <li>
+    <p>打开<code class="language-plaintext highlighter-rouge"> .bashrc sudo vim ~/.bashrc </code></p>
+
+    <p>需要注意的,设置<code class="language-plaintext highlighter-rouge">XINFERENCE_HOME</code>的终端和启动Xinference的终端必须是同一个终端窗口,笔者曾经在一个终端窗口设置环境变量,一个窗口启动。后来发现设置的环境变量并没有生效。</p>
+  </li>
+  <li>设置<code class="language-plaintext highlighter-rouge">HF_ENDPOINT</code> Xinference 模型下载默认是从<a href="https://huggingface.co/models">Huggingface官方网站下载</a> 。在国内因为网络原因,可以通过下面的环境变量设计为其它镜像网站：<code class="language-plaintext highlighter-rouge">HF_ENDPOINT=https://hf-mirror.com/</code> 具体设置步骤与上述相同。 另外也可通过设置<code class="language-plaintext highlighter-rouge">XINFERENCE_MODEL_SRC=modelscope</code>,使其默认从<code class="language-plaintext highlighter-rouge">modelscop</code>下载。</li>
+</ol>
+
+<div class="language-shell highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">#打开</span>
+nano ~/.bashrc
+
+<span class="c"># 设置 Hugging Face 镜像源为 hf-mirror.com</span>
+<span class="nb">export </span><span class="nv">HF_ENDPOINT</span><span class="o">=</span>https://hf-mirror.com
+
+<span class="c"># 或者选择 设置模型下载源为 ModelScope</span>
+<span class="nb">export </span><span class="nv">XINFERENCE_MODEL_SRC</span><span class="o">=</span>modelscope
+
+<span class="c"># Xinference 配置：指定数据存储目录</span>
+<span class="nb">export </span><span class="nv">XINFERENCE_HOME</span><span class="o">=</span>/home/pepper/data/xinference_data
+
+<span class="c"># 激活</span>
+<span class="nb">source</span> ~/.bashrc
+<span class="c">## 验证</span>
+<span class="nb">echo</span> <span class="nv">$XINFERENCE_HOME</span>
+<span class="nb">echo</span> <span class="nv">$HF_ENDPOINT</span>
+</code></pre></div></div>
+
+<h4 id="启动xinference">启动Xinference</h4>
+
+<div class="language-latex highlighter-rouge"><div class="highlight"><pre class="highlight"><code>xinference-local --host 0.0.0.0 --port 9997
+</code></pre></div></div>
+
+<p>Xinference 默认会在本地启动服务,因为这里配置了–host 0.0.0.0参数,使非本地客户端也可以通过机器的 IP 地址来访问 Xinference 服务。端口默认为 9997,可以使用–port配置其他端口。 启动成功后,可以通过<code class="language-plaintext highlighter-rouge">http://IP:9997</code>,访问WebGUI界面。</p>
+
+<p><img src="https://pic1.zhimg.com/v2-19741080cabd9108417768969b27ec7e_r.jpg" alt="" /></p>
+
+<h3 id="2-使用xinference部署模型">2. 使用Xinference部署模型</h3>
+
+<p>在Xinference上可以部署多种模型,比如大语言模型、嵌入模型等,甚至可以部署自定义模型。笔者将以部署DeepSeek-R1模型为例,阐述如何部署模型和部署过程中需要注意的地方。由于笔者使用的显卡显存为48G。所以选择DeepSeek-R1:32b量化后的6bit版本。其模型的基本配置如下：</p>
+
+<p><img src="https://pica.zhimg.com/v2-4dadba5a671dc864a399f4bedb1f2518_r.jpg" alt="" /></p>
+
+<p>我选择<code class="language-plaintext highlighter-rouge">modelscope</code>作为模型的下载源,其配置如下：</p>
+
+<p><img src="https://picx.zhimg.com/v2-ceda093a48b4afe5969e450485567bb3_r.jpg" alt="" /></p>
+
+<p>其中需要着重讲一下vLLM的配置参数<code class="language-plaintext highlighter-rouge">gpu_memory_utilization</code>和<code class="language-plaintext highlighter-rouge">max_model_len</code>.</p>
+
+<p><code class="language-plaintext highlighter-rouge">gpu_memory_utilization</code>：vLLM在部署模型过程中会为其预先分配显存,<code class="language-plaintext highlighter-rouge">gpu_memory_utilization</code>值越大,预先分配的显存就越大,一般默认值为0.9。比如  本机总显存为48G,<code class="language-plaintext highlighter-rouge">gpu_memory_utilization=0.9</code>,那么为模型预先分配显存的就是<code class="language-plaintext highlighter-rouge">48G*0.9</code>,预先分配显存越大,就有更多显存可用于 KV 缓存,推理速度也会越快。在显存足够的情况下,<code class="language-plaintext highlighter-rouge">gpu_memory_utilization</code>可以设置为0.95。这也是为什么部署一模一样的量化模型,使用vLLM要比使用Ollama部署占用的显存多的原因。</p>
+
+<p><code class="language-plaintext highlighter-rouge">max_model_len</code>：模型的最大生成长度,包含prompt长度和generated长度。这个值需要根据<code class="language-plaintext highlighter-rouge">gpu_memory_utilization</code>设置。经过测试笔者推测<code class="language-plaintext highlighter-rouge">模型预先分配显存-模型部署本身需要的显存=模型的最大生成长度</code>。笔者以部署DeepSeek32b-6bit量化版简单做了个实验,实验结果如下：</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>gpu_memory_utilization</th>
+      <th>max_model_len</th>
+      <th>model size</th>
+      <th>显存差</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>0.6(28.8G)</td>
+      <td>8122</td>
+      <td>25.1G</td>
+      <td>3.7G</td>
+    </tr>
+    <tr>
+      <td>0.7(33.6G)</td>
+      <td>27584</td>
+      <td>25.1G</td>
+      <td>8.5G</td>
+    </tr>
+    <tr>
+      <td>0.8(38.4G)</td>
+      <td>47056</td>
+      <td>25.1G</td>
+      <td>13.3G</td>
+    </tr>
+    <tr>
+      <td>0.9(43.2G)</td>
+      <td>66523</td>
+      <td>25.1G</td>
+      <td>18.1G</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>如果在部署过程中碰到”The model’s max seq len (131000) is larger than the maximum number of tokens that can be stored in KV cache (66512). Try increasing <code class="language-plaintext highlighter-rouge">gpu_memory_utilization</code> or decreasing <code class="language-plaintext highlighter-rouge">max_model_len</code> when initializing the engine.”这个报错,那么代表着自己设置的<code class="language-plaintext highlighter-rouge">max_model_len=131000</code>太大了,超过了当前显存可生成的KV cache（66512）。</p>
+
+<p>所以有两个解决办法：1）将<code class="language-plaintext highlighter-rouge">max_model_len</code>设置小于当前显存生成的最大值就可以了。2）修改<code class="language-plaintext highlighter-rouge">gpu_memory_utilization</code> 使其模型占用的显存变大,从而使可以生成的KV cache变多。</p>
+
+<h2 id="报错记录">报错记录</h2>
+
+<p>1.</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>2025-11-17 13:05:58.280 Uncaught app exception
+Traceback <span class="o">(</span>most recent call last<span class="o">)</span>:
+  File <span class="s2">"/home/pepper/miniconda3/envs/chatchat/lib/python3.11/site-packages/streamlit/runtime/scriptrunner/script_runner.py"</span>, line 600, <span class="k">in </span>_run_script
+    <span class="nb">exec</span><span class="o">(</span>code, module.__dict__<span class="o">)</span>
+  File <span class="s2">"/home/pepper/code/llm/Langchain-Chatchat/libs/chatchat-server/chatchat/webui.py"</span>, line 77, <span class="k">in</span> &lt;module&gt;
+    dialogue_page<span class="o">(</span><span class="nv">api</span><span class="o">=</span>api, <span class="nv">is_lite</span><span class="o">=</span>is_lite<span class="o">)</span>
+  File <span class="s2">"/home/pepper/code/llm/Langchain-Chatchat/libs/chatchat-server/chatchat/webui_pages/dialogue/dialogue.py"</span>, line 418, <span class="k">in </span>dialogue_page
+    <span class="nv">upload_image</span><span class="o">=</span>upload_image,
+                 ^^^^^^^^^^^^
+UnboundLocalError: cannot access <span class="nb">local </span>variable <span class="s1">'use_mcp'</span> where it is not associated with a value
+</code></pre></div></div>
+
+<h3 id="3-配置手动磁力下载模型">3. 配置手动磁力下载模型</h3>
+
+<p>经典多线程工具推荐两个：IDM、Aria2。 IDM 适用于 Windows、aria2 适用于 Linux/Mac OS。</p>
+
+<ol>
+  <li>
+    <p>方法1 ： 获取并提供 Hugging Face 令牌</p>
+
+    <p>步骤 1: 获取 Hugging Face 访问令牌 (Token)</p>
+
+    <ul>
+      <li>访问令牌设置页面： 前往 <code class="language-plaintext highlighter-rouge">https://huggingface.co/settings/tokens</code></li>
+      <li>创建新令牌： 点击 “New token” (新建令牌)。</li>
+      <li>为令牌命名（例如 xinference-download）。</li>
+      <li>选择 “Role”（角色）为 Read（读取），这是下载模型所需的最低权限。</li>
+      <li>点击 “Generate a token”（生成令牌）。</li>
+      <li>复制令牌： 令牌生成后只会显示一次，请务必将其复制并妥善保管。</li>
+    </ul>
+
+    <p>步骤 2: 使用令牌运行下载命令</p>
+
+    <ul>
+      <li>由于你的脚本提示需要传递 <code class="language-plaintext highlighter-rouge">--hf_username</code> 和 <code class="language-plaintext highlighter-rouge">--hf_token</code>，你可以修改你的下载命令，将用户名和令牌作为参数传入。  格式：</li>
+    </ul>
+
+    <div class="language-shell highlighter-rouge"><div class="highlight"><pre class="highlight"><code>   ./hfd.sh 模型ID <span class="se">\-</span><span class="nt">-hf</span><span class="se">\_</span>username 你的用户名 <span class="se">\-</span><span class="nt">-hf</span><span class="se">\_</span>token 你的令牌 <span class="se">\-</span><span class="nt">-exclude</span> ...
+</code></pre></div>    </div>
+
+    <p>示例（请替换为你自己的信息）：</p>
+
+    <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  ./hfd.sh meta-llama/Llama-2-7b <span class="se">\-</span><span class="nt">-hf</span><span class="se">\_</span>username 你的HuggingFace用户名 <span class="se">\-</span><span class="nt">-hf</span><span class="se">\_</span>token 你复制的令牌 <span class="se">\-</span><span class="nt">-exc</span>
+</code></pre></div>    </div>
+  </li>
+  <li>
+    <p>方法2 ：使用 <code class="language-plaintext highlighter-rouge">huggingface-cli login</code></p>
+
+    <p>如果你的 <code class="language-plaintext highlighter-rouge">./hfd.sh</code> 脚本底层是调用 <code class="language-plaintext highlighter-rouge">huggingface_hub</code> 库，那么你可以先在终端中执行登录命令，让系统记住你的凭证：</p>
+
+    <p>登录： 在终端中运行以下命令：</p>
+
+    <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code> huggingface-cli login
+</code></pre></div>    </div>
+
+    <p>输入令牌： 系统会提示你输入在步骤 1 中获取的 Hugging Face 令牌。</p>
+
+    <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code> git config <span class="nt">--global</span> credential.helper store
+ <span class="c"># 存储地方</span>
+ <span class="nb">cat</span> /home/peper/.cache/huggingface/token
+</code></pre></div>    </div>
+
+    <p>重新运行下载： 登录成功后，再次运行你的原始下载命令：</p>
+
+    <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code> <span class="c"># 可以手动限制下载的内容</span>
+ ./hfd.sh meta-llama/Llama-2-7b <span class="nt">--exclude</span> <span class="se">\*</span>.bin <span class="se">\*</span>.msgpack onnx/
+</code></pre></div>    </div>
+  </li>
+</ol>
+
+<hr />

@@ -1,14 +1,12 @@
 ---
-title: 'what_Torchversion_install'
+title: '工具-PyTorch版本安装指南'
 lang: zh-CN
 date: 2025-02-11
 author: pepper
-tags: [tool]
+tags: [pytorch, tool]
 permalink: /posts/2025/02/what_Torchversion_install/
 pinned: false
 toc: true
-tags:
-  - daily
 ---
 这篇博客介绍了如何安装和使用 PyTorch 最新版本，同时提供了旧版本的安装指南，帮助用户根据需求快速开始机器学习开发。
 <!-- more -->

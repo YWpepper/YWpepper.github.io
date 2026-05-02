@@ -1,9 +1,9 @@
 ---
 layout: post
-title: "how_to_changeEasyDataset"
+title: '开发-EasyDataset登录验证开发'
 date: 2026-04-07
 author: pepper
-tags: [server]
+tags: [easydataset, java]
 comments: true
 toc: true
 pinned: false

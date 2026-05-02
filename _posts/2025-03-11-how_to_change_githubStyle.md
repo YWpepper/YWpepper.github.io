@@ -1,14 +1,11 @@
 ---
-title: 'how_to_change_githubStyle'
+title: '工具-GitHub-Pages主题样式修改'
 lang: zh-CN
 date: 2025-03-11
 author: pepper
-tags: [service]
+tags: [github, jekyll]
 pinned: false
 toc: true
-tags:
-  - ssh
-  - sever
 ---
 
 这篇博客介绍了如何修改 GitHub 的样式,包括修改主题、字体、背景等。

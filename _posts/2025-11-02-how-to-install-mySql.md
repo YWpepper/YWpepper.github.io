@@ -1,14 +1,11 @@
 ---
-title: 'how_to_install_mySql'
+title: '服务器-MySQL安装与配置'
 lang: zh-CN
 date: 2025-11-02
-tags: [service]
+tags: [mysql, server]
 author: pepper
 pinned: false
 toc: true
-tags:
-  - ssh
-  - sever
 ---
 安装 MySQL 关系型数据库管理系统的操作指南；
 <!-- more -->

@@ -1,14 +1,12 @@
 ---
-title: 'how_to_learn_GNNs'
+title: '论文-图神经网络学习资源'
 lang: zh-CN
 date: 2025-03-07
 author: pepper
 permalink: /posts/2025/03/how_to_learn_graphNetwork/
 pinned: false
 toc: true
-tags:
-  - graph
-  - booksresourse
+tags: [gnn, research]
 ---
 这篇博客介绍了图神经网络（GNNs）的学习资源。
 <!-- more -->

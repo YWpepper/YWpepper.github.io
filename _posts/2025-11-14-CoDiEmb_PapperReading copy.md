@@ -1,9 +1,9 @@
 ---
 layout: post
-title: 'CoDiEmb_PapperReading'
+title: '论文-CoDiEmb文本嵌入表示学习'
 date: 2025-11-17
 author: pepper
-tags: [papperReading]
+tags: [nlp, codiemb]
 comments: true
 toc: true
 pinned: false

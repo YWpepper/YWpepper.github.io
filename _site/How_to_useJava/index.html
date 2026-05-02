@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html>
+  <head>
+  <title>开发-Java代码生成器使用 – Pepper – 一个随心记录的地方</title>
+
+      <meta charset="utf-8" />
+    <meta content='text/html; charset=utf-8' http-equiv='Content-Type'>
+    <meta http-equiv='X-UA-Compatible' content='IE=edge'>
+    <meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1.0'>
+
+    
+    <meta name="description" content="这篇博客介绍了JAVA下的代码生成器。
+" />
+    <meta property="og:description" content="这篇博客介绍了JAVA下的代码生成器。
+" />
+    
+    <meta name="author" content="Pepper" />
+
+    
+    <meta property="og:title" content="开发-Java代码生成器使用" />
+    <meta property="twitter:title" content="开发-Java代码生成器使用" />
+    
+  <!-- Async font loading -->
+<script>
+  window.WebFontConfig = {
+      custom: {
+          families: ['Spoqa Han Sans:100,300,400,700'],
+          urls: ['https://spoqa.github.io/spoqa-han-sans/css/SpoqaHanSans-kr.css']
+      },
+      timeout: 60000
+  };
+  (function(d) {
+      var wf = d.createElement('script'), s = d.scripts[0];
+      wf.src = 'https://ajax.googleapis.com/ajax/libs/webfont/1.5.18/webfont.js';
+      s.parentNode.insertBefore(wf, s);
+  })(document);
+</script>
+
+<!--adobe fonts-->
+<script>
+    (function(d) {
+      var config = {
+        kitId: 'vbt3gjx',
+        scriptTimeout: 3000,
+        async: true
+      },
+      h=d.documentElement,t=setTimeout(function(){h.className=h.className.replace(/\bwf-loading\b/g,"")+" wf-inactive";},config.scriptTimeout),tk=d.createElement("script"),f=false,s=d.getElementsByTagName("script")[0],a;h.className+=" wf-loading";tk.src='https://use.typekit.net/'+config.kitId+'.js';tk.async=true;tk.onload=tk.onreadystatechange=function(){a=this.readyState;if(f||a&&a!="complete"&&a!="loaded")return;f=true;clearTimeout(t);try{Typekit.load(config)}catch(e){}};s.parentNode.insertBefore(tk,s)
+    })(document);
+</script> 
+
+  <!--[if lt IE 9]>
+    <script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+  <![endif]-->
+
+  <link rel="stylesheet" type="text/css" href="/style.css" />
+  <link rel="alternate" type="application/rss+xml" title="Pepper - 一个随心记录的地方" href="/feed.xml" />
+  <link rel="shortcut icon" href="https://images.weserv.nl/?url=cdn.nlark.com/yuque/0/2025/png/40742019/1766300112246-d1fc30f4-d036-46b5-98b0-073628c06a88.png?x-oss-process=image%2Fformat%2Cwebp">
+  <script src="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js"></script>
+  <script src="https://unpkg.com/feather-icons"></script>
+  <script type="text/javascript" async
+  src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+  </script>
+  <script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+      tex2jax: {
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre'],
+        inlineMath: [['$','$']]
+      }
+    });
+  </script>
+
+  <!-- Created with Jekyll Now - http://github.com/barryclark/jekyll-now -->
+
+</head>
+
+  <body>
+    
+
+
+    
+      <aside class="toc">
+        <ul>
+  <li><a href="#">开发-Java代码生成器使用</a>
+    <ul>
+      <li><a href="#java-代码生成器">JAVA 代码生成器</a></li>
+    </ul>
+  </li>
+</ul>
+      </aside>
+    
+
+    <div id="main" role="main" class="wrapper-content">
+      <div class="container">
+        <article class="posts">
+  <div class="back-to-home">
+    <a href="/" class="btn-home">← 返回主页</a>
+  </div>
+  
+  <h1>开发-Java代码生成器使用</h1>
+  
+
+  <div clsss="meta">
+    <span class="author">
+      pepper
+    </span>
+
+    <span class="date">
+      2025-11-22
+    </span>
+
+    <ul class="tag">
+      
+      <li>
+        <a href="http://localhost:4000/tags#java">
+          java
+        </a>
+      </li>
+      
+      <li>
+        <a href="http://localhost:4000/tags#maven">
+          maven
+        </a>
+      </li>
+      
+    </ul>
+  </div>
+
+  <div class="entry">
+    <p>这篇博客介绍了JAVA下的代码生成器。
+<!-- more --></p>
+
+<h3 id="java-代码生成器">JAVA 代码生成器</h3>
+
+<ol>
+  <li>修改generator.properties文件
+比如代码配置文件 <code class="language-plaintext highlighter-rouge">renren-generator/target/classes/generator.properties</code></li>
+</ol>
+
+<div class="language-properties highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">#代码生成器，配置信息
+</span>
+<span class="py">mainPath</span><span class="p">=</span><span class="s">com.atpepper</span>
+<span class="c">#包名
+</span><span class="py">package</span><span class="p">=</span><span class="s">com.atpepper.modules</span>
+<span class="py">moduleName</span><span class="p">=</span><span class="s">coupon</span>
+<span class="c">#作者
+</span><span class="py">author</span><span class="p">=</span><span class="s">pepper</span>
+<span class="c">#Email
+</span><span class="py">email</span><span class="p">=</span><span class="s">newen.yan@gmail.com</span>
+<span class="c">#表前缀（类名不会包含表前缀）
+</span><span class="py">tablePrefix</span><span class="p">=</span><span class="s">pms_</span>
+
+<span class="c">#\u7C7B\u578B\u8F6C\u6362\uFF0C\u914D\u7F6E\u4FE1\u606F
+</span><span class="py">tinyint</span><span class="p">=</span><span class="s">Integer</span>
+<span class="py">smallint</span><span class="p">=</span><span class="s">Integer</span>
+<span class="py">mediumint</span><span class="p">=</span><span class="s">Integer</span>
+<span class="py">int</span><span class="p">=</span><span class="s">Integer</span>
+<span class="py">integer</span><span class="p">=</span><span class="s">Integer</span>
+<span class="py">bigint</span><span class="p">=</span><span class="s">Long</span>
+<span class="py">float</span><span class="p">=</span><span class="s">Float</span>
+<span class="py">double</span><span class="p">=</span><span class="s">Double</span>
+<span class="py">decimal</span><span class="p">=</span><span class="s">BigDecimal</span>
+<span class="py">bit</span><span class="p">=</span><span class="s">Boolean</span>
+
+<span class="py">char</span><span class="p">=</span><span class="s">String</span>
+<span class="py">varchar</span><span class="p">=</span><span class="s">String</span>
+<span class="py">tinytext</span><span class="p">=</span><span class="s">String</span>
+<span class="py">text</span><span class="p">=</span><span class="s">String</span>
+<span class="py">mediumtext</span><span class="p">=</span><span class="s">String</span>
+<span class="py">longtext</span><span class="p">=</span><span class="s">String</span>
+
+
+<span class="py">date</span><span class="p">=</span><span class="s">Date</span>
+<span class="py">datetime</span><span class="p">=</span><span class="s">Date</span>
+<span class="py">timestamp</span><span class="p">=</span><span class="s">Date</span>
+
+<span class="py">NUMBER</span><span class="p">=</span><span class="s">Integer</span>
+<span class="py">INT</span><span class="p">=</span><span class="s">Integer</span>
+<span class="py">INTEGER</span><span class="p">=</span><span class="s">Integer</span>
+<span class="py">BINARY_INTEGER</span><span class="p">=</span><span class="s">Integer</span>
+<span class="py">LONG</span><span class="p">=</span><span class="s">String</span>
+<span class="py">FLOAT</span><span class="p">=</span><span class="s">Float</span>
+<span class="py">BINARY_FLOAT</span><span class="p">=</span><span class="s">Float</span>
+<span class="py">DOUBLE</span><span class="p">=</span><span class="s">Double</span>
+<span class="py">BINARY_DOUBLE</span><span class="p">=</span><span class="s">Double</span>
+<span class="py">DECIMAL</span><span class="p">=</span><span class="s">BigDecimal</span>
+<span class="py">CHAR</span><span class="p">=</span><span class="s">String</span>
+<span class="py">VARCHAR</span><span class="p">=</span><span class="s">String</span>
+<span class="py">VARCHAR2</span><span class="p">=</span><span class="s">String</span>
+<span class="py">NVARCHAR</span><span class="p">=</span><span class="s">String</span>
+<span class="py">NVARCHAR2</span><span class="p">=</span><span class="s">String</span>
+<span class="py">CLOB</span><span class="p">=</span><span class="s">String</span>
+<span class="py">BLOB</span><span class="p">=</span><span class="s">String</span>
+<span class="py">DATE</span><span class="p">=</span><span class="s">Date</span>
+<span class="py">DATETIME</span><span class="p">=</span><span class="s">Date</span>
+<span class="py">TIMESTAMP</span><span class="p">=</span><span class="s">Date</span>
+<span class="err">TIMESTAMP(6)=Date</span>
+
+<span class="py">int8</span><span class="p">=</span><span class="s">Long</span>
+<span class="py">int4</span><span class="p">=</span><span class="s">Integer</span>
+<span class="py">int2</span><span class="p">=</span><span class="s">Integer</span>
+<span class="py">numeric</span><span class="p">=</span><span class="s">BigDecimal</span>
+
+<span class="py">nvarchar</span><span class="p">=</span><span class="s">String</span>
+
+</code></pre></div></div>
+
+<ol>
+  <li>修改yaml文件
+比如代码配置文件 <code class="language-plaintext highlighter-rouge">renren-generator/src/main/resources/application.yaml</code>,修改现在需要连接的数据库<code class="language-plaintext highlighter-rouge">gulimail_sms</code></li>
+</ol>
+
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="na">server</span><span class="pi">:</span>
+  <span class="na">port</span><span class="pi">:</span> <span class="m">80</span>
+
+<span class="c1"># mysql</span>
+<span class="na">spring</span><span class="pi">:</span>
+  <span class="na">datasource</span><span class="pi">:</span>
+    <span class="na">type</span><span class="pi">:</span> <span class="s">com.alibaba.druid.pool.DruidDataSource</span>
+    <span class="c1">#MySQL配置</span>
+    <span class="na">driverClassName</span><span class="pi">:</span> <span class="s">com.mysql.cj.jdbc.Driver</span>
+    <span class="na">url</span><span class="pi">:</span> <span class="s">jdbc:mysql://localhost:3308/gulimail_sms?useUnicode=true&amp;characterEncoding=UTF-8&amp;useSSL=false&amp;serverTimezone=Asia/Shanghai</span>
+    <span class="na">username</span><span class="pi">:</span> <span class="s">root</span>
+    <span class="na">password</span><span class="pi">:</span> <span class="s">xxxxxxxx</span>
+</code></pre></div></div>
+<ol>
+  <li>运行生成器服务
+运行 <code class="language-plaintext highlighter-rouge">RenrenGeneratorApplication</code> 类，启动代码生成器服务，该项目启动后会运行到localhost:80端口，生成代码到 <code class="language-plaintext highlighter-rouge">gulimail_sms</code> 数据库中对应的表。</li>
+</ol>
+
+<p><img src="https://images.weserv.nl/?url=cdn.nlark.com/yuque/0/2025/png/40742019/1763794603048-80bf3e8a-b6ba-49c1-a127-bd365116f9ff.png?x-oss-process=image%2Fformat%2Cwebp" width="100%" alt="FinRpt Framework Diagram" /></p>
+
+<ol>
+  <li>替换生成代码
+生成代码的java和resource替换掉原来的代码现在需要修补里的common包</li>
+</ol>
+
+<div class="language-xml highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  <span class="c">&lt;!-- Add shared common utilities so controllers/services can import com.atpepper.common.* --&gt;</span>
+  <span class="nt">&lt;dependency&gt;</span>
+    <span class="nt">&lt;groupId&gt;</span>com.atpepper.gulimail<span class="nt">&lt;/groupId&gt;</span>
+    <span class="nt">&lt;artifactId&gt;</span>gulimail-common<span class="nt">&lt;/artifactId&gt;</span>
+    <span class="nt">&lt;version&gt;</span>0.0.1-SNAPSHOT<span class="nt">&lt;/version&gt;</span>
+  <span class="nt">&lt;/dependency&gt;</span>
+</code></pre></div></div>
+
+<ol>
+  <li>配置yaml文件</li>
+</ol>
+
+<p>修改 <code class="language-plaintext highlighter-rouge">gulimail-sms/src/main/resources/application.yaml</code> 文件，配置数据库连接</p>
+
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code>
+<span class="na">spring</span><span class="pi">:</span>
+  <span class="na">config</span><span class="pi">:</span>
+    <span class="na">import</span><span class="pi">:</span> <span class="s2">"</span><span class="s">optional:nacos:"</span>
+  <span class="na">datasource</span><span class="pi">:</span>
+    <span class="na">username</span><span class="pi">:</span> <span class="s">root</span>
+    <span class="na">password</span><span class="pi">:</span> <span class="s">xxxxxx</span>
+    <span class="na">url</span><span class="pi">:</span> <span class="s">jdbc:mysql://localhost:3308/gulimail_sms?useUnicode=true&amp;characterEncoding=UTF-8&amp;useSSL=false&amp;serverTimezone=Asia/Shanghai</span>
+    <span class="na">driver-class-name</span><span class="pi">:</span> <span class="s">com.mysql.cj.jdbc.Driver</span>
+
+<span class="na">mybatis-plus</span><span class="pi">:</span>
+  <span class="na">mapper-locations</span><span class="pi">:</span> <span class="s">classpath*:/mapper/**/*.xml</span>
+  <span class="na">global-config</span><span class="pi">:</span>
+    <span class="na">db-config</span><span class="pi">:</span>
+      <span class="na">id-type</span><span class="pi">:</span> <span class="s">auto</span>
+</code></pre></div></div>
+<ol>
+  <li>测试运行
+根据代码的路由打开网站<code class="language-plaintext highlighter-rouge">http://localhost:8080/coupon/coupon/list</code></li>
+</ol>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nd">@RestController</span>
+<span class="nd">@RequestMapping</span><span class="o">(</span><span class="s">"/coupon/coupon"</span><span class="o">)</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">CouponController</span> <span class="o">{</span>
+    <span class="nd">@Autowired</span>
+    <span class="kd">private</span> <span class="nc">CouponService</span> <span class="n">couponService</span><span class="o">;</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<p>网站响应如下：
+  <img src="https://images.weserv.nl/?url=cdn.nlark.com/yuque/0/2025/png/40742019/1763816685783-30c05649-32b0-4f48-8e06-a1d237f48988.png?x-oss-process=image%2Fformat%2Cwebp" width="100%" alt="FinRpt Framework Diagram" /></p>
+
+<ol>
+  <li>手动修改由于路径冲突问题</li>
+</ol>
+
+<p>在模板 <code class="language-plaintext highlighter-rouge">Controller.java.vm</code> 添加类级 <code class="language-plaintext highlighter-rouge">@RequestMapping("/${moduleName}/${classname}")</code>，生成的控制器将拥有唯一前缀，避免所有实体共享根路径导致的 <code class="language-plaintext highlighter-rouge">/update</code> 等冲突。</p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">package</span> <span class="err">${</span><span class="nn">package</span><span class="o">}.</span><span class="err">$</span><span class="o">{</span><span class="n">moduleName</span><span class="o">}.</span><span class="na">controller</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">java.util.Arrays</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">java.util.Map</span><span class="o">;</span>
+
+<span class="c1">//import org.apache.shiro.authz.annotation.RequiresPermissions;</span>
+<span class="kn">import</span> <span class="nn">org.springframework.beans.factory.annotation.Autowired</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.springframework.web.bind.annotation.PathVariable</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.springframework.web.bind.annotation.RequestBody</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.springframework.web.bind.annotation.RequestMapping</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.springframework.web.bind.annotation.RequestParam</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.springframework.web.bind.annotation.RestController</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="err">${</span><span class="nn">package</span><span class="o">}.</span><span class="err">$</span><span class="o">{</span><span class="n">moduleName</span><span class="o">}.</span><span class="na">entity</span><span class="o">.</span><span class="err">$</span><span class="o">{</span><span class="n">className</span><span class="o">}</span><span class="nc">Entity</span><span class="o">;</span>
+<span class="kn">import</span> <span class="err">${</span><span class="nn">package</span><span class="o">}.</span><span class="err">$</span><span class="o">{</span><span class="n">moduleName</span><span class="o">}.</span><span class="na">service</span><span class="o">.</span><span class="err">$</span><span class="o">{</span><span class="n">className</span><span class="o">}</span><span class="nc">Service</span><span class="o">;</span>
+<span class="kn">import</span> <span class="err">${</span><span class="nn">mainPath</span><span class="o">}.</span><span class="na">common</span><span class="o">.</span><span class="na">utils</span><span class="o">.</span><span class="na">PageUtils</span><span class="o">;</span>
+<span class="kn">import</span> <span class="err">${</span><span class="nn">mainPath</span><span class="o">}.</span><span class="na">common</span><span class="o">.</span><span class="na">utils</span><span class="o">.</span><span class="na">R</span><span class="o">;</span>
+
+<span class="cm">/**
+ * ${comments}
+ *
+ * @author ${author}
+ * @email ${email}
+ * @date ${datetime}
+ */</span>
+<span class="nd">@RestController</span>
+<span class="nd">@RequestMapping</span><span class="o">(</span><span class="s">"/${moduleName}/${classname}"</span><span class="o">)</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="err">${</span><span class="nc">className</span><span class="o">}</span><span class="nc">Controller</span> <span class="o">{</span>
+    <span class="nd">@Autowired</span>
+    <span class="kd">private</span> <span class="err">$</span><span class="o">{</span><span class="n">className</span><span class="o">}</span><span class="nc">Service</span> <span class="err">$</span><span class="o">{</span><span class="n">classname</span><span class="o">}</span><span class="nc">Service</span><span class="o">;</span>
+
+    <span class="cm">/**
+     * 列表
+     */</span>
+    <span class="nd">@RequestMapping</span><span class="o">(</span><span class="s">"/list"</span><span class="o">)</span>
+    <span class="c1">//@RequiresPermissions("${moduleName}:${pathName}:list")</span>
+    <span class="kd">public</span> <span class="no">R</span> <span class="nf">list</span><span class="o">(</span><span class="nd">@RequestParam</span> <span class="nc">Map</span><span class="o">&lt;</span><span class="nc">String</span><span class="o">,</span> <span class="nc">Object</span><span class="o">&gt;</span> <span class="n">params</span><span class="o">){</span>
+        <span class="nc">PageUtils</span> <span class="n">page</span> <span class="o">=</span> <span class="err">$</span><span class="o">{</span><span class="n">classname</span><span class="o">}</span><span class="nc">Service</span><span class="o">.</span><span class="na">queryPage</span><span class="o">(</span><span class="n">params</span><span class="o">);</span>
+
+        <span class="k">return</span> <span class="no">R</span><span class="o">.</span><span class="na">ok</span><span class="o">().</span><span class="na">put</span><span class="o">(</span><span class="s">"page"</span><span class="o">,</span> <span class="n">page</span><span class="o">);</span>
+    <span class="o">}</span>
+
+
+    <span class="cm">/**
+     * 信息
+     */</span>
+    <span class="nd">@RequestMapping</span><span class="o">(</span><span class="s">"/info/{${pk.attrname}}"</span><span class="o">)</span>
+    <span class="c1">//@RequiresPermissions("${moduleName}:${pathName}:info")</span>
+    <span class="kd">public</span> <span class="no">R</span> <span class="nf">info</span><span class="o">(</span><span class="nd">@PathVariable</span><span class="o">(</span><span class="s">"${pk.attrname}"</span><span class="o">)</span> <span class="err">$</span><span class="o">{</span><span class="n">pk</span><span class="o">.</span><span class="na">attrType</span><span class="o">}</span> <span class="err">$</span><span class="o">{</span><span class="n">pk</span><span class="o">.</span><span class="na">attrname</span><span class="o">}){</span>
+		<span class="err">$</span><span class="o">{</span><span class="n">className</span><span class="o">}</span><span class="nc">Entity</span> <span class="err">$</span><span class="o">{</span><span class="n">classname</span><span class="o">}</span> <span class="o">=</span> <span class="err">$</span><span class="o">{</span><span class="n">classname</span><span class="o">}</span><span class="nc">Service</span><span class="o">.</span><span class="na">getById</span><span class="o">(</span><span class="err">$</span><span class="o">{</span><span class="n">pk</span><span class="o">.</span><span class="na">attrname</span><span class="o">});</span>
+
+        <span class="k">return</span> <span class="no">R</span><span class="o">.</span><span class="na">ok</span><span class="o">().</span><span class="na">put</span><span class="o">(</span><span class="s">"${classname}"</span><span class="o">,</span> <span class="err">$</span><span class="o">{</span><span class="n">classname</span><span class="o">});</span>
+    <span class="o">}</span>
+
+    <span class="cm">/**
+     * 保存
+     */</span>
+    <span class="nd">@RequestMapping</span><span class="o">(</span><span class="s">"/save"</span><span class="o">)</span>
+    <span class="c1">//@RequiresPermissions("${moduleName}:${pathName}:save")</span>
+    <span class="kd">public</span> <span class="no">R</span> <span class="nf">save</span><span class="o">(</span><span class="nd">@RequestBody</span> <span class="err">$</span><span class="o">{</span><span class="n">className</span><span class="o">}</span><span class="nc">Entity</span> <span class="err">$</span><span class="o">{</span><span class="n">classname</span><span class="o">}){</span>
+		<span class="err">$</span><span class="o">{</span><span class="n">classname</span><span class="o">}</span><span class="nc">Service</span><span class="o">.</span><span class="na">save</span><span class="o">(</span><span class="err">$</span><span class="o">{</span><span class="n">classname</span><span class="o">});</span>
+
+        <span class="k">return</span> <span class="no">R</span><span class="o">.</span><span class="na">ok</span><span class="o">();</span>
+    <span class="o">}</span>
+
+    <span class="cm">/**
+     * 修改
+     */</span>
+    <span class="nd">@RequestMapping</span><span class="o">(</span><span class="s">"/update"</span><span class="o">)</span>
+    <span class="c1">//@RequiresPermissions("${moduleName}:${pathName}:update")</span>
+    <span class="kd">public</span> <span class="no">R</span> <span class="nf">update</span><span class="o">(</span><span class="nd">@RequestBody</span> <span class="err">$</span><span class="o">{</span><span class="n">className</span><span class="o">}</span><span class="nc">Entity</span> <span class="err">$</span><span class="o">{</span><span class="n">classname</span><span class="o">}){</span>
+		<span class="err">$</span><span class="o">{</span><span class="n">classname</span><span class="o">}</span><span class="nc">Service</span><span class="o">.</span><span class="na">updateById</span><span class="o">(</span><span class="err">$</span><span class="o">{</span><span class="n">classname</span><span class="o">});</span>
+
+        <span class="k">return</span> <span class="no">R</span><span class="o">.</span><span class="na">ok</span><span class="o">();</span>
+    <span class="o">}</span>
+
+    <span class="cm">/**
+     * 删除
+     */</span>
+    <span class="nd">@RequestMapping</span><span class="o">(</span><span class="s">"/delete"</span><span class="o">)</span>
+    <span class="c1">//@RequiresPermissions("${moduleName}:${pathName}:delete")</span>
+    <span class="kd">public</span> <span class="no">R</span> <span class="nf">delete</span><span class="o">(</span><span class="nd">@RequestBody</span> <span class="err">$</span><span class="o">{</span><span class="n">pk</span><span class="o">.</span><span class="na">attrType</span><span class="o">}[]</span> <span class="err">$</span><span class="o">{</span><span class="n">pk</span><span class="o">.</span><span class="na">attrname</span><span class="o">}</span><span class="n">s</span><span class="o">){</span>
+		<span class="err">$</span><span class="o">{</span><span class="n">classname</span><span class="o">}</span><span class="nc">Service</span><span class="o">.</span><span class="na">removeByIds</span><span class="o">(</span><span class="nc">Arrays</span><span class="o">.</span><span class="na">asList</span><span class="o">(</span><span class="err">$</span><span class="o">{</span><span class="n">pk</span><span class="o">.</span><span class="na">attrname</span><span class="o">}</span><span class="n">s</span><span class="o">));</span>
+
+        <span class="k">return</span> <span class="no">R</span><span class="o">.</span><span class="na">ok</span><span class="o">();</span>
+    <span class="o">}</span>
+
+<span class="o">}</span>
+
+</code></pre></div></div>
+
+<hr />
+
+  </div>
+
+  
+  
+<script src="https://utteranc.es/client.js"
+        repo="ywpepper/ywpepper.github.io"
+        issue-term="issue-term"
+        label="comment"
+        theme="github-light"
+        crossorigin="anonymous"
+        async>
+</script>
+
+
+  
+</article>
+
+<div class="pagination">
+  
+    <span class="prev" >
+      <a href="http://localhost:4000../../../How-to-Use-Gmail/">
+        ← 上一篇
+      </a>
+    </span>
+  
+  
+    <span class="next" >
+      <a href="http://localhost:4000../../../What_is_meavn/">
+        下一篇 →
+      </a>
+    </span>
+  
+</div>
+
+      </div>
+    </div>
+
+    
+
+  </body>
+
+  
+  <script>
+    document.getElementById("main").classList.add("withtoc");
+  </script>
+  
+
+  <div class="wrapper-footer-mobile">
+    <footer class="footer">
+      <!-- Refer to https://codepen.io/ruandre/pen/howFi -->
+<ul class="svg-icon">
+
+  
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</ul>
+
+
+
+<p>Copyright © 2025 ywpepper. All Rights Reserved.</p>
+
+    </footer>
+
+
+</html>

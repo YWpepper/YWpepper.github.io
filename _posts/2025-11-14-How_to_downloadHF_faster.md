@@ -1,9 +1,9 @@
 ---
 layout: post
-title: 'How_to_downloadHF'
+title: '工具-HuggingFace模型快速下载'
 date: 2025-11-14
 author: pepper
-tags: [server]
+tags: [hf, tool]
 comments: true
 toc: true
 pinned: false

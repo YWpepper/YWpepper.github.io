@@ -1,9 +1,9 @@
 ---
 layout: post
-title: "how_to_useVLLM"
+title: '服务器-vLLM多端口部署LLM'
 date: 2026-04-06
 author: pepper
-tags: [server]
+tags: [vllm, llm, server]
 comments: true
 toc: true
 pinned: false

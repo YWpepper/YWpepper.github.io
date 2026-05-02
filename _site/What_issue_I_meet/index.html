@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html>
+  <head>
+  <title>开发-SpringBoot配置错误排查 – Pepper – 一个随心记录的地方</title>
+
+      <meta charset="utf-8" />
+    <meta content='text/html; charset=utf-8' http-equiv='Content-Type'>
+    <meta http-equiv='X-UA-Compatible' content='IE=edge'>
+    <meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1.0'>
+
+    
+    <meta name="description" content="这篇博客介绍了乱七八糟的代码报错。
+" />
+    <meta property="og:description" content="这篇博客介绍了乱七八糟的代码报错。
+" />
+    
+    <meta name="author" content="Pepper" />
+
+    
+    <meta property="og:title" content="开发-SpringBoot配置错误排查" />
+    <meta property="twitter:title" content="开发-SpringBoot配置错误排查" />
+    
+  <!-- Async font loading -->
+<script>
+  window.WebFontConfig = {
+      custom: {
+          families: ['Spoqa Han Sans:100,300,400,700'],
+          urls: ['https://spoqa.github.io/spoqa-han-sans/css/SpoqaHanSans-kr.css']
+      },
+      timeout: 60000
+  };
+  (function(d) {
+      var wf = d.createElement('script'), s = d.scripts[0];
+      wf.src = 'https://ajax.googleapis.com/ajax/libs/webfont/1.5.18/webfont.js';
+      s.parentNode.insertBefore(wf, s);
+  })(document);
+</script>
+
+<!--adobe fonts-->
+<script>
+    (function(d) {
+      var config = {
+        kitId: 'vbt3gjx',
+        scriptTimeout: 3000,
+        async: true
+      },
+      h=d.documentElement,t=setTimeout(function(){h.className=h.className.replace(/\bwf-loading\b/g,"")+" wf-inactive";},config.scriptTimeout),tk=d.createElement("script"),f=false,s=d.getElementsByTagName("script")[0],a;h.className+=" wf-loading";tk.src='https://use.typekit.net/'+config.kitId+'.js';tk.async=true;tk.onload=tk.onreadystatechange=function(){a=this.readyState;if(f||a&&a!="complete"&&a!="loaded")return;f=true;clearTimeout(t);try{Typekit.load(config)}catch(e){}};s.parentNode.insertBefore(tk,s)
+    })(document);
+</script> 
+
+  <!--[if lt IE 9]>
+    <script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+  <![endif]-->
+
+  <link rel="stylesheet" type="text/css" href="/style.css" />
+  <link rel="alternate" type="application/rss+xml" title="Pepper - 一个随心记录的地方" href="/feed.xml" />
+  <link rel="shortcut icon" href="https://images.weserv.nl/?url=cdn.nlark.com/yuque/0/2025/png/40742019/1766300112246-d1fc30f4-d036-46b5-98b0-073628c06a88.png?x-oss-process=image%2Fformat%2Cwebp">
+  <script src="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js"></script>
+  <script src="https://unpkg.com/feather-icons"></script>
+  <script type="text/javascript" async
+  src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+  </script>
+  <script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+      tex2jax: {
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre'],
+        inlineMath: [['$','$']]
+      }
+    });
+  </script>
+
+  <!-- Created with Jekyll Now - http://github.com/barryclark/jekyll-now -->
+
+</head>
+
+  <body>
+    
+
+
+    
+      <aside class="toc">
+        <ul>
+  <li><a href="#">开发-SpringBoot配置错误排查</a>
+    <ul>
+      <li><a href="#1-使用-springboottestclasses--">1. <strong>使用 <code class="language-plaintext highlighter-rouge">@SpringBootTest(classes = ...)</code></strong></a></li>
+      <li><a href="#2-确保你的主类使用了-springbootapplication">2. <strong>确保你的主类使用了 <code class="language-plaintext highlighter-rouge">@SpringBootApplication</code></strong></a></li>
+      <li><a href="#3-使用-contextconfiguration-注解">3. <strong>使用 <code class="language-plaintext highlighter-rouge">@ContextConfiguration</code> 注解</strong></a></li>
+      <li><a href="#4-检查-springboottest-是否正确导入">4. <strong>检查 <code class="language-plaintext highlighter-rouge">@SpringBootTest</code> 是否正确导入</strong></a></li>
+      <li><a href="#5-检查-maven-依赖">5. <strong>检查 Maven 依赖</strong></a></li>
+      <li><a href="#6-检查-maven-surefire-plugin-配置">6. <strong>检查 <code class="language-plaintext highlighter-rouge">maven-surefire-plugin</code> 配置</strong></a></li>
+      <li><a href="#7-调试日志">7. <strong>调试日志</strong></a></li>
+      <li><a href="#总结">总结</a>
+        <ul>
+          <li><a href="#作用总结">作用总结：</a></li>
+          <li><a href="#使用场景">使用场景：</a>
+            <ul>
+              <li><a href="#例如">例如：</a></li>
+            </ul>
+          </li>
+          <li><a href="#命令的实际效果">命令的实际效果：</a></li>
+          <li><a href="#注意事项">注意事项：</a></li>
+        </ul>
+      </li>
+    </ul>
+  </li>
+</ul>
+      </aside>
+    
+
+    <div id="main" role="main" class="wrapper-content">
+      <div class="container">
+        <article class="posts">
+  <div class="back-to-home">
+    <a href="/" class="btn-home">← 返回主页</a>
+  </div>
+  
+  <h1>开发-SpringBoot配置错误排查</h1>
+  
+
+  <div clsss="meta">
+    <span class="author">
+      pepper
+    </span>
+
+    <span class="date">
+      2025-11-19
+    </span>
+
+    <ul class="tag">
+      
+      <li>
+        <a href="http://localhost:4000/tags#springboot">
+          springboot
+        </a>
+      </li>
+      
+      <li>
+        <a href="http://localhost:4000/tags#bug">
+          bug
+        </a>
+      </li>
+      
+    </ul>
+  </div>
+
+  <div class="entry">
+    <p>这篇博客介绍了乱七八糟的代码报错。
+<!-- more --></p>
+
+<p>这个报错信息显示的是 <strong><code class="language-plaintext highlighter-rouge">IllegalStateException</code></strong>，提示你在测试中没有找到合适的 <strong><code class="language-plaintext highlighter-rouge">@SpringBootConfiguration</code></strong>。具体错误的描述是：<code class="language-plaintext highlighter-rouge">Unable to find a @SpringBootConfiguration</code>，意味着 Spring Boot 测试无法正确识别应用的配置类。解决方法是确保你的测试类能够正确地加载 Spring Boot 配置。</p>
+
+<p>下面是一些常见的解决方案：</p>
+
+<h3 id="1-使用-springboottestclasses--">1. <strong>使用 <code class="language-plaintext highlighter-rouge">@SpringBootTest(classes = ...)</code></strong></h3>
+
+<ul>
+  <li>如果你没有使用 <code class="language-plaintext highlighter-rouge">@SpringBootConfiguration</code>，你可以显式地指定配置类，通过 <code class="language-plaintext highlighter-rouge">@SpringBootTest</code> 注解指定你的主配置类。假设你的主配置类是 <code class="language-plaintext highlighter-rouge">GulimailProductApplication</code>，你可以这样写：</li>
+</ul>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nd">@SpringBootTest</span><span class="o">(</span><span class="n">classes</span> <span class="o">=</span> <span class="nc">GulimailProductApplication</span><span class="o">.</span><span class="na">class</span><span class="o">)</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">GulimailProductApplicationTest</span> <span class="o">{</span>
+    <span class="c1">// 测试方法</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<h3 id="2-确保你的主类使用了-springbootapplication">2. <strong>确保你的主类使用了 <code class="language-plaintext highlighter-rouge">@SpringBootApplication</code></strong></h3>
+
+<ul>
+  <li>Spring Boot 项目通常会在启动类（通常是项目的 <code class="language-plaintext highlighter-rouge">main</code> 类）上使用 <code class="language-plaintext highlighter-rouge">@SpringBootApplication</code> 注解，这个注解本身就包含了 <code class="language-plaintext highlighter-rouge">@SpringBootConfiguration</code>。</li>
+  <li>确保你在 <code class="language-plaintext highlighter-rouge">GulimailProductApplication</code> 类上有 <code class="language-plaintext highlighter-rouge">@SpringBootApplication</code> 注解，类似这样：</li>
+</ul>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nd">@SpringBootApplication</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">GulimailProductApplication</span> <span class="o">{</span>
+    <span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">main</span><span class="o">(</span><span class="nc">String</span><span class="o">[]</span> <span class="n">args</span><span class="o">)</span> <span class="o">{</span>
+        <span class="nc">SpringApplication</span><span class="o">.</span><span class="na">run</span><span class="o">(</span><span class="nc">GulimailProductApplication</span><span class="o">.</span><span class="na">class</span><span class="o">,</span> <span class="n">args</span><span class="o">);</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<h3 id="3-使用-contextconfiguration-注解">3. <strong>使用 <code class="language-plaintext highlighter-rouge">@ContextConfiguration</code> 注解</strong></h3>
+
+<ul>
+  <li>如果你不使用 <code class="language-plaintext highlighter-rouge">@SpringBootTest</code>，也可以通过 <code class="language-plaintext highlighter-rouge">@ContextConfiguration</code> 注解来手动指定 Spring 的配置类。</li>
+</ul>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nd">@RunWith</span><span class="o">(</span><span class="nc">SpringRunner</span><span class="o">.</span><span class="na">class</span><span class="o">)</span>
+<span class="nd">@ContextConfiguration</span><span class="o">(</span><span class="n">classes</span> <span class="o">=</span> <span class="nc">GulimailProductApplication</span><span class="o">.</span><span class="na">class</span><span class="o">)</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">GulimailProductApplicationTest</span> <span class="o">{</span>
+    <span class="c1">// 测试方法</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<h3 id="4-检查-springboottest-是否正确导入">4. <strong>检查 <code class="language-plaintext highlighter-rouge">@SpringBootTest</code> 是否正确导入</strong></h3>
+
+<ul>
+  <li>确保你的测试类已经导入了正确的 Spring Boot 测试支持。比如你可能需要确保导入了 <code class="language-plaintext highlighter-rouge">@SpringBootTest</code> 和 <code class="language-plaintext highlighter-rouge">@RunWith(SpringRunner.class)</code>（如果你使用 JUnit 4）。</li>
+</ul>
+
+<h3 id="5-检查-maven-依赖">5. <strong>检查 Maven 依赖</strong></h3>
+
+<ul>
+  <li>确保你已经正确地添加了 Spring Boot 测试相关的依赖，比如 <code class="language-plaintext highlighter-rouge">spring-boot-starter-test</code>。依赖应该类似于：</li>
+</ul>
+
+<div class="language-xml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nt">&lt;dependency&gt;</span>
+    <span class="nt">&lt;groupId&gt;</span>org.springframework.boot<span class="nt">&lt;/groupId&gt;</span>
+    <span class="nt">&lt;artifactId&gt;</span>spring-boot-starter-test<span class="nt">&lt;/artifactId&gt;</span>
+    <span class="nt">&lt;scope&gt;</span>test<span class="nt">&lt;/scope&gt;</span>
+<span class="nt">&lt;/dependency&gt;</span>
+</code></pre></div></div>
+
+<h3 id="6-检查-maven-surefire-plugin-配置">6. <strong>检查 <code class="language-plaintext highlighter-rouge">maven-surefire-plugin</code> 配置</strong></h3>
+
+<ul>
+  <li>如果你的 Maven 配置有问题，可能也会导致测试无法正确执行。检查 <code class="language-plaintext highlighter-rouge">maven-surefire-plugin</code> 是否有相关配置问题，确保它正确识别和执行你的测试类。你可以通过在 <code class="language-plaintext highlighter-rouge">pom.xml</code> 中调整或更新插件配置来修复这个问题。</li>
+</ul>
+
+<h3 id="7-调试日志">7. <strong>调试日志</strong></h3>
+
+<ul>
+  <li>
+    <p>你可以使用 <code class="language-plaintext highlighter-rouge">-X</code> 参数重新运行 Maven 来获取更详细的调试信息，这样可以帮助你更深入地理解问题的根本原因。命令如下：</p>
+
+    <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>mvn <span class="nb">test</span> <span class="nt">-X</span>
+</code></pre></div>    </div>
+  </li>
+</ul>
+
+<h3 id="总结">总结</h3>
+
+<p>最常见的解决方法是确保你的测试类上有正确的 Spring Boot 配置注解，并确保主配置类（如 <code class="language-plaintext highlighter-rouge">@SpringBootApplication</code>）存在。如果这些都没有问题，可以进一步检查 Maven 配置、插件和依赖的正确性。</p>
+
+<hr />
+
+<p>命令 <code class="language-plaintext highlighter-rouge">mvn -q -pl gulimail-common -am install</code> 用于 Maven 构建项目时，以下是它的详细解释：</p>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">mvn</code>: 执行 Maven 构建工具的命令。</li>
+  <li><code class="language-plaintext highlighter-rouge">-q</code>（quiet）：这个参数会减少输出的日志信息，只显示必要的输出，通常用于当你希望只看到错误和关键的信息时。</li>
+  <li><code class="language-plaintext highlighter-rouge">-pl gulimail-common</code>：<code class="language-plaintext highlighter-rouge">-pl</code>（<code class="language-plaintext highlighter-rouge">--projects</code>）表示你指定的模块或项目，<code class="language-plaintext highlighter-rouge">gulimail-common</code> 是你想要构建的模块。这个参数限制了 Maven 只构建指定模块，而不是整个项目。</li>
+  <li><code class="language-plaintext highlighter-rouge">-am</code>（<code class="language-plaintext highlighter-rouge">--also-make</code>）：这个参数表示，除了构建 <code class="language-plaintext highlighter-rouge">gulimail-common</code> 模块之外，如果该模块有依赖的其他模块，Maven 会一起构建这些依赖模块。</li>
+  <li><code class="language-plaintext highlighter-rouge">install</code>: 这个命令会将构建好的模块安装到本地 Maven 仓库中，使其他模块可以在构建时使用。</li>
+</ul>
+
+<h3 id="作用总结">作用总结：</h3>
+
+<p>这条命令的作用是：<strong>构建 <code class="language-plaintext highlighter-rouge">gulimail-common</code> 模块以及它的所有依赖模块，并将构建结果安装到本地 Maven 仓库</strong>。这个命令适用于你在构建一个模块时，它依赖的其他模块没有被构建和安装在本地仓库的情况。它会确保所有相关的模块（包括 <code class="language-plaintext highlighter-rouge">gulimail-common</code> 模块及其依赖）都被构建并安装好。</p>
+
+<h3 id="使用场景">使用场景：</h3>
+
+<p>假设你有一个多模块的 Maven 项目，比如 <code class="language-plaintext highlighter-rouge">gulimail-product</code> 依赖 <code class="language-plaintext highlighter-rouge">gulimail-common</code>，而 <code class="language-plaintext highlighter-rouge">gulimail-common</code> 又依赖其他模块。如果你只想构建 <code class="language-plaintext highlighter-rouge">gulimail-common</code> 模块，并且确保它的所有依赖项也被构建并安装到本地仓库，可以使用这个命令。</p>
+
+<h4 id="例如">例如：</h4>
+
+<ul>
+  <li>如果 <code class="language-plaintext highlighter-rouge">gulimail-common</code> 依赖于 <code class="language-plaintext highlighter-rouge">gulimail-core</code>，<code class="language-plaintext highlighter-rouge">gulimail-core</code> 没有被构建过，那么 <code class="language-plaintext highlighter-rouge">-am</code> 参数会确保 <code class="language-plaintext highlighter-rouge">gulimail-core</code> 也会被构建并安装。</li>
+</ul>
+
+<h3 id="命令的实际效果">命令的实际效果：</h3>
+
+<ol>
+  <li><strong>构建</strong>：会先构建 <code class="language-plaintext highlighter-rouge">gulimail-common</code>，然后根据依赖关系构建它依赖的其他模块。</li>
+  <li><strong>安装</strong>：构建完成后，所有构建的模块会被安装到本地 Maven 仓库（通常是 <code class="language-plaintext highlighter-rouge">~/.m2/repository</code>）中，供其他项目使用。</li>
+  <li><strong>减少输出</strong>：由于使用了 <code class="language-plaintext highlighter-rouge">-q</code> 参数，命令执行时会减少不必要的日志输出，仅显示关键错误信息。</li>
+</ol>
+
+<h3 id="注意事项">注意事项：</h3>
+
+<ul>
+  <li>如果你只想构建 <code class="language-plaintext highlighter-rouge">gulimail-common</code>，并且不想构建其他模块，可以去掉 <code class="language-plaintext highlighter-rouge">-am</code> 参数。但在这种情况下，如果 <code class="language-plaintext highlighter-rouge">gulimail-common</code> 有依赖项未构建，它们会引发错误。</li>
+  <li>确保在执行命令前，<code class="language-plaintext highlighter-rouge">gulimail-common</code> 模块的 <code class="language-plaintext highlighter-rouge">pom.xml</code> 配置正确，且它的依赖都已经设置好。</li>
+</ul>
+
+<p>总之，这条命令是在本地构建并安装 <code class="language-plaintext highlighter-rouge">gulimail-common</code> 及其相关依赖的一个方便方式。</p>
+
+<hr />
+
+
+  </div>
+
+  
+  
+<script src="https://utteranc.es/client.js"
+        repo="ywpepper/ywpepper.github.io"
+        issue-term="issue-term"
+        label="comment"
+        theme="github-light"
+        crossorigin="anonymous"
+        async>
+</script>
+
+
+  
+</article>
+
+<div class="pagination">
+  
+    <span class="prev" >
+      <a href="http://localhost:4000../../../CoDiEmb_PapperReading-copy/">
+        ← 上一篇
+      </a>
+    </span>
+  
+  
+    <span class="next" >
+      <a href="http://localhost:4000../../../How-to-Use-Gmail/">
+        下一篇 →
+      </a>
+    </span>
+  
+</div>
+
+      </div>
+    </div>
+
+    
+
+  </body>
+
+  
+  <script>
+    document.getElementById("main").classList.add("withtoc");
+  </script>
+  
+
+  <div class="wrapper-footer-mobile">
+    <footer class="footer">
+      <!-- Refer to https://codepen.io/ruandre/pen/howFi -->
+<ul class="svg-icon">
+
+  
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</ul>
+
+
+
+<p>Copyright © 2025 ywpepper. All Rights Reserved.</p>
+
+    </footer>
+
+
+</html>

@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html>
+  <head>
+  <title>服务器-SSL证书安装与配置 – Pepper – 一个随心记录的地方</title>
+
+      <meta charset="utf-8" />
+    <meta content='text/html; charset=utf-8' http-equiv='Content-Type'>
+    <meta http-equiv='X-UA-Compatible' content='IE=edge'>
+    <meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1.0'>
+
+    
+    <meta name="description" content="这篇博客介绍了安装SSL证书，防止“裸奔”在互联网——用户信息可能被窃取，搜索引擎排名也会大打折扣。一张SSL证书，不仅能实现HTTPS加密，还能提升用户信任度！
+
+" />
+    <meta property="og:description" content="这篇博客介绍了安装SSL证书，防止“裸奔”在互联网——用户信息可能被窃取，搜索引擎排名也会大打折扣。一张SSL证书，不仅能实现HTTPS加密，还能提升用户信任度！
+
+" />
+    
+    <meta name="author" content="Pepper" />
+
+    
+    <meta property="og:title" content="服务器-SSL证书安装与配置" />
+    <meta property="twitter:title" content="服务器-SSL证书安装与配置" />
+    
+  <!-- Async font loading -->
+<script>
+  window.WebFontConfig = {
+      custom: {
+          families: ['Spoqa Han Sans:100,300,400,700'],
+          urls: ['https://spoqa.github.io/spoqa-han-sans/css/SpoqaHanSans-kr.css']
+      },
+      timeout: 60000
+  };
+  (function(d) {
+      var wf = d.createElement('script'), s = d.scripts[0];
+      wf.src = 'https://ajax.googleapis.com/ajax/libs/webfont/1.5.18/webfont.js';
+      s.parentNode.insertBefore(wf, s);
+  })(document);
+</script>
+
+<!--adobe fonts-->
+<script>
+    (function(d) {
+      var config = {
+        kitId: 'vbt3gjx',
+        scriptTimeout: 3000,
+        async: true
+      },
+      h=d.documentElement,t=setTimeout(function(){h.className=h.className.replace(/\bwf-loading\b/g,"")+" wf-inactive";},config.scriptTimeout),tk=d.createElement("script"),f=false,s=d.getElementsByTagName("script")[0],a;h.className+=" wf-loading";tk.src='https://use.typekit.net/'+config.kitId+'.js';tk.async=true;tk.onload=tk.onreadystatechange=function(){a=this.readyState;if(f||a&&a!="complete"&&a!="loaded")return;f=true;clearTimeout(t);try{Typekit.load(config)}catch(e){}};s.parentNode.insertBefore(tk,s)
+    })(document);
+</script> 
+
+  <!--[if lt IE 9]>
+    <script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+  <![endif]-->
+
+  <link rel="stylesheet" type="text/css" href="/style.css" />
+  <link rel="alternate" type="application/rss+xml" title="Pepper - 一个随心记录的地方" href="/feed.xml" />
+  <link rel="shortcut icon" href="https://images.weserv.nl/?url=cdn.nlark.com/yuque/0/2025/png/40742019/1766300112246-d1fc30f4-d036-46b5-98b0-073628c06a88.png?x-oss-process=image%2Fformat%2Cwebp">
+  <script src="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js"></script>
+  <script src="https://unpkg.com/feather-icons"></script>
+  <script type="text/javascript" async
+  src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+  </script>
+  <script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+      tex2jax: {
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre'],
+        inlineMath: [['$','$']]
+      }
+    });
+  </script>
+
+  <!-- Created with Jekyll Now - http://github.com/barryclark/jekyll-now -->
+
+</head>
+
+  <body>
+    
+
+
+    
+      <aside class="toc">
+        <ul>
+  <li><a href="#">服务器-SSL证书安装与配置</a>
+    <ul>
+      <li><a href="#一ssl证书怎么选">一、SSL证书怎么选？</a></li>
+      <li><a href="#二托管平台不建议">二、托管平台(不建议)</a>
+        <ul>
+          <li><a href="#0-dns授权">0. DNS授权</a></li>
+          <li><a href="#1-新建ram用户">1. 新建RAM用户</a></li>
+          <li><a href="#2-保存accesskey-id和accesskey-secret">2. 保存AccessKey ID和AccessKey Secret</a></li>
+          <li><a href="#3-为用户添加权限">3. 为用户添加权限</a></li>
+          <li><a href="#4-部署ssl证书">4. 部署SSL证书</a></li>
+          <li><a href="#三-certbot工具配置">三、 certbot工具配置</a>
+            <ul>
+              <li><a href="#1-安装-certbot官方推荐">1. 安装 Certbot（官方推荐）</a></li>
+              <li><a href="#2申请--自动配置证书">2.申请 &amp; 自动配置证书</a></li>
+              <li><a href="#3交互过程执行命令后">3、交互过程（执行命令后）</a></li>
+              <li><a href="#4-配置">4. 配置</a></li>
+              <li><a href="#5-测试--重启-nginx">5. 测试 + 重启 Nginx</a></li>
+              <li><a href="#6-自动续期证书必须配置">6. 自动续期证书（必须配置）</a></li>
+            </ul>
+          </li>
+        </ul>
+      </li>
+    </ul>
+  </li>
+</ul>
+      </aside>
+    
+
+    <div id="main" role="main" class="wrapper-content">
+      <div class="container">
+        <article class="posts">
+  <div class="back-to-home">
+    <a href="/" class="btn-home">← 返回主页</a>
+  </div>
+  
+  <h1>服务器-SSL证书安装与配置</h1>
+  
+
+  <div clsss="meta">
+    <span class="author">
+      pepper
+    </span>
+
+    <span class="date">
+      2026-04-07
+    </span>
+
+    <ul class="tag">
+      
+      <li>
+        <a href="http://localhost:4000/tags#ssl">
+          ssl
+        </a>
+      </li>
+      
+      <li>
+        <a href="http://localhost:4000/tags#server">
+          server
+        </a>
+      </li>
+      
+    </ul>
+  </div>
+
+  <div class="entry">
+    <p>这篇博客介绍了安装SSL证书，防止“裸奔”在互联网——用户信息可能被窃取，搜索引擎排名也会大打折扣。一张SSL证书，不仅能实现HTTPS加密，还能提升用户信任度！</p>
+
+<!-- more -->
+
+<h3 id="一ssl证书怎么选">一、SSL证书怎么选？</h3>
+
+<p>看域名数量</p>
+
+<ul>
+  <li>
+    <p>单域名：保护1个主域名（如 http://www.company.com）。</p>
+  </li>
+  <li>
+    <p>通配符：保护主域名+所有子域名（如 *.http://company.com）。</p>
+  </li>
+  <li>
+    <p>多域名：一张证书覆盖多个独立域名（如 http://company.com + http://shop.company.net）。</p>
+  </li>
+</ul>
+
+<h3 id="二托管平台不建议">二、托管平台(不建议)</h3>
+
+<p>由于一开始是新手，自己不会，所以在网上找了免费签发版本。申请后五分钟内可以发放，参考 <a href="https://ohttps.com/docs/">OHTTPS</a> 的免费版 HTTPS 证书 / SSL 证书。其中，OHTTPS 的免费版 HTTPS证书 / SSL 证书是由 Let’s Encrypt 颁发。</p>
+
+<h4 id="0-dns授权">0. DNS授权</h4>
+
+<p>由于这个托管平台需要帮你管理，它需要有很多权限，其中我们按照它的指南开始操作，以下选择DNS授权验证模式，可以参考它的<a href="https://ohttps.com/docs/dns/aliyun">指南</a>，但是有点旧了。</p>
+
+<p><img src="https://virginia-pepper.oss-cn-guangzhou.aliyuncs.com/20260408222044022.png" alt="alt text" width="80%" /></p>
+
+<h4 id="1-新建ram用户">1. 新建RAM用户</h4>
+<p>访问阿里云的链接如下：<code class="language-plaintext highlighter-rouge">https://ram.console.aliyun.com/overview</code></p>
+
+<p><img src="https://virginia-pepper.oss-cn-guangzhou.aliyuncs.com/20260408222548784.png" alt="alt text" width="80%" /></p>
+
+<h4 id="2-保存accesskey-id和accesskey-secret">2. 保存AccessKey ID和AccessKey Secret</h4>
+
+<p><img src="https://virginia-pepper.oss-cn-guangzhou.aliyuncs.com/20260408222226606.png" alt="alt text" width="80%" /></p>
+
+<p>阿里云中的获取方式与之前的传统不一样，在用户新建完成后，及时保存 <code class="language-plaintext highlighter-rouge">AccessKey ID</code> 和<code class="language-plaintext highlighter-rouge">AccessKey Secret</code>。</p>
+
+<p><img src="https://virginia-pepper.oss-cn-guangzhou.aliyuncs.com/20260408223229155.png" alt="alt text" width="80%" /></p>
+
+<h4 id="3-为用户添加权限">3. 为用户添加权限</h4>
+<p>选择新建的<code class="language-plaintext highlighter-rouge">ohttps-dns</code>用户，为该用户添加<code class="language-plaintext highlighter-rouge">[AliyunDNSFullAccess(管理云解析（DNS）的权限)]</code> 以及 <code class="language-plaintext highlighter-rouge">[AliyunYundunCertFullAccess(管理云盾证书服务的权限)]</code> 权限。该权限仅在申请证书时证书提供商 Let’sEncrypt 验证域名所属权使用,以及该权限仅用于上传用户在 OHTTPS 中申请的 HTTPS 证书 / SSL 证书。</p>
+
+<p><img src="https://virginia-pepper.oss-cn-guangzhou.aliyuncs.com/20260408223417844.png" alt="alt text" width="80%" /></p>
+
+<p><img src="https://virginia-pepper.oss-cn-guangzhou.aliyuncs.com/20260408223614769.png" alt="alt text" width="80%" /></p>
+
+<h4 id="4-部署ssl证书">4. 部署SSL证书</h4>
+
+<p>下载证书放到服务器上，或者使用平台直接托管一键操作。</p>
+
+<p><img src="https://virginia-pepper.oss-cn-guangzhou.aliyuncs.com/20260408223652679.png" alt="alt text" width="80%" /></p>
+
+<h3 id="三-certbot工具配置">三、 certbot工具配置</h3>
+
+<p>在自己的服务器上配置 Let’s Encrypt SSL 证书，最主流、最省心的方案是使用 Certbot 工具。它能自动完成域名验证、证书签发、Web 服务器配置（Nginx/Apache）、自动续期全流程。</p>
+
+<h4 id="1-安装-certbot官方推荐">1. 安装 Certbot（官方推荐）</h4>
+
+<p>用 apt 安装（Ubuntu/Debian）</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">sudo </span>apt update
+<span class="nb">sudo </span>apt <span class="nb">install </span>certbot python3-certbot-nginx python3-certbot-apache <span class="nt">-y</span>
+</code></pre></div></div>
+<h4 id="2申请--自动配置证书">2.申请 &amp; 自动配置证书</h4>
+
+<p>Nginx 服务器（全自动，最常用）:Certbot 会自动修改 Nginx 配置、开启 HTTPS、强制 HTTP→HTTPS 重定向。</p>
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>certbot <span class="nt">--nginx</span> <span class="nt">-d</span> 你的域名.com <span class="nt">--non-interactive</span> <span class="nt">--agree-tos</span> <span class="nt">-m</span> 你的邮箱@xxx.com
+</code></pre></div></div>
+
+<p>这条命令会：自动验证域名 /  自动签发证书 / 自动修改 Nginx 配置 / 自动开启 HTTPS / 自动把 80 重定向到 443 / 自动配置自动续期任务</p>
+
+<blockquote>
+  <p>执行后会问你 3 个问题：
+    1. 输入邮箱：随便填一个你的邮箱
+    2. 同意协议：输入 Y
+    3. 是否共享邮箱：输入 N
+    4. 最后问是否重定向：输入 2（自动 HTTP 转 HTTPS）</p>
+</blockquote>
+
+<h4 id="3交互过程执行命令后">3、交互过程（执行命令后）</h4>
+<p>成功后会提示：</p>
+<ul>
+  <li>证书路径：<code class="language-plaintext highlighter-rouge">/etc/letsencrypt/live/yourdomain.com/</code> 也可以手动指定移动到例如 <code class="language-plaintext highlighter-rouge">/etc/nginx/ssl/yourdomain.com</code></li>
+  <li>关键文件：
+    <ul>
+      <li>fullchain.pem（证书链）</li>
+      <li>privkey.pem（私钥）</li>
+    </ul>
+  </li>
+</ul>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># 复制 Let's Encrypt 证书到这个目录（自动续期后也需要重新复制）</span>
+<span class="nb">sudo cp</span> /etc/letsencrypt/live/yourdomain.com/fullchain.pem /etc/nginx/ssl/yourdomain.com/
+<span class="nb">sudo cp</span> /etc/letsencrypt/live/yourdomain.com/privkey.pem /etc/nginx/ssl/yourdomain.com/
+
+<span class="c"># 设置正确权限</span>
+<span class="nb">sudo chmod </span>600 /etc/nginx/ssl/yourdomain.com/<span class="k">*</span>
+<span class="nb">sudo chown </span>nginx:nginx /etc/nginx/ssl/yourdomain.com/<span class="k">*</span>  <span class="c"># 如果是 Ubuntu 则是 www-data:www-data</span>
+
+</code></pre></div></div>
+
+<h4 id="4-配置">4. 配置</h4>
+<p>打开配置文件：</p>
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">sudo </span>vi /etc/nginx/conf.d/vllm-https.conf
+</code></pre></div></div>
+<p>把下面内容完整粘贴进去（只需要把 yourdomain.com 换成你的真实域名）：</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>
+<span class="c"># HTTPS 安全配置</span>
+server <span class="o">{</span>
+    listen 443 ssl http2<span class="p">;</span>
+    server_name yourdomain.com<span class="p">;</span>  <span class="c"># 改成你的域名</span>
+
+    <span class="c"># 你要求的证书路径</span>
+    ssl_certificate /etc/nginx/ssl/yourdomain.com/fullchain.pem<span class="p">;</span>
+    ssl_certificate_key /etc/nginx/ssl/yourdomain.com/privkey.pem<span class="p">;</span>
+
+    <span class="c"># 安全优化（官方推荐）</span>
+    ssl_protocols TLSv1.2 TLSv1.3<span class="p">;</span>
+    ssl_prefer_server_ciphers on<span class="p">;</span>
+    ssl_session_cache shared:SSL:10m<span class="p">;</span>
+    ssl_session_timeout 10m<span class="p">;</span>
+
+    <span class="c"># 这里是你的 vllm 代理配置</span>
+    location / <span class="o">{</span>
+        proxy_pass http://127.0.0.1:8000<span class="p">;</span>  <span class="c"># vllm 默认端口</span>
+        proxy_set_header Host <span class="nv">$host</span><span class="p">;</span>
+        proxy_set_header X-Real-IP <span class="nv">$remote_addr</span><span class="p">;</span>
+        proxy_set_header X-Forwarded-For <span class="nv">$proxy_add_x_forwarded_for</span><span class="p">;</span>
+        proxy_set_header X-Forwarded-Proto <span class="nv">$scheme</span><span class="p">;</span>
+        
+        <span class="c"># 大模型接口需要长连接</span>
+        proxy_connect_timeout 300<span class="p">;</span>
+        proxy_send_timeout 300<span class="p">;</span>
+        proxy_read_timeout 300<span class="p">;</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+
+<span class="c"># 强制 HTTP 跳转到 HTTPS（必开）</span>
+server <span class="o">{</span>
+    listen 80<span class="p">;</span>
+    server_name yourdomain.com<span class="p">;</span>
+    <span class="k">return </span>301 https://<span class="nv">$host$request_uri</span><span class="p">;</span>
+<span class="o">}</span>
+
+</code></pre></div></div>
+
+<h4 id="5-测试--重启-nginx">5. 测试 + 重启 Nginx</h4>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># 测试配置是否正确</span>
+<span class="nb">sudo </span>nginx <span class="nt">-t</span>
+
+<span class="c"># 重启生效</span>
+<span class="nb">sudo </span>systemctl restart nginx
+</code></pre></div></div>
+
+<h4 id="6-自动续期证书必须配置">6. 自动续期证书（必须配置）</h4>
+<p>因为你手动移动了证书，Certbot 自动续期后不会同步到 /etc/nginx/ssl，所以要加一个自动复制脚本:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">sudo </span>vi /etc/letsencrypt/renewal-hooks/deploy/copy-to-nginx-ssl.sh
+</code></pre></div></div>
+<p>粘贴内容：</p>
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">#!/bin/bash</span>
+<span class="nv">DOMAIN</span><span class="o">=</span><span class="s2">"yourdomain.com"</span>
+<span class="nb">cp</span> /etc/letsencrypt/live/<span class="nv">$DOMAIN</span>/fullchain.pem /etc/nginx/ssl/<span class="nv">$DOMAIN</span>/
+<span class="nb">cp</span> /etc/letsencrypt/live/<span class="nv">$DOMAIN</span>/privkey.pem /etc/nginx/ssl/<span class="nv">$DOMAIN</span>/
+<span class="nb">chmod </span>600 /etc/nginx/ssl/<span class="nv">$DOMAIN</span>/<span class="k">*</span>
+systemctl reload nginx
+</code></pre></div></div>
+
+<p>加执行权限：</p>
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">sudo chmod</span> +x /etc/letsencrypt/renewal-hooks/deploy/copy-to-nginx-ssl.sh
+</code></pre></div></div>
+
+  </div>
+
+  
+  
+<script src="https://utteranc.es/client.js"
+        repo="ywpepper/ywpepper.github.io"
+        issue-term="issue-term"
+        label="comment"
+        theme="github-light"
+        crossorigin="anonymous"
+        async>
+</script>
+
+
+  
+</article>
+
+<div class="pagination">
+  
+    <span class="prev" >
+      <a href="http://localhost:4000../../../how_to_changeEasyDataset/">
+        ← 上一篇
+      </a>
+    </span>
+  
+  
+</div>
+
+      </div>
+    </div>
+
+    
+
+  </body>
+
+  
+  <script>
+    document.getElementById("main").classList.add("withtoc");
+  </script>
+  
+
+  <div class="wrapper-footer-mobile">
+    <footer class="footer">
+      <!-- Refer to https://codepen.io/ruandre/pen/howFi -->
+<ul class="svg-icon">
+
+  
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</ul>
+
+
+
+<p>Copyright © 2025 ywpepper. All Rights Reserved.</p>
+
+    </footer>
+
+
+</html>

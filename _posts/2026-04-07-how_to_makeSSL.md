@@ -1,9 +1,9 @@
 ---
 layout: post
-title: "how_to_makeSSL"
+title: '服务器-SSL证书安装与配置'
 date: 2026-04-07
 author: pepper
-tags: [server]
+tags: [ssl, server]
 comments: true
 toc: true
 pinned: false

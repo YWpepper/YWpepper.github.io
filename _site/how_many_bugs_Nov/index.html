@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html>
+  <head>
+  <title>开发-十一月Bug排查记录 – Pepper – 一个随心记录的地方</title>
+
+      <meta charset="utf-8" />
+    <meta content='text/html; charset=utf-8' http-equiv='Content-Type'>
+    <meta http-equiv='X-UA-Compatible' content='IE=edge'>
+    <meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1.0'>
+
+    
+    <meta name="description" content="记录11月有价值的bug。
+" />
+    <meta property="og:description" content="记录11月有价值的bug。
+" />
+    
+    <meta name="author" content="Pepper" />
+
+    
+    <meta property="og:title" content="开发-十一月Bug排查记录" />
+    <meta property="twitter:title" content="开发-十一月Bug排查记录" />
+    
+  <!-- Async font loading -->
+<script>
+  window.WebFontConfig = {
+      custom: {
+          families: ['Spoqa Han Sans:100,300,400,700'],
+          urls: ['https://spoqa.github.io/spoqa-han-sans/css/SpoqaHanSans-kr.css']
+      },
+      timeout: 60000
+  };
+  (function(d) {
+      var wf = d.createElement('script'), s = d.scripts[0];
+      wf.src = 'https://ajax.googleapis.com/ajax/libs/webfont/1.5.18/webfont.js';
+      s.parentNode.insertBefore(wf, s);
+  })(document);
+</script>
+
+<!--adobe fonts-->
+<script>
+    (function(d) {
+      var config = {
+        kitId: 'vbt3gjx',
+        scriptTimeout: 3000,
+        async: true
+      },
+      h=d.documentElement,t=setTimeout(function(){h.className=h.className.replace(/\bwf-loading\b/g,"")+" wf-inactive";},config.scriptTimeout),tk=d.createElement("script"),f=false,s=d.getElementsByTagName("script")[0],a;h.className+=" wf-loading";tk.src='https://use.typekit.net/'+config.kitId+'.js';tk.async=true;tk.onload=tk.onreadystatechange=function(){a=this.readyState;if(f||a&&a!="complete"&&a!="loaded")return;f=true;clearTimeout(t);try{Typekit.load(config)}catch(e){}};s.parentNode.insertBefore(tk,s)
+    })(document);
+</script> 
+
+  <!--[if lt IE 9]>
+    <script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+  <![endif]-->
+
+  <link rel="stylesheet" type="text/css" href="/style.css" />
+  <link rel="alternate" type="application/rss+xml" title="Pepper - 一个随心记录的地方" href="/feed.xml" />
+  <link rel="shortcut icon" href="https://images.weserv.nl/?url=cdn.nlark.com/yuque/0/2025/png/40742019/1766300112246-d1fc30f4-d036-46b5-98b0-073628c06a88.png?x-oss-process=image%2Fformat%2Cwebp">
+  <script src="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js"></script>
+  <script src="https://unpkg.com/feather-icons"></script>
+  <script type="text/javascript" async
+  src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+  </script>
+  <script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+      tex2jax: {
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre'],
+        inlineMath: [['$','$']]
+      }
+    });
+  </script>
+
+  <!-- Created with Jekyll Now - http://github.com/barryclark/jekyll-now -->
+
+</head>
+
+  <body>
+    
+
+
+    
+      <aside class="toc">
+        <ul>
+  <li><a href="#">开发-十一月Bug排查记录</a>
+    <ul>
+      <li><a href="#语雀的图片">语雀的图片</a></li>
+      <li><a href="#github加速镜像">github加速镜像</a>
+        <ul>
+          <li><a href="#方案一使用文件加速代理服务最推荐">方案一：使用文件加速/代理服务（最推荐）</a></li>
+          <li><a href="#ubuntu-部分命令积累">ubuntu 部分命令积累</a></li>
+        </ul>
+      </li>
+    </ul>
+  </li>
+</ul>
+      </aside>
+    
+
+    <div id="main" role="main" class="wrapper-content">
+      <div class="container">
+        <article class="posts">
+  <div class="back-to-home">
+    <a href="/" class="btn-home">← 返回主页</a>
+  </div>
+  
+  <h1>开发-十一月Bug排查记录</h1>
+  
+
+  <div clsss="meta">
+    <span class="author">
+      pepper
+    </span>
+
+    <span class="date">
+      2025-11-11
+    </span>
+
+    <ul class="tag">
+      
+      <li>
+        <a href="http://localhost:4000/tags#bug">
+          bug
+        </a>
+      </li>
+      
+      <li>
+        <a href="http://localhost:4000/tags#springboot">
+          springboot
+        </a>
+      </li>
+      
+    </ul>
+  </div>
+
+  <div class="entry">
+    <p>记录11月有价值的bug。
+<!-- more --></p>
+<h3 id="语雀的图片">语雀的图片</h3>
+
+<p>语雀的图片在 GitHub 页面上无法显示的原因主要有以下几点：</p>
+
+<ol>
+  <li>
+    <p>跨域（CORS）限制 🔒
+语雀的图片服务器配置了 CORS 策略，限制了来自其他域名（如 GitHub Pages）的访问请求。浏览器出于安全考虑会阻止这些跨域请求。</p>
+  </li>
+  <li>
+    <p>防盗链机制 🛡️
+语雀可能实施了防盗链措施，检查 HTTP 请求头中的 Referer 字段。当从 GitHub Pages 访问图片时，Referer 不是语雺域名，请求会被拒绝。</p>
+  </li>
+  <li>
+    <p>域名白名单 ✅
+语雀的服务器只允许特定域名访问其资源，GitHub Pages 的域名不在白名单中。</p>
+  </li>
+</ol>
+
+<p>方案一：下载图片到本地仓库（推荐）</p>
+
+<p>方案二：使用图片代理服务，使用免费的图片代理服务绕过限制：</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>&lt;img <span class="nv">src</span><span class="o">=</span><span class="s2">"https://images.weserv.nl/?url=cdn.nlark.com/yuque/0/2025/png/..."</span> <span class="nv">width</span><span class="o">=</span><span class="s2">"70%"</span><span class="o">&gt;</span>
+</code></pre></div></div>
+
+<p>方案三：使用 GitHub 提供的 CDN</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>&lt;img <span class="nv">src</span><span class="o">=</span><span class="s2">"https://raw.githubusercontent.com/YWpepper/HomePage/master/images/image-name.png"</span> <span class="nv">width</span><span class="o">=</span><span class="s2">"70%"</span><span class="o">&gt;</span>
+</code></pre></div></div>
+<h3 id="github加速镜像">github加速镜像</h3>
+
+<p>下载的 Release 文件（二进制压缩包），应主要使用“GitHub 文件加速”或“GitHub Proxy”服务。</p>
+
+<p>原链接：<code class="language-plaintext highlighter-rouge">https://github.com/fatedier/frp/releases/download/v0.48.0/frp_0.48.0_linux_amd64.tar.gz</code></p>
+
+<h5 id="方案一使用文件加速代理服务最推荐">方案一：使用文件加速/代理服务（最推荐）</h5>
+
+<p>这些服务通常通过 CDN 缓存文件或作为国内高速代理。您只需将原链接作为参数输入或替换域名。</p>
+
+<table>
+  <thead>
+    <tr>
+      <th style="text-align: left">加速域名/服务</th>
+      <th style="text-align: left">使用方式</th>
+      <th style="text-align: left">对应的 <code class="language-plaintext highlighter-rouge">wget</code> 命令</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td style="text-align: left"><strong><code class="language-plaintext highlighter-rouge">ghproxy.link</code></strong></td>
+      <td style="text-align: left">替换 <code class="language-plaintext highlighter-rouge">github.com</code></td>
+      <td style="text-align: left"><code class="language-plaintext highlighter-rouge">wget https://ghproxy.link/https://github.com/fatedier/frp/releases/download/v0.48.0/frp_0.48.0_linux_amd64.tar.gz</code></td>
+    </tr>
+    <tr>
+      <td style="text-align: left"><strong><code class="language-plaintext highlighter-rouge">ghfast.top</code></strong></td>
+      <td style="text-align: left">替换 <code class="language-plaintext highlighter-rouge">github.com</code></td>
+      <td style="text-align: left"><code class="language-plaintext highlighter-rouge">wget https://ghfast.top/https://github.com/fatedier/frp/releases/download/v0.48.0/frp_0.48.0_linux_amd64.tar.gz</code></td>
+    </tr>
+    <tr>
+      <td style="text-align: left"><strong><code class="language-plaintext highlighter-rouge">github.fxxk.dedyn.io</code></strong></td>
+      <td style="text-align: left">作为前缀/代理</td>
+      <td style="text-align: left"><code class="language-plaintext highlighter-rouge">wget https://github.fxxk.dedyn.io/fatedier/frp/releases/download/v0.48.0/frp_0.48.0_linux_amd64.tar.gz</code></td>
+    </tr>
+  </tbody>
+</table>
+
+<p><img src="https://images.weserv.nl/?url=cdn.nlark.com/yuque/0/2025/png/40742019/1763192246006-8ce1b00a-ca27-4166-b657-28644537bc24.png" width="100%" alt="FinRpt Framework Diagram" /></p>
+
+<h3 id="ubuntu-部分命令积累">ubuntu 部分命令积累</h3>
+
+<ol>
+  <li>进入其他人的文件夹
+    <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code> <span class="nb">sudo</span> <span class="nt">-iu</span> root
+</code></pre></div>    </div>
+    <hr />
+  </li>
+</ol>
+
+  </div>
+
+  
+  
+<script src="https://utteranc.es/client.js"
+        repo="ywpepper/ywpepper.github.io"
+        issue-term="issue-term"
+        label="comment"
+        theme="github-light"
+        crossorigin="anonymous"
+        async>
+</script>
+
+
+  
+</article>
+
+<div class="pagination">
+  
+    <span class="prev" >
+      <a href="http://localhost:4000../../../how_to_make_Xinference/">
+        ← 上一篇
+      </a>
+    </span>
+  
+  
+    <span class="next" >
+      <a href="http://localhost:4000../../../What_accidentLLM/">
+        下一篇 →
+      </a>
+    </span>
+  
+</div>
+
+      </div>
+    </div>
+
+    
+
+  </body>
+
+  
+  <script>
+    document.getElementById("main").classList.add("withtoc");
+  </script>
+  
+
+  <div class="wrapper-footer-mobile">
+    <footer class="footer">
+      <!-- Refer to https://codepen.io/ruandre/pen/howFi -->
+<ul class="svg-icon">
+
+  
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</ul>
+
+
+
+<p>Copyright © 2025 ywpepper. All Rights Reserved.</p>
+
+    </footer>
+
+
+</html>

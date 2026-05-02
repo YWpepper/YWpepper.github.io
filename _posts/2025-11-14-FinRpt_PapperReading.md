@@ -1,9 +1,9 @@
 ---
 layout: post
-title: 'FinRpt_PapperReading_AAAI2026'
+title: '论文-FinRpt股票研报自动生成'
 date: 2025-11-14
 author: pepper
-tags: [papperReading]
+tags: [finreport, nlp]
 comments: true
 toc: true
 pinned: false

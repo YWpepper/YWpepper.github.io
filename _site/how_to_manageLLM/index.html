@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html>
+  <head>
+  <title>服务器-Xinference管理LLM模型 – Pepper – 一个随心记录的地方</title>
+
+      <meta charset="utf-8" />
+    <meta content='text/html; charset=utf-8' http-equiv='Content-Type'>
+    <meta http-equiv='X-UA-Compatible' content='IE=edge'>
+    <meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1.0'>
+
+    
+    <meta name="description" content="这篇博客介绍了如何管理本地的LLM，本文将详细梳理使用xinference管理LLM模型的常用命令，以及通过vllm部署LLM模型的核心操作步骤与命令示例，帮助读者快速掌握本地LLM的管理与部署流程。
+
+" />
+    <meta property="og:description" content="这篇博客介绍了如何管理本地的LLM，本文将详细梳理使用xinference管理LLM模型的常用命令，以及通过vllm部署LLM模型的核心操作步骤与命令示例，帮助读者快速掌握本地LLM的管理与部署流程。
+
+" />
+    
+    <meta name="author" content="Pepper" />
+
+    
+    <meta property="og:title" content="服务器-Xinference管理LLM模型" />
+    <meta property="twitter:title" content="服务器-Xinference管理LLM模型" />
+    
+  <!-- Async font loading -->
+<script>
+  window.WebFontConfig = {
+      custom: {
+          families: ['Spoqa Han Sans:100,300,400,700'],
+          urls: ['https://spoqa.github.io/spoqa-han-sans/css/SpoqaHanSans-kr.css']
+      },
+      timeout: 60000
+  };
+  (function(d) {
+      var wf = d.createElement('script'), s = d.scripts[0];
+      wf.src = 'https://ajax.googleapis.com/ajax/libs/webfont/1.5.18/webfont.js';
+      s.parentNode.insertBefore(wf, s);
+  })(document);
+</script>
+
+<!--adobe fonts-->
+<script>
+    (function(d) {
+      var config = {
+        kitId: 'vbt3gjx',
+        scriptTimeout: 3000,
+        async: true
+      },
+      h=d.documentElement,t=setTimeout(function(){h.className=h.className.replace(/\bwf-loading\b/g,"")+" wf-inactive";},config.scriptTimeout),tk=d.createElement("script"),f=false,s=d.getElementsByTagName("script")[0],a;h.className+=" wf-loading";tk.src='https://use.typekit.net/'+config.kitId+'.js';tk.async=true;tk.onload=tk.onreadystatechange=function(){a=this.readyState;if(f||a&&a!="complete"&&a!="loaded")return;f=true;clearTimeout(t);try{Typekit.load(config)}catch(e){}};s.parentNode.insertBefore(tk,s)
+    })(document);
+</script> 
+
+  <!--[if lt IE 9]>
+    <script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+  <![endif]-->
+
+  <link rel="stylesheet" type="text/css" href="/style.css" />
+  <link rel="alternate" type="application/rss+xml" title="Pepper - 一个随心记录的地方" href="/feed.xml" />
+  <link rel="shortcut icon" href="https://images.weserv.nl/?url=cdn.nlark.com/yuque/0/2025/png/40742019/1766300112246-d1fc30f4-d036-46b5-98b0-073628c06a88.png?x-oss-process=image%2Fformat%2Cwebp">
+  <script src="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js"></script>
+  <script src="https://unpkg.com/feather-icons"></script>
+  <script type="text/javascript" async
+  src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+  </script>
+  <script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+      tex2jax: {
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre'],
+        inlineMath: [['$','$']]
+      }
+    });
+  </script>
+
+  <!-- Created with Jekyll Now - http://github.com/barryclark/jekyll-now -->
+
+</head>
+
+  <body>
+    
+
+
+    
+      <aside class="toc">
+        <ul>
+  <li><a href="#">服务器-Xinference管理LLM模型</a>
+    <ul>
+      <li><a href="#一xinference管理llm模型常用命令">一、xinference管理LLM模型常用命令</a>
+        <ul>
+          <li><a href="#1-安装xinference">1. 安装xinference</a></li>
+          <li><a href="#2-设置xinference为服务">2. 设置xinference为服务</a></li>
+        </ul>
+      </li>
+    </ul>
+  </li>
+</ul>
+      </aside>
+    
+
+    <div id="main" role="main" class="wrapper-content">
+      <div class="container">
+        <article class="posts">
+  <div class="back-to-home">
+    <a href="/" class="btn-home">← 返回主页</a>
+  </div>
+  
+  <h1>服务器-Xinference管理LLM模型</h1>
+  
+
+  <div clsss="meta">
+    <span class="author">
+      pepper
+    </span>
+
+    <span class="date">
+      2026-04-05
+    </span>
+
+    <ul class="tag">
+      
+      <li>
+        <a href="http://localhost:4000/tags#xinference">
+          xinference
+        </a>
+      </li>
+      
+      <li>
+        <a href="http://localhost:4000/tags#llm">
+          llm
+        </a>
+      </li>
+      
+      <li>
+        <a href="http://localhost:4000/tags#server">
+          server
+        </a>
+      </li>
+      
+    </ul>
+  </div>
+
+  <div class="entry">
+    <p>这篇博客介绍了如何管理本地的LLM，本文将详细梳理使用xinference管理LLM模型的常用命令，以及通过vllm部署LLM模型的核心操作步骤与命令示例，帮助读者快速掌握本地LLM的管理与部署流程。</p>
+
+<!-- more -->
+
+<h3 id="一xinference管理llm模型常用命令">一、xinference管理LLM模型常用命令</h3>
+
+<h4 id="1-安装xinference">1. 安装xinference</h4>
+
+<p>注意版本不要太高，详细安装和配置可以参考官网文档：
+目前本人使用的版本是 <code class="language-plaintext highlighter-rouge">xinference ==1.13.0</code> 以及<code class="language-plaintext highlighter-rouge">torch==2.3.1+cu121</code> 和<code class="language-plaintext highlighter-rouge">transformers==4.57.1</code></p>
+
+<h4 id="2-设置xinference为服务">2. 设置xinference为服务</h4>
+
+<p>找到目标脚本<code class="language-plaintext highlighter-rouge">xinference/run.sh</code>，先给它执行权限：</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">chmod</span> +x ~/xinference/run.sh
+</code></pre></div></div>
+
+<p>创建systemd服务文件：</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">sudo </span>nano /etc/systemd/system/xinference.service
+</code></pre></div></div>
+
+<p>在文件中添加以下内容：</p>
+
+<div class="language-ini highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nn">[Unit]</span>
+<span class="py">Description</span><span class="p">=</span><span class="s">Xinference Service</span>
+<span class="py">After</span><span class="p">=</span><span class="s">network.target</span>
+
+<span class="nn">[Service]</span>
+<span class="py">Type</span><span class="p">=</span><span class="s">simple</span>
+<span class="py">User</span><span class="p">=</span><span class="s">yw</span>
+<span class="py">WorkingDirectory</span><span class="p">=</span><span class="s">/home/yw/xinference</span>
+<span class="py">ExecStart</span><span class="p">=</span><span class="s">/home/yw/xinference/run.sh</span>
+<span class="py">Restart</span><span class="p">=</span><span class="s">on-failure</span>
+
+<span class="nn">[Install]</span>
+<span class="py">WantedBy</span><span class="p">=</span><span class="s">multi-user.target</span>
+</code></pre></div></div>
+
+<p>保存并退出后，执行以下命令启用服务：</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">sudo </span>systemctl daemon-reload
+<span class="nb">sudo </span>systemctl <span class="nb">enable </span>xinference
+<span class="nb">sudo </span>systemctl start xinference
+
+<span class="c"># 查看服务状态</span>
+<span class="nb">sudo </span>systemctl status xinference
+</code></pre></div></div>
+
+  </div>
+
+  
+  
+<script src="https://utteranc.es/client.js"
+        repo="ywpepper/ywpepper.github.io"
+        issue-term="issue-term"
+        label="comment"
+        theme="github-light"
+        crossorigin="anonymous"
+        async>
+</script>
+
+
+  
+</article>
+
+<div class="pagination">
+  
+    <span class="prev" >
+      <a href="http://localhost:4000../../../how-to-use-ollama/">
+        ← 上一篇
+      </a>
+    </span>
+  
+  
+    <span class="next" >
+      <a href="http://localhost:4000../../../how_to_useVLLM/">
+        下一篇 →
+      </a>
+    </span>
+  
+</div>
+
+      </div>
+    </div>
+
+    
+
+  </body>
+
+  
+  <script>
+    document.getElementById("main").classList.add("withtoc");
+  </script>
+  
+
+  <div class="wrapper-footer-mobile">
+    <footer class="footer">
+      <!-- Refer to https://codepen.io/ruandre/pen/howFi -->
+<ul class="svg-icon">
+
+  
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</ul>
+
+
+
+<p>Copyright © 2025 ywpepper. All Rights Reserved.</p>
+
+    </footer>
+
+
+</html>

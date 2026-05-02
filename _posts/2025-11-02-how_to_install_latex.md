@@ -1,14 +1,11 @@
 ---
-title: 'how_to_install_latex'
+title: '工具-VSCode与LaTeX安装配置'
 lang: zh-CN
 date: 2025-11-02
 author: pepper
-tags: [tool]
+tags: [latex, tool]
 pinned: false
 toc: true
-tags:
-  - ssh
-  - sever
 ---
 这篇博客介绍了安装和配置VSCode+LaTeX(含环境变量_配置_详细过程)
 <!-- more -->

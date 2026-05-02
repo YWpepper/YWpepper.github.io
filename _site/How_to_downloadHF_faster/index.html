@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html>
+  <head>
+  <title>工具-HuggingFace模型快速下载 – Pepper – 一个随心记录的地方</title>
+
+      <meta charset="utf-8" />
+    <meta content='text/html; charset=utf-8' http-equiv='Content-Type'>
+    <meta http-equiv='X-UA-Compatible' content='IE=edge'>
+    <meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1.0'>
+
+    
+    <meta name="description" content="这篇博客介绍了使用专用多线程下载器快速下载huggingface上的模型。
+" />
+    <meta property="og:description" content="这篇博客介绍了使用专用多线程下载器快速下载huggingface上的模型。
+" />
+    
+    <meta name="author" content="Pepper" />
+
+    
+    <meta property="og:title" content="工具-HuggingFace模型快速下载" />
+    <meta property="twitter:title" content="工具-HuggingFace模型快速下载" />
+    
+  <!-- Async font loading -->
+<script>
+  window.WebFontConfig = {
+      custom: {
+          families: ['Spoqa Han Sans:100,300,400,700'],
+          urls: ['https://spoqa.github.io/spoqa-han-sans/css/SpoqaHanSans-kr.css']
+      },
+      timeout: 60000
+  };
+  (function(d) {
+      var wf = d.createElement('script'), s = d.scripts[0];
+      wf.src = 'https://ajax.googleapis.com/ajax/libs/webfont/1.5.18/webfont.js';
+      s.parentNode.insertBefore(wf, s);
+  })(document);
+</script>
+
+<!--adobe fonts-->
+<script>
+    (function(d) {
+      var config = {
+        kitId: 'vbt3gjx',
+        scriptTimeout: 3000,
+        async: true
+      },
+      h=d.documentElement,t=setTimeout(function(){h.className=h.className.replace(/\bwf-loading\b/g,"")+" wf-inactive";},config.scriptTimeout),tk=d.createElement("script"),f=false,s=d.getElementsByTagName("script")[0],a;h.className+=" wf-loading";tk.src='https://use.typekit.net/'+config.kitId+'.js';tk.async=true;tk.onload=tk.onreadystatechange=function(){a=this.readyState;if(f||a&&a!="complete"&&a!="loaded")return;f=true;clearTimeout(t);try{Typekit.load(config)}catch(e){}};s.parentNode.insertBefore(tk,s)
+    })(document);
+</script> 
+
+  <!--[if lt IE 9]>
+    <script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+  <![endif]-->
+
+  <link rel="stylesheet" type="text/css" href="/style.css" />
+  <link rel="alternate" type="application/rss+xml" title="Pepper - 一个随心记录的地方" href="/feed.xml" />
+  <link rel="shortcut icon" href="https://images.weserv.nl/?url=cdn.nlark.com/yuque/0/2025/png/40742019/1766300112246-d1fc30f4-d036-46b5-98b0-073628c06a88.png?x-oss-process=image%2Fformat%2Cwebp">
+  <script src="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js"></script>
+  <script src="https://unpkg.com/feather-icons"></script>
+  <script type="text/javascript" async
+  src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+  </script>
+  <script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+      tex2jax: {
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre'],
+        inlineMath: [['$','$']]
+      }
+    });
+  </script>
+
+  <!-- Created with Jekyll Now - http://github.com/barryclark/jekyll-now -->
+
+</head>
+
+  <body>
+    
+
+
+    
+      <aside class="toc">
+        <ul>
+  <li><a href="#">工具-HuggingFace模型快速下载</a>
+    <ul>
+      <li><a href="#专用多线程下载器-hfd">专用多线程下载器 hfd</a></li>
+      <li><a href="#操作案例">操作案例</a></li>
+      <li><a href="#报错案例">报错案例</a>
+        <ul>
+          <li><a href="#403-token权限">403 token权限</a></li>
+          <li><a href="#443-取消代理">443 取消代理</a></li>
+          <li><a href="#重新设置代理">重新设置代理</a></li>
+        </ul>
+      </li>
+    </ul>
+  </li>
+</ul>
+      </aside>
+    
+
+    <div id="main" role="main" class="wrapper-content">
+      <div class="container">
+        <article class="posts">
+  <div class="back-to-home">
+    <a href="/" class="btn-home">← 返回主页</a>
+  </div>
+  
+  <h1>工具-HuggingFace模型快速下载</h1>
+  
+
+  <div clsss="meta">
+    <span class="author">
+      pepper
+    </span>
+
+    <span class="date">
+      2025-11-14
+    </span>
+
+    <ul class="tag">
+      
+      <li>
+        <a href="http://localhost:4000/tags#hf">
+          hf
+        </a>
+      </li>
+      
+      <li>
+        <a href="http://localhost:4000/tags#tool">
+          tool
+        </a>
+      </li>
+      
+    </ul>
+  </div>
+
+  <div class="entry">
+    <p>这篇博客介绍了使用专用多线程下载器快速下载huggingface上的模型。
+<!-- more --></p>
+
+<h3 id="专用多线程下载器-hfd">专用多线程下载器 hfd</h3>
+
+<p><strong><code class="language-plaintext highlighter-rouge">hfd</code> 是基于 curl 和 aria2 实现的专用于huggingface 下载的命令行脚本：</strong> <a href="https://zhuanlan.zhihu.com/p/721778923">hfd.sh</a>（<a href="https://link.zhihu.com/?target=https%3A//gist.github.com/padeoe/697678ab8e528b85a2a7bddafea1fa4f">Gitst链接</a>）。hfd 相比 <code class="language-plaintext highlighter-rouge">huggingface-cli</code> ，鲁棒性更好，此外多线程控制力度也更细，可以设置下载线程数、并行文件数。缺点是目前<strong>仅适用于 Linux 和 Mac OS</strong>。</p>
+
+<p>其原理:</p>
+<ul>
+  <li>Step1：通过Hugging Face API获取模型/数据集仓库对应的所有文件 url；</li>
+  <li>Step2：利用 <code class="language-plaintext highlighter-rouge">aria2</code> 多线程下载文件。</li>
+</ul>
+
+<p>该工具同样支持设置镜像端点的环境变量:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  <span class="nb">export </span><span class="nv">HF_ENDPOINT</span><span class="o">=</span><span class="s2">"https://hf-mirror.com"</span>
+</code></pre></div></div>
+
+<p>下载hfd文件</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>wget https://hf-mirror.com/hfd/hfd.sh
+<span class="nb">chmod</span> +x hfd.sh
+</code></pre></div></div>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>curl <span class="nt">-O</span> https://hf-mirror.com/hfd/hfd.sh
+<span class="nb">chmod</span> +x hfd.sh
+</code></pre></div></div>
+
+<p><strong>基本命令：</strong></p>
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  <span class="c">##下载指定模型</span>
+  ./hfd.sh gpt2
+  <span class="c">##下载指定数据集</span>
+  ./hfd.sh UDVideoQA/Urban_Dynamics_VideoQA_dataset
+  <span class="c">## 如果下载失败，可以明确指定类型</span>
+  ./hfd.sh <span class="nt">-d</span> datasets UDVideoQA/Urban_Dynamics_VideoQA_dataset
+  <span class="c">## 如果是私有数据集，登陆后下载</span>
+  huggingface-cli login
+  <span class="c">## 下载到指定目录</span>
+  ./hfd.sh <span class="nt">-d</span> datasets UDVideoQA/Urban_Dynamics_VideoQA_dataset <span class="nt">-o</span> ./my_data
+  <span class="c">## 只下载某个子文件夹（如果数据很大）</span>
+  ./hfd.sh <span class="nt">-d</span> datasets UDVideoQA/Urban_Dynamics_VideoQA_dataset <span class="nt">--include</span> <span class="s2">"videos/*"</span>
+</code></pre></div></div>
+
+<p>如果没有安装 aria2，则可以改用 wget：</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>./hdf.sh bigscience/bloom-560m --tool wget
+</code></pre></div></div>
+
+<p><code class="language-plaintext highlighter-rouge">--include</code> 指定下载特定文件</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code># Qwen2.5-Coder下载q2_k量化版本的模型
+hfd Qwen/Qwen2.5-Coder-32B-Instruct-GGUF --include qwen2.5-coder-32b-instruct-q2_k.gguf
+# gpt2下载onnx路径下的所有json文件
+hfd gpt2 --include onnx/*.json 
+</code></pre></div></div>
+
+<p><code class="language-plaintext highlighter-rouge">--exclude</code> 排除特定文件的下载</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code># gpt2仓库，不下载.bin格式的模型以及onnx模型
+hfd gpt2 --exclude *.bin onnx/*
+</code></pre></div></div>
+
+<p>注意：语法方面，<code class="language-plaintext highlighter-rouge">--include a --include b</code> 和 <code class="language-plaintext highlighter-rouge">--include a b</code> 等价。</p>
+
+<p><strong>完整命令格式：</strong></p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ ./hfd.sh --help
+用法:
+  hfd &lt;REPO_ID&gt; [--include include_pattern1 include_pattern2 ...] [--exclude exclude_pattern1 exclude_pattern2 ...] [--hf_username username] [--hf_token token] [--tool aria2c|wget] [-x threads] [-j jobs] [--dataset] [--local-dir path]
+
+描述:
+使用提供的仓库ID从Hugging Face下载模型或数据集。
+
+参数:
+仓库ID          Hugging Face仓库ID(必需)
+                格式:'组织名/仓库名'或旧版格式(如 gpt2)
+选项:
+包含/排除模式    用于匹配文件路径的模式,支持通配符。
+                 例如:'--exclude *.safetensor .md', '--include vae/*'。
+--include       (可选)指定要下载的文件包含模式(支持多个模式)。
+--exclude       (可选)指定要排除下载的文件模式(支持多个模式)。
+--hf_username   (可选)Hugging Face用户名用于认证(非邮箱)。
+--hf_token      (可选)Hugging Face令牌用于认证。
+--tool          (可选)使用的下载工具:aria2c(默认)或wget。
+-x              (可选)aria2c的下载线程数(默认:4)。
+-j              (可选)aria2c的并发下载数(默认:5)。
+--dataset       (可选)标记下载的是数据集。
+--local-dir     (可选)存储下载数据的目录路径。
+                 默认下载到当前目录下以'仓库名'命名的子目录。(如果记仓库ID为'组织名/仓库名')。
+
+示例:
+hfd gpt2
+hfd bigscience/bloom-560m --exclude *.bin .msgpack onnx/
+hfd meta-llama/Llama-2-7b --hf_username myuser --hf_token mytoken -x 4
+hfd lavita/medical-qa-shared-task-v1-toy --dataset
+</code></pre></div></div>
+
+<p>多线程和并行下载：</p>
+
+<p>hfd 在使用 aria2c 作为下载工具时，支持两种并行配置：</p>
+
+<p>单文件线程数 (-x)：控制每个文件的连接数，用法：hfd gpt2 -x 8，建议值：4-8，默认：4 线程。限制最大为10，别开太多了，服务器压力太大了😂。
+并发文件数 (-j)：控制同时下载的文件数，用法：hfd gpt2 -j 3，建议值：3-8，默认：5 个文件。限制最大为10，同上别开太大。
+组合使用：</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>hfd gpt2 <span class="nt">-x</span> 8 <span class="nt">-j</span> 3  <span class="c"># 每个文件 8 个线程，同时下载 3 个文件</span>
+</code></pre></div></div>
+
+<h3 id="操作案例">操作案例</h3>
+
+<ol>
+  <li>
+    <p>方法1 ： 获取并提供 Hugging Face 令牌</p>
+
+    <p>步骤 1: 获取 Hugging Face 访问令牌 (Token)</p>
+
+    <ul>
+      <li>访问令牌设置页面： 前往 <code class="language-plaintext highlighter-rouge">https://huggingface.co/settings/tokens</code></li>
+      <li>创建新令牌： 点击 “New token” (新建令牌)。</li>
+      <li>为令牌命名（例如 xinference-download）。</li>
+      <li>选择 “Role”（角色）为 Read（读取），这是下载模型所需的最低权限。</li>
+      <li>点击 “Generate a token”（生成令牌）。</li>
+      <li>复制令牌： 令牌生成后只会显示一次，请务必将其复制并妥善保管。</li>
+    </ul>
+
+    <p>步骤 2: 使用令牌运行下载命令</p>
+
+    <ul>
+      <li>由于你的脚本提示需要传递 <code class="language-plaintext highlighter-rouge">--hf_username</code> 和 <code class="language-plaintext highlighter-rouge">--hf_token</code>，你可以修改你的下载命令，将用户名和令牌作为参数传入。  格式：</li>
+    </ul>
+
+    <div class="language-shell highlighter-rouge"><div class="highlight"><pre class="highlight"><code>   ./hfd.sh 模型ID <span class="se">\-</span><span class="nt">-hf</span><span class="se">\_</span>username 你的用户名 <span class="se">\-</span><span class="nt">-hf</span><span class="se">\_</span>token 你的令牌 <span class="se">\-</span><span class="nt">-exclude</span> ...
+</code></pre></div>    </div>
+
+    <p>示例（请替换为你自己的信息）：</p>
+
+    <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  ./hfd.sh meta-llama/Llama-2-7b <span class="se">\-</span><span class="nt">-hf</span><span class="se">\_</span>username 你的HuggingFace用户名 <span class="se">\-</span><span class="nt">-hf</span><span class="se">\_</span>token 你复制的令牌 <span class="se">\-</span><span class="nt">-exc</span>
+</code></pre></div>    </div>
+  </li>
+  <li>
+    <p>方法2 ：使用 <code class="language-plaintext highlighter-rouge">huggingface-cli login</code>
+ 首先安装好环境 <code class="language-plaintext highlighter-rouge">pip install -U huggingface_hub</code>
+ 如果你的 <code class="language-plaintext highlighter-rouge">./hfd.sh</code> 脚本底层是调用 <code class="language-plaintext highlighter-rouge">huggingface_hub</code> 库，那么你可以先在终端中执行登录命令，让系统记住你的凭证：</p>
+
+    <p>登录： 在终端中运行以下命令：</p>
+
+    <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code> huggingface-cli login
+</code></pre></div>    </div>
+
+    <p>输入令牌： 系统会提示你输入在步骤 1 中获取的 Hugging Face 令牌。</p>
+
+    <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code> git config <span class="nt">--global</span> credential.helper store
+ <span class="c"># 存储地方</span>
+ <span class="nb">cat</span> /home/peper/.cache/huggingface/token
+</code></pre></div>    </div>
+
+    <p>重新运行下载： 登录成功后，再次运行你的原始下载命令：</p>
+
+    <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code> <span class="c"># 可以手动限制下载的内容</span>
+ ./hfd.sh meta-llama/Llama-2-7b <span class="nt">--exclude</span> <span class="se">\*</span>.bin <span class="se">\*</span>.msgpack onnx/
+</code></pre></div>    </div>
+  </li>
+</ol>
+
+<p>ps： 参考<a href="https://zhuanlan.zhihu.com/p/663712983">知乎指南1</a></p>
+
+<h3 id="报错案例">报错案例</h3>
+<h4 id="403-token权限">403 token权限</h4>
+
+<p>403 = Forbidden（服务器拒绝访问）</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>-&gt; <span class="o">[</span>HttpSkipResponseCommand.cc:239] <span class="nv">errorCode</span><span class="o">=</span>22 响应状态不成功。状态<span class="o">=</span>403
+
+Access to dataset UDVideoQA/Urban_Dynamics_VideoQA_dataset is restricted and you are not <span class="k">in </span>the authorized list. Visit https://huggingface.co/datasets/UDVideoQA/Urban_Dynamics_VideoQA_dataset to ask <span class="k">for </span>access.
+</code></pre></div></div>
+
+<p>说明：元数据已经成功获取 ✅ 正在下载大文件 <code class="language-plaintext highlighter-rouge">.tar</code>，但是镜像服务器拒绝访问这个文件 ❌
+解决办法：
+  a. 不要用镜像，直接用官方：<code class="language-plaintext highlighter-rouge">unset HF_ENDPOINT</code>
+  b. 防止一次性下载太大的文件，使用<code class="language-plaintext highlighter-rouge">--include "Set/*"</code>命令
+  c. token 错误，注意此处在官网上创建的时候，要使用write模式，不要其他模式。
+     <img src="https://images.weserv.nl/?url=cdn.nlark.com/yuque/0/2026/png/40742019/1772183252606-ef2e6d24-039a-4fb6-9982-9c2378e74a17.png" width="100%" alt="huggingface-token" /></p>
+
+<h4 id="443-取消代理">443 取消代理</h4>
+
+<p>443 报错可能是因为之前配置了代理，然后现在过期不可用了。</p>
+
+<p>在命令行查看是否设置代理：</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">env</span> | <span class="nb">grep</span> <span class="nt">-i</span> proxy
+</code></pre></div></div>
+
+<p>可能的输出：</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">http_proxy</span><span class="o">=</span>http://127.0.0.1:7890
+<span class="nv">https_proxy</span><span class="o">=</span>http://127.0.0.1:7890
+<span class="nv">all_proxy</span><span class="o">=</span>socks5://127.0.0.1:7891
+</code></pre></div></div>
+
+<p>使用以下命令取消：</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">unset </span>http_proxy                                 
+<span class="nb">unset </span>https_proxy
+<span class="nb">unset </span>all_proxy
+</code></pre></div></div>
+
+<p>取消代理之后仍然可能报对应端口的错误，然后<code class="language-plaintext highlighter-rouge">Git clone failed.</code>这有可能是因为你的 Git 之前配置了代理。</p>
+
+<p>查看配置（如果是当前项目配置，去掉 –global）：</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>git config <span class="nt">--global</span> <span class="nt">--list</span>
+</code></pre></div></div>
+
+<p>可能的输出：</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>http.proxy<span class="o">=</span>http://127.0.0.1:7890
+https.proxy<span class="o">=</span>http://127.0.0.1:7890
+</code></pre></div></div>
+
+<p>如果存在代理，对应取消：</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>git config <span class="nt">--global</span> <span class="nt">--unset</span> http.proxy
+git config <span class="nt">--global</span> <span class="nt">--unset</span> https.proxy
+</code></pre></div></div>
+
+<p>现在应该可以正常下载。</p>
+
+<h3 id="重新设置代理">重新设置代理</h3>
+
+<p>如果你想重新设置代理，下面也给出对应的命令，假设 HTTP/HTTPS 端口号为 7890， SOCKS5 为 7891。</p>
+
+<ul>
+  <li>终端代理：</li>
+</ul>
+
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>export http_proxy=http://127.0.0.1:7890
+export https_proxy=http://127.0.0.1:7890
+export all_proxy=socks5://127.0.0.1:7891
+</code></pre></div></div>
+
+<ul>
+  <li>Git 代理：</li>
+</ul>
+
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>git config --global http.proxy http://127.0.0.1:7890
+git config --global https.proxy http://127.0.0.1:7890
+</code></pre></div></div>
+
+<hr />
+
+  </div>
+
+  
+  
+<script src="https://utteranc.es/client.js"
+        repo="ywpepper/ywpepper.github.io"
+        issue-term="issue-term"
+        label="comment"
+        theme="github-light"
+        crossorigin="anonymous"
+        async>
+</script>
+
+
+  
+</article>
+
+<div class="pagination">
+  
+    <span class="prev" >
+      <a href="http://localhost:4000../../../FinRpt_PapperReading/">
+        ← 上一篇
+      </a>
+    </span>
+  
+  
+    <span class="next" >
+      <a href="http://localhost:4000../../../What_is_frpServe/">
+        下一篇 →
+      </a>
+    </span>
+  
+</div>
+
+      </div>
+    </div>
+
+    
+
+  </body>
+
+  
+  <script>
+    document.getElementById("main").classList.add("withtoc");
+  </script>
+  
+
+  <div class="wrapper-footer-mobile">
+    <footer class="footer">
+      <!-- Refer to https://codepen.io/ruandre/pen/howFi -->
+<ul class="svg-icon">
+
+  
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</ul>
+
+
+
+<p>Copyright © 2025 ywpepper. All Rights Reserved.</p>
+
+    </footer>
+
+
+</html>

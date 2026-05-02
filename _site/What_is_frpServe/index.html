@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html>
+  <head>
+  <title>服务器-frp内网穿透部署 – Pepper – 一个随心记录的地方</title>
+
+      <meta charset="utf-8" />
+    <meta content='text/html; charset=utf-8' http-equiv='Content-Type'>
+    <meta http-equiv='X-UA-Compatible' content='IE=edge'>
+    <meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1.0'>
+
+    
+    <meta name="description" content="这篇博客介绍了在Ubuntu22.04上部署frp-0.48.0内网穿透服务。
+
+" />
+    <meta property="og:description" content="这篇博客介绍了在Ubuntu22.04上部署frp-0.48.0内网穿透服务。
+
+" />
+    
+    <meta name="author" content="Pepper" />
+
+    
+    <meta property="og:title" content="服务器-frp内网穿透部署" />
+    <meta property="twitter:title" content="服务器-frp内网穿透部署" />
+    
+  <!-- Async font loading -->
+<script>
+  window.WebFontConfig = {
+      custom: {
+          families: ['Spoqa Han Sans:100,300,400,700'],
+          urls: ['https://spoqa.github.io/spoqa-han-sans/css/SpoqaHanSans-kr.css']
+      },
+      timeout: 60000
+  };
+  (function(d) {
+      var wf = d.createElement('script'), s = d.scripts[0];
+      wf.src = 'https://ajax.googleapis.com/ajax/libs/webfont/1.5.18/webfont.js';
+      s.parentNode.insertBefore(wf, s);
+  })(document);
+</script>
+
+<!--adobe fonts-->
+<script>
+    (function(d) {
+      var config = {
+        kitId: 'vbt3gjx',
+        scriptTimeout: 3000,
+        async: true
+      },
+      h=d.documentElement,t=setTimeout(function(){h.className=h.className.replace(/\bwf-loading\b/g,"")+" wf-inactive";},config.scriptTimeout),tk=d.createElement("script"),f=false,s=d.getElementsByTagName("script")[0],a;h.className+=" wf-loading";tk.src='https://use.typekit.net/'+config.kitId+'.js';tk.async=true;tk.onload=tk.onreadystatechange=function(){a=this.readyState;if(f||a&&a!="complete"&&a!="loaded")return;f=true;clearTimeout(t);try{Typekit.load(config)}catch(e){}};s.parentNode.insertBefore(tk,s)
+    })(document);
+</script> 
+
+  <!--[if lt IE 9]>
+    <script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+  <![endif]-->
+
+  <link rel="stylesheet" type="text/css" href="/style.css" />
+  <link rel="alternate" type="application/rss+xml" title="Pepper - 一个随心记录的地方" href="/feed.xml" />
+  <link rel="shortcut icon" href="https://images.weserv.nl/?url=cdn.nlark.com/yuque/0/2025/png/40742019/1766300112246-d1fc30f4-d036-46b5-98b0-073628c06a88.png?x-oss-process=image%2Fformat%2Cwebp">
+  <script src="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js"></script>
+  <script src="https://unpkg.com/feather-icons"></script>
+  <script type="text/javascript" async
+  src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+  </script>
+  <script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+      tex2jax: {
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre'],
+        inlineMath: [['$','$']]
+      }
+    });
+  </script>
+
+  <!-- Created with Jekyll Now - http://github.com/barryclark/jekyll-now -->
+
+</head>
+
+  <body>
+    
+
+
+    
+      <aside class="toc">
+        <ul>
+  <li><a href="#">服务器-frp内网穿透部署</a>
+    <ul>
+      <li><a href="#服务端公网ip服务器">服务端（公网IP服务器）</a></li>
+      <li><a href="#客户端windowsubuntu">客户端（windows/ubuntu）</a></li>
+    </ul>
+  </li>
+</ul>
+      </aside>
+    
+
+    <div id="main" role="main" class="wrapper-content">
+      <div class="container">
+        <article class="posts">
+  <div class="back-to-home">
+    <a href="/" class="btn-home">← 返回主页</a>
+  </div>
+  
+  <h1>服务器-frp内网穿透部署</h1>
+  
+
+  <div clsss="meta">
+    <span class="author">
+      pepper
+    </span>
+
+    <span class="date">
+      2025-11-14
+    </span>
+
+    <ul class="tag">
+      
+      <li>
+        <a href="http://localhost:4000/tags#frp">
+          frp
+        </a>
+      </li>
+      
+      <li>
+        <a href="http://localhost:4000/tags#server">
+          server
+        </a>
+      </li>
+      
+    </ul>
+  </div>
+
+  <div class="entry">
+    <p>这篇博客介绍了在Ubuntu22.04上部署frp-0.48.0内网穿透服务。</p>
+
+<!-- more -->
+
+<p>内网穿透允许我们在公共网络中安全地访问位于私有网络中的设备。其中一种常用的实现方式是使用frp（Fast Reverse Proxy）工具。frp是一个开源的内网穿透工具，它提供了简单而强大的功能，可以帮助我们轻松地实现内网穿透，让我们能够方便地访问内网资源。</p>
+
+<h2 id="服务端公网ip服务器">服务端（公网IP服务器）</h2>
+
+<ol>
+  <li>
+    <p>下载frp
+frp-0.48.0的下载地址为：<a href="https://link.zhihu.com/?target=https%3A//github.com/fatedier/frp/releases/tag/vv0.65.0">fatedier/frp/releases/tag/vv0.65.0</a></p>
+
+    <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">#直接使用weget命令，使用github加速镜像</span>
+wget https://ghfast.top/https://github.com/fatedier/frp/releases/download/v0.48.0/frp_0.48.0_linux_amd64.tar.gz
+</code></pre></div>    </div>
+
+    <p><img src="https://images.weserv.nl/?url=cdn.nlark.com/yuque/0/2025/png/40742019/1763220029393-aee9343c-ee15-4ae6-b9dd-b857a5773f8b.png" width="100%" alt="FinRpt Framework Diagram" /></p>
+  </li>
+  <li>
+    <p>将文件上传至服务器</p>
+
+    <p>将下载的frp的.tar.gz文件传到服务器中(建议使用xftp)</p>
+
+    <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># 在服务器中使用下面的命令解压.tar.gz文件</span>
+<span class="nb">tar</span> <span class="nt">-zxvf</span> frp_0.65.0_linux_amd64.tar.gz
+</code></pre></div>    </div>
+
+    <p>将解压后的文件夹移动到/root/目录下</p>
+
+    <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># 移动到root目录下</span>
+<span class="nb">sudo mv </span>frp_0.48.0_linux_amd64/ /root/frp
+
+<span class="c"># 将文件夹以及其子文件权限设置为仅root可读可写</span>
+<span class="nb">sudo chmod</span> <span class="nt">-R</span> 700 frp
+
+<span class="c"># 将文件夹与其子文件的拥有者设置为root用户</span>
+<span class="nb">sudo chown</span> <span class="nt">-R</span> root:root frp
+</code></pre></div>    </div>
+  </li>
+  <li>
+    <p>frps配置</p>
+
+    <p>为了方便起见，以下配置需要切换到root用户，用sudo也可行。</p>
+
+    <div class="language-shell highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># 进入到frp目录</span>
+<span class="nb">cd</span> /root/frp
+<span class="c"># 编辑frps的配置文件</span>
+nano frps.ini
+</code></pre></div>    </div>
+
+    <p>下面是frps服务器端的配置文件的参考，虚线中间的<strong>端口</strong>、<strong>用户名</strong>及<strong>密码</strong>请根据自己的需求更改</p>
+
+    <div class="language-shell highlighter-rouge"><div class="highlight"><pre class="highlight"><code>
+<span class="o">[</span>common]
+<span class="c"># --------------------------------------------------------------------------------------</span>
+<span class="c"># bind_port为frps和frpc通信的端口，需要在防火墙中放行该端口</span>
+bind_port <span class="o">=</span> 80001
+<span class="c"># dashboard_port 网页界面的端口，在网页中输入ip:dashboard_port，可以查看frpc的连接情况</span>
+dashboard_port <span class="o">=</span> 80002
+<span class="c"># frps的连接密码,这里需要和frpc.ini文件中的token保持一致</span>
+token <span class="o">=</span> password
+
+<span class="c"># 80002端口下的dashboard网页用户名密码，用来作为管理界面</span>
+dashboard_user <span class="o">=</span> user
+dashboard_pwd <span class="o">=</span> password
+<span class="c"># --------------------------------------------------------------------------------------</span>
+
+max_pool_count <span class="o">=</span> 50
+log_file <span class="o">=</span> /root/frp/logs/frps.log
+log_level <span class="o">=</span> info
+log_max_days <span class="o">=</span> 10
+<span class="c"># 我这里打开了tls加密，根据个人情况决定是否要开</span>
+tls_only <span class="o">=</span> <span class="nb">true</span>
+</code></pre></div>    </div>
+  </li>
+  <li>
+    <p>设置开机自启动</p>
+
+    <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code> <span class="c"># 先打开服务文件</span>
+ <span class="nb">cd</span> /etc/systemd/system/
+ nano frps.service
+
+ <span class="c"># 将下面内容写入到frps.service</span>
+ <span class="o">[</span>Unit]
+ <span class="nv">Description</span><span class="o">=</span>Frp Server Service
+ <span class="nv">After</span><span class="o">=</span>network.target
+
+ <span class="o">[</span>Service]
+ <span class="nv">Type</span><span class="o">=</span>simple
+ <span class="nv">User</span><span class="o">=</span>root
+ <span class="nv">Restart</span><span class="o">=</span>on-failure
+ <span class="nv">RestartSec</span><span class="o">=</span>5s
+ <span class="nv">ExecStart</span><span class="o">=</span>/root/frp/frps <span class="nt">-c</span> /root/frp/frps.ini
+ <span class="nv">ExecReload</span><span class="o">=</span>/root/frp/frps <span class="nt">-c</span> /root/frp/frps.ini
+ <span class="nv">LimitNOFILE</span><span class="o">=</span>1048576
+
+ <span class="o">[</span>Install]
+ <span class="nv">WantedBy</span><span class="o">=</span>multi-user.target
+</code></pre></div>    </div>
+  </li>
+  <li>
+    <p>保存后执行下面命令启动开机自启动</p>
+    <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># 修改完一次配置文件，就需要reload一下</span>
+systemctl daemon-reload
+<span class="c"># 打开服务</span>
+systemctl start frps.service
+<span class="c"># 暂停服务</span>
+systemctl stop frps.service
+<span class="c"># 设置开机自启动</span>
+systemctl <span class="nb">enable </span>frps.service
+<span class="c">## 最后一定要检查一下服务是否打开</span>
+systemctl status frps.service
+</code></pre></div>    </div>
+  </li>
+</ol>
+
+<h2 id="客户端windowsubuntu">客户端（windows/ubuntu）</h2>
+
+<ol>
+  <li>
+    <p>安装frp文件同上</p>
+  </li>
+  <li>
+    <p>切换到root用户，编辑frpc的配置文件,这里修改client的配置</p>
+
+    <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># 进入到frp目录</span>
+<span class="nb">cd</span> /root/frp
+<span class="c"># 编辑frpc的配置文件</span>
+nano frpc.ini
+</code></pre></div>    </div>
+  </li>
+  <li>
+    <p>编辑frpc的配置文件。</p>
+
+    <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">[</span>common]
+<span class="c"># 比如域名baidu.com / 它对应ip 180.101.49.11</span>
+server_addr <span class="o">=</span> 你的服务器的IP地址（如果是动态IP，使用ddns的域名也行）
+<span class="c"># server_port和frps中的bind_port对应</span>
+<span class="c"># 即由于服务器上在端口80001开启了服务，所以你需要请求80001</span>
+server_port <span class="o">=</span> 80001
+<span class="c"># 与frps配置文件中的token对应，这个用来校验身份</span>
+token <span class="o">=</span>  password
+tls_enable <span class="o">=</span> <span class="nb">true</span>
+
+<span class="c"># 第一个服务类型为tcp的ssh远程连接</span>
+<span class="o">[</span>ssh]
+<span class="nb">type</span> <span class="o">=</span> tcp
+local_ip <span class="o">=</span> 127.0.0.1
+local_port <span class="o">=</span> 22
+<span class="c"># 下面的remote_port端口需要在部署frps的服务器中放行该端口</span>
+<span class="c"># 即我本地的22端口映射到公网服务器上的remote端口，服务器要打开这个端口，区分上面的服务端口80001</span>
+remote_port <span class="o">=</span> 2222
+
+<span class="c"># 第二个服务类型为udp的windows远程桌面连接,可以注释掉</span>
+<span class="o">[</span>windows_remote]
+<span class="nb">type</span> <span class="o">=</span> udp
+<span class="c"># 穿透的主机不仅局限于本机，这个地方我还不太明白</span>
+local_ip <span class="o">=</span> 192.168.123.100
+local_port <span class="o">=</span> 3389
+<span class="c"># 需要在部署frps的服务器中放行3389端口</span>
+remote_port <span class="o">=</span> 3389
+</code></pre></div>    </div>
+  </li>
+</ol>
+
+<blockquote>
+  <p>补充一下： 一台 FRP 服务器 + 两个客户端（完美方案），我们保持[common]不要变。</p>
+</blockquote>
+
+<blockquote>
+  <p>核心规则其他如下</p>
+</blockquote>
+
+<ul>
+  <li>一台服务器足够，不用多开</li>
+  <li>两个客户端的 代理名字不能重复 <code class="language-plaintext highlighter-rouge">[pc1_ssh]</code> <code class="language-plaintext highlighter-rouge">[pc2_ssh]</code></li>
+  <li>两个客户端的 端口不能重复 <code class="language-plaintext highlighter-rouge">remote_port = 10001  # 端口1</code> <code class="language-plaintext highlighter-rouge">remote_port = 10002  # 不同端口</code>,注意在服务器上面打开那两个端口,命令如下<code class="language-plaintext highlighter-rouge">ufw allow 10001/tcp</code> <code class="language-plaintext highlighter-rouge">ufw allow 10002/tcp</code></li>
+  <li>服务端完全不用改！直接通用。</li>
+</ul>
+
+<blockquote>
+  <p>当客户端是wsl里面的ssh</p>
+</blockquote>
+
+<ul>
+  <li>注意<code class="language-plaintext highlighter-rouge">wsl</code>的<code class="language-plaintext highlighter-rouge">ssh</code>服务已经打开，并且检查<code class="language-plaintext highlighter-rouge">wsl</code>的<code class="language-plaintext highlighter-rouge">ssh</code>服务端口，一般不是<code class="language-plaintext highlighter-rouge">22</code>，可能被我们修改为了<code class="language-plaintext highlighter-rouge">8022</code>也有可能，所以要注意检查。</li>
+  <li>检查安装指令
+    <ul>
+      <li><code class="language-plaintext highlighter-rouge">apt install openssh-server -y</code> 安装ssh</li>
+      <li><code class="language-plaintext highlighter-rouge">service ssh start</code> 开启服务</li>
+      <li><code class="language-plaintext highlighter-rouge">systemctl status ssh</code> 查看状态</li>
+    </ul>
+  </li>
+  <li>如果还要开启<code class="language-plaintext highlighter-rouge">rdp</code>的服务，一般<code class="language-plaintext highlighter-rouge">wsl</code>是没有这个服务的，所以在<code class="language-plaintext highlighter-rouge">local_ip</code> 处修改为 <code class="language-plaintext highlighter-rouge">host.docker.internal</code>，这个需要尝试。</li>
+</ul>
+
+<ol>
+  <li>
+    <p>客户端启动frpc服务</p>
+
+    <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">cd</span> /etc/systemd/system/
+nano frpc.service
+</code></pre></div>    </div>
+
+    <p>将下面的内容写入到frpc.service</p>
+
+    <div class="language-shell highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">[</span>Unit]
+<span class="nv">Description</span><span class="o">=</span>Frp Client Service
+<span class="nv">After</span><span class="o">=</span>network.target
+
+<span class="o">[</span>Service]
+<span class="nv">Type</span><span class="o">=</span>simple
+<span class="nv">User</span><span class="o">=</span>root
+<span class="nv">Restart</span><span class="o">=</span>on-failure
+<span class="nv">RestartSec</span><span class="o">=</span>5s
+<span class="nv">ExecStart</span><span class="o">=</span>/root/frp/frpc <span class="nt">-c</span> /root/frp/frpc.ini
+<span class="nv">ExecReload</span><span class="o">=</span>/root/frp/frpc <span class="nt">-c</span> /root/frp/frpc.ini
+<span class="nv">LimitNOFILE</span><span class="o">=</span>1048576
+
+<span class="o">[</span>Install]
+<span class="nv">WantedBy</span><span class="o">=</span>multi-user.target
+</code></pre></div>    </div>
+  </li>
+  <li>
+    <p>保存后执行下面命令启动开机自启动</p>
+
+    <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>systemctl daemon-reload
+systemctl start frpc.service
+<span class="c"># 修改完配置 需要restart</span>
+systemctl restart frpc.service
+systemctl <span class="nb">enable </span>frpc.service
+
+<span class="c"># 注意最后检查是否与服务器实现通信</span>
+systemctl status frpc.service
+</code></pre></div>    </div>
+
+    <p><img src="https://images.weserv.nl/?url=cdn.nlark.com/yuque/0/2025/png/40742019/1763219783004-bc1961bf-e64d-4e02-a62c-241b7cf1aa04.png" width="100%" alt="FinRpt Framework Diagram" /></p>
+  </li>
+</ol>
+
+<p>至此完成所有步骤.</p>
+
+  </div>
+
+  
+  
+<script src="https://utteranc.es/client.js"
+        repo="ywpepper/ywpepper.github.io"
+        issue-term="issue-term"
+        label="comment"
+        theme="github-light"
+        crossorigin="anonymous"
+        async>
+</script>
+
+
+  
+</article>
+
+<div class="pagination">
+  
+    <span class="prev" >
+      <a href="http://localhost:4000../../../How_to_downloadHF_faster/">
+        ← 上一篇
+      </a>
+    </span>
+  
+  
+    <span class="next" >
+      <a href="http://localhost:4000../../../CoDiEmb_PapperReading-copy/">
+        下一篇 →
+      </a>
+    </span>
+  
+</div>
+
+      </div>
+    </div>
+
+    
+
+  </body>
+
+  
+  <script>
+    document.getElementById("main").classList.add("withtoc");
+  </script>
+  
+
+  <div class="wrapper-footer-mobile">
+    <footer class="footer">
+      <!-- Refer to https://codepen.io/ruandre/pen/howFi -->
+<ul class="svg-icon">
+
+  
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</ul>
+
+
+
+<p>Copyright © 2025 ywpepper. All Rights Reserved.</p>
+
+    </footer>
+
+
+</html>

@@ -1,12 +1,11 @@
 ---
-title: 'What_is_trafficPrediction'
+title: '论文-交通预测研究概述'
 lang: zh-CN
 date: 2025-02-07
 author: pepper
 toc: true
 pinned: false
-tags:
-  - Study
+tags: [traffic, research]
 ---
 Traffic Prediction 方向的研究概述
 <!-- more -->

@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html>
+  <head>
+  <title>服务器-Ollama常用命令 – Pepper – 一个随心记录的地方</title>
+
+      <meta charset="utf-8" />
+    <meta content='text/html; charset=utf-8' http-equiv='Content-Type'>
+    <meta http-equiv='X-UA-Compatible' content='IE=edge'>
+    <meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1.0'>
+
+    
+    <meta name="description" content="这篇博客介绍了Ollama 常用命令笔记（Ubuntu 终端专用）
+
+" />
+    <meta property="og:description" content="这篇博客介绍了Ollama 常用命令笔记（Ubuntu 终端专用）
+
+" />
+    
+    <meta name="author" content="Pepper" />
+
+    
+    <meta property="og:title" content="服务器-Ollama常用命令" />
+    <meta property="twitter:title" content="服务器-Ollama常用命令" />
+    
+  <!-- Async font loading -->
+<script>
+  window.WebFontConfig = {
+      custom: {
+          families: ['Spoqa Han Sans:100,300,400,700'],
+          urls: ['https://spoqa.github.io/spoqa-han-sans/css/SpoqaHanSans-kr.css']
+      },
+      timeout: 60000
+  };
+  (function(d) {
+      var wf = d.createElement('script'), s = d.scripts[0];
+      wf.src = 'https://ajax.googleapis.com/ajax/libs/webfont/1.5.18/webfont.js';
+      s.parentNode.insertBefore(wf, s);
+  })(document);
+</script>
+
+<!--adobe fonts-->
+<script>
+    (function(d) {
+      var config = {
+        kitId: 'vbt3gjx',
+        scriptTimeout: 3000,
+        async: true
+      },
+      h=d.documentElement,t=setTimeout(function(){h.className=h.className.replace(/\bwf-loading\b/g,"")+" wf-inactive";},config.scriptTimeout),tk=d.createElement("script"),f=false,s=d.getElementsByTagName("script")[0],a;h.className+=" wf-loading";tk.src='https://use.typekit.net/'+config.kitId+'.js';tk.async=true;tk.onload=tk.onreadystatechange=function(){a=this.readyState;if(f||a&&a!="complete"&&a!="loaded")return;f=true;clearTimeout(t);try{Typekit.load(config)}catch(e){}};s.parentNode.insertBefore(tk,s)
+    })(document);
+</script> 
+
+  <!--[if lt IE 9]>
+    <script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+  <![endif]-->
+
+  <link rel="stylesheet" type="text/css" href="/style.css" />
+  <link rel="alternate" type="application/rss+xml" title="Pepper - 一个随心记录的地方" href="/feed.xml" />
+  <link rel="shortcut icon" href="https://images.weserv.nl/?url=cdn.nlark.com/yuque/0/2025/png/40742019/1766300112246-d1fc30f4-d036-46b5-98b0-073628c06a88.png?x-oss-process=image%2Fformat%2Cwebp">
+  <script src="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js"></script>
+  <script src="https://unpkg.com/feather-icons"></script>
+  <script type="text/javascript" async
+  src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+  </script>
+  <script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+      tex2jax: {
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre'],
+        inlineMath: [['$','$']]
+      }
+    });
+  </script>
+
+  <!-- Created with Jekyll Now - http://github.com/barryclark/jekyll-now -->
+
+</head>
+
+  <body>
+    
+
+
+    
+      <aside class="toc">
+        <ul>
+  <li><a href="#">服务器-Ollama常用命令</a></li>
+  <li><a href="#ollama-常用命令笔记ubuntu-终端专用">Ollama 常用命令笔记（Ubuntu 终端专用）</a>
+    <ul>
+      <li><a href="#1-安装与服务">1. 安装与服务</a></li>
+      <li><a href="#2-基础命令">2. 基础命令</a></li>
+      <li><a href="#3-模型下载运行删除">3. 模型下载、运行、删除</a></li>
+      <li><a href="#4-交互模式内命令对话中使用">4. 交互模式内命令（对话中使用）</a></li>
+      <li><a href="#5-日志与排查">5. 日志与排查</a></li>
+      <li><a href="#6-卸载-ollama如需">6. 卸载 Ollama（如需）</a></li>
+    </ul>
+  </li>
+</ul>
+      </aside>
+    
+
+    <div id="main" role="main" class="wrapper-content">
+      <div class="container">
+        <article class="posts">
+  <div class="back-to-home">
+    <a href="/" class="btn-home">← 返回主页</a>
+  </div>
+  
+  <h1>服务器-Ollama常用命令</h1>
+  
+
+  <div clsss="meta">
+    <span class="author">
+      pepper
+    </span>
+
+    <span class="date">
+      2026-04-02
+    </span>
+
+    <ul class="tag">
+      
+      <li>
+        <a href="http://localhost:4000/tags#ollama">
+          ollama
+        </a>
+      </li>
+      
+      <li>
+        <a href="http://localhost:4000/tags#llm">
+          llm
+        </a>
+      </li>
+      
+      <li>
+        <a href="http://localhost:4000/tags#server">
+          server
+        </a>
+      </li>
+      
+    </ul>
+  </div>
+
+  <div class="entry">
+    <p>这篇博客介绍了Ollama 常用命令笔记（Ubuntu 终端专用）</p>
+
+<!-- more -->
+
+<h1 id="ollama-常用命令笔记ubuntu-终端专用">Ollama 常用命令笔记（Ubuntu 终端专用）</h1>
+<p>全部为 Ubuntu 下直接可执行的命令，简洁可复制保存。</p>
+
+<h2 id="1-安装与服务">1. 安装与服务</h2>
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># 安装 Ollama（官方一键脚本）</span>
+curl <span class="nt">-fsSL</span> https://ollama.com/install.sh | sh
+
+<span class="c"># 查看 Ollama 服务状态</span>
+systemctl status ollama
+
+<span class="c"># 启动/停止/重启服务</span>
+<span class="nb">sudo </span>systemctl start ollama
+<span class="nb">sudo </span>systemctl stop ollama
+<span class="nb">sudo </span>systemctl restart ollama
+
+<span class="c"># 设置开机自启</span>
+<span class="nb">sudo </span>systemctl <span class="nb">enable </span>ollama
+</code></pre></div></div>
+
+<h2 id="2-基础命令">2. 基础命令</h2>
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># 查看版本</span>
+ollama <span class="nt">--version</span>
+
+<span class="c"># 查看已安装模型</span>
+ollama list
+
+<span class="c"># 查看正在运行的模型</span>
+ollama ps
+
+<span class="c"># 停止所有运行中的模型</span>
+ollama stop
+</code></pre></div></div>
+
+<h2 id="3-模型下载运行删除">3. 模型下载、运行、删除</h2>
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># 下载模型</span>
+ollama pull qwen2.5:7b
+ollama pull llama3.2:3b
+ollama pull gemma2:2b
+
+<span class="c"># 运行并进入对话</span>
+ollama run qwen2.5:7b
+
+<span class="c"># 后台运行（供 API 调用）</span>
+ollama run qwen2.5:7b <span class="nt">--now</span>
+
+<span class="c"># 删除模型</span>
+ollama <span class="nb">rm </span>qwen2.5:7b
+
+<span class="c"># 复制/重命名模型</span>
+ollama <span class="nb">cp </span>原模型名 新模型名
+
+<span class="c"># 查看模型信息</span>
+ollama show qwen2.5:7b
+</code></pre></div></div>
+
+<h2 id="4-交互模式内命令对话中使用">4. 交互模式内命令（对话中使用）</h2>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>/bye        退出
+/help       帮助
+/system     设置系统提示词
+/set        设置参数
+/show       查看当前模型信息
+</code></pre></div></div>
+
+<h2 id="5-日志与排查">5. 日志与排查</h2>
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># 查看 Ollama 日志</span>
+journalctl <span class="nt">-u</span> ollama <span class="nt">-f</span>
+
+<span class="c"># 查看占用端口（默认 11434）</span>
+ss <span class="nt">-tulpn</span> | <span class="nb">grep </span>ollama
+</code></pre></div></div>
+
+<h2 id="6-卸载-ollama如需">6. 卸载 Ollama（如需）</h2>
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">sudo </span>systemctl stop ollama
+<span class="nb">sudo rm</span> /usr/local/bin/ollama
+<span class="nb">sudo rm</span> <span class="nt">-rf</span> /usr/share/ollama
+<span class="nb">rm</span> <span class="nt">-rf</span> ~/.ollama
+</code></pre></div></div>
+
+
+  </div>
+
+  
+  
+<script src="https://utteranc.es/client.js"
+        repo="ywpepper/ywpepper.github.io"
+        issue-term="issue-term"
+        label="comment"
+        theme="github-light"
+        crossorigin="anonymous"
+        async>
+</script>
+
+
+  
+</article>
+
+<div class="pagination">
+  
+    <span class="prev" >
+      <a href="http://localhost:4000../../../algorithm_BinarySearch/">
+        ← 上一篇
+      </a>
+    </span>
+  
+  
+    <span class="next" >
+      <a href="http://localhost:4000../../../how_to_manageLLM/">
+        下一篇 →
+      </a>
+    </span>
+  
+</div>
+
+      </div>
+    </div>
+
+    
+
+  </body>
+
+  
+  <script>
+    document.getElementById("main").classList.add("withtoc");
+  </script>
+  
+
+  <div class="wrapper-footer-mobile">
+    <footer class="footer">
+      <!-- Refer to https://codepen.io/ruandre/pen/howFi -->
+<ul class="svg-icon">
+
+  
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</ul>
+
+
+
+<p>Copyright © 2025 ywpepper. All Rights Reserved.</p>
+
+    </footer>
+
+
+</html>

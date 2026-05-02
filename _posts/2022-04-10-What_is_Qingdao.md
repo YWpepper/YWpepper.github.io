@@ -1,11 +1,10 @@
 ---
-title: "What_is_Qingdao"
+title: '生活-青岛旅行杂记'
 lang: zh-CN
 date: 2022-04-10
 author: pepper
 toc: true
-tags:
-  - daily
+tags: [qingdao, travel]
 ---
 
 旅游杂记-青岛

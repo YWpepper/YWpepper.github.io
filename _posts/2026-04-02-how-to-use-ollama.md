@@ -1,9 +1,9 @@
 ---
 layout: post
-title: "how_to_useOllama"
+title: '服务器-Ollama常用命令'
 date: 2026-04-02
 author: pepper
-tags: [server]
+tags: [ollama, llm, server]
 comments: true
 toc: true
 pinned: false

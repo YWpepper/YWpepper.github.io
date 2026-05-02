@@ -1,22 +1,22 @@
----
-title: 'How_to_useGit'
+<!-- markdownlint-disable -->
+
+***
+
+title: '工具-Git常用命令与笔记润色'
 lang: zh-CN
 date: 2024-02-07
 author: pepper
 toc: true
 pinned: false
-tags:
-  - Server
-  - Command
----
+tags: [git, tool]
 
+***
 
 # 个人常用指令
 
+### 1. 切换分支直接关联远程并提交：
 
-## 切换分支直接关联远程并提交：
-
-```bash
+```Shell
 git init
 git remote add origin git@github.com:YWpepper/zhuanli_shijue.git
 git checkout -b new_branch
@@ -28,35 +28,77 @@ git push -u origin new_branch
 git pull origin main --allow-unrelated-histories
 ```
 
+### 2. 强制覆盖本地文件，用于同步仓库：
 
+您可以使用以下命令放弃本地所有修改并强制同步远程版本：
 
+```Shell
+git reset --hard origin/master
+```
 
+执行结果：
+1） 放弃所有未提交的本地修改 2） 将本地分支强制重置为远程 origin/master 的状态
+ 3） 之后可以正常执行 git pull
 
-### 回退到指定提交版本
+操作步骤：
+
+1. 执行重置命令：
+   ```Shell
+   git reset --hard origin/master
+   ```
+2. 验证结果：
+   ```Shell
+    git status
+    ## 如果发现未跟踪的文件
+    # 1. 方案一： 删除不需要的文件
+    rm -rf _site/
+    rm -rf assets/
+    # 如何需要删除的太多 -d 删除未跟踪的目录  -f ：强制删除
+    git clean -df 
+    # 2. 方案二：如果确实需要跟踪这些文件 
+    git add _site/ assets/
+    git commit -m "Add site files"
+    git push
+   ```
+3. 现在可以正常拉取更新：
+   ```Shell
+   git pull
+   ```
+
+注意： 此操作会永久删除所有未提交的本地修改，请确保这些修改确实不需要保留！
+
+### 3. 回退到指定提交版本
 
 **步骤1：查看提交历史**
+
 ```bash
 git log --oneline
 ```
+
 - 该命令会以简洁的方式显示提交历史，包含提交哈希值和提交信息
 - 找到你想要回退到的目标提交的哈希值（如：c3c1e06）
 
 **步骤2：执行回退操作**
+
 ```bash
 git reset --hard c3c1e06
 ```
+
 - `--hard` 参数：彻底回退，重置工作区、暂存区和HEAD指针到指定提交
 - `c3c1e06`：你想要回退到的目标提交的哈希值
 
 **步骤3：推送到远程仓库**
+
 ```bash
 git push -f origin master
 ```
+
 - `-f` 或 `--force`：强制推送，因为本地分支历史已被修改
 - `origin`：远程仓库名
 - `master`：分支名
 
 **注意事项**：
+
 - 强制推送会覆盖远程仓库的历史记录，可能影响其他协作者
 - 回退操作前建议备份重要代码
 - 回退成功后，本地分支会比远程分支落后n个提交，需要强制推送才能同步
@@ -75,7 +117,7 @@ git push -f origin master
 
 [Oh Shit, Git!?!](https://ohshitgit.com/zh)
 
-!\[]\(https\://lightblues.github.io/techNotes/code/CS/media/git-note/16348994455801.jpg null)
+!\[]\(<https://lightblues.github.io/techNotes/code/CS/media/git-note/16348994455801.jpg> null)
 
 - Workspace：工作区
 - Index / Stage：暂存区

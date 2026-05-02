@@ -1,13 +1,11 @@
 ---
-title: 理论知识_SFT_RLHF_RAG
+title: '论文-LLM微调与RAG技术综述'
 lang: zh-CN
 date: 2025-05-06
 author: pepper
-tags: [papperReading]
+tags: [llm, sft, rlhf, rag]
 pinned: false
 toc: true
-tags:
-  - LLM
 ---
 
 这篇博客介绍了SFT（有监督微调）、RLHF（强化学习）、RAG（检索增强生成）的技术说明。

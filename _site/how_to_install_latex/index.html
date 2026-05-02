@@ -1,0 +1,409 @@
+<p>这篇博客介绍了安装和配置VSCode+LaTeX(含环境变量_配置_详细过程)
+<!-- more --></p>
+
+<p><a href="https://zhuanlan.zhihu.com/p/637046509">安装和_配置_VSCode+<em>LaTeX</em>(含环境变量_配置_详细过程)</a></p>
+
+<h2 id="windows">Windows</h2>
+
+<h3 id="1-下载tex-live">1. 下载TeX Live</h3>
+
+<p>清华镜像：</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>镜像源</th>
+      <th>链接</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>清华大学</td>
+      <td><a href="https://mirrors.tuna.tsinghua.edu.cn/CTAN/systems/texlive/Images/">https://mirrors.tuna.tsinghua.edu.cn/CTAN/systems/texlive/Images/</a></td>
+    </tr>
+    <tr>
+      <td>镜像2</td>
+      <td><a href="https://mirror-hk.koddos.net/CTAN/systems/texlive/Images/">https://mirror-hk.koddos.net/CTAN/systems/texlive/Images/</a></td>
+    </tr>
+    <tr>
+      <td>镜像3</td>
+      <td><a href="https://mirrors.aliyun.com/CTAN/systems/texlive/Images/?userCode=okjhlpr5">https://mirrors.aliyun.com/CTAN/systems/texlive/Images/?userCode=okjhlpr5</a></td>
+    </tr>
+  </tbody>
+</table>
+
+<p>推荐使用清华大学开源软件镜像站：<a href="https://mirrors.tuna.tsinghua.edu.cn/CTAN/systems/texlive/Images/">Index of /CTAN/systems/texlive/Images/</a></p>
+
+<p><img src="https://pic3.zhimg.com/v2-ba9e4144613807cc8060928e3b797460_1440w.jpg" alt="选择版本" /></p>
+
+<p>下载开始，过程有些慢。（可以把链接复制到迅雷里会快一些）</p>
+
+<hr />
+
+<hr />
+
+<h3 id="2-安装texlive">2. 安装texlive</h3>
+<p>2.1 双击(或者 鼠标右键-&gt;打开方式:文件任务管理器)</p>
+
+<p><img src="https://pica.zhimg.com/v2-ce182325403752f04fd283ac7a4161c8_1440w.jpg" alt="" /></p>
+
+<p>2.2 找到 <code class="language-plaintext highlighter-rouge">install-tl-windows.bat</code> 文件,双击</p>
+
+<p><img src="https://pic2.zhimg.com/v2-dd43f01034bec373c94396e404fbfa07_1440w.jpg" alt="" /></p>
+
+<p>安装</p>
+
+<p>2.3 更改一些安装配置</p>
+
+<p><img src="https://pic4.zhimg.com/v2-62b352617f91ba6bb254b63e30f95bd1_1440w.jpg" alt="" /></p>
+
+<p>自定义安装</p>
+
+<p>修改一些安装内容,控制内存…</p>
+
+<p>记得可以自定义安装位置(我这里没截图,路径最好不要有中文),<strong>记住路径,后面配置环境变量需要</strong></p>
+
+<p><img src="https://picx.zhimg.com/v2-68e612a066aa381759300d5350f9d33d_1440w.jpg" alt="" /></p>
+
+<p>控制内存</p>
+
+<p>我选择删去了一些国家的语言和TexWorks editor等内容(因为我要用VSCode编辑LaTeX)</p>
+
+<p><img src="https://pica.zhimg.com/v2-b4ac4d1571e772e9150fb7fa0edba4d8_1440w.jpg" alt="" /></p>
+
+<p>最后大概的样子(Greek为希腊语,可能会用到一些符号,就没删)</p>
+
+<p><img src="https://pic1.zhimg.com/v2-3ff955c65cc1e898060831e512e288ae_1440w.jpg" alt="" /></p>
+
+<p>自定义后的截图</p>
+
+<p>点击安装..过程会很慢很慢</p>
+
+<p><img src="https://picx.zhimg.com/v2-b86996996492f012dae91f6e3acb80f7_1440w.jpg" alt="" /></p>
+
+<p>安装完成</p>
+
+<p>查看环境变量是否可用:</p>
+
+<p><code class="language-plaintext highlighter-rouge">Win + R</code> 打开命令面板:<code class="language-plaintext highlighter-rouge">tex -v</code> 查看环境变量是否可用.</p>
+
+<p>以下截图是环境变量正确的..无需进行<code class="language-plaintext highlighter-rouge">2.4</code>操作</p>
+
+<p>其实是要查看四个环境(但一个好,其他的都好了)</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>tex <span class="nt">-v</span>
+latex <span class="nt">-v</span>
+xelatex <span class="nt">-v</span>
+pdflatex <span class="nt">-v</span>
+</code></pre></div></div>
+
+<p><img src="https://pic3.zhimg.com/v2-f197d83ae94c670339194fee8a42055e_1440w.jpg" alt="" /></p>
+
+<p>2.4 配置环境变量!(<font style="color:#DF2A3F;">我是先配置了path然后才能在终端里检索到，检索到之后就没关系了</font>)</p>
+
+<p>我的电脑–&gt;属性(左上角or鼠标右键)–&gt;高级系统设置–&gt;环境变量–&gt;系统变量Path–&gt;双击Path</p>
+
+<p><img src="https://pic1.zhimg.com/v2-dbabd09e0641215aea06b14c59338370_1440w.jpg" alt="" /></p>
+
+<p>添加环境变量</p>
+
+<p><img src="https://pic1.zhimg.com/v2-1f92f31de257d505e2c689fc0e60d10a_1440w.jpg" alt="" /></p>
+
+<p>我这里出现的问题是安装时<strong>自动配置的变量路径不对</strong>!正确路径:<code class="language-plaintext highlighter-rouge">E:\texlive\2023\bin\windows</code> (这个路径是自己在<code class="language-plaintext highlighter-rouge">2.3</code>步骤中自定义的位置下的,可以找到那个文件夹,继续单击,知道出现<code class="language-plaintext highlighter-rouge">bin\win</code>即可,也可能是<code class="language-plaintext highlighter-rouge">\bin\windows</code>都可以)</p>
+
+<p>一定要在<code class="language-plaintext highlighter-rouge">....\bin\win</code>后面</p>
+
+<p>再次<code class="language-plaintext highlighter-rouge">Win + R</code>打开命令面板:<code class="language-plaintext highlighter-rouge">tex -v</code> 查看环境变量是否可用</p>
+
+<p><img src="https://pic3.zhimg.com/v2-f197d83ae94c670339194fee8a42055e_1440w.jpg" alt="" /></p>
+
+<p>环境变量可用</p>
+
+<p>再次输入其他命令查看环境变量:</p>
+
+<div class="language-shell highlighter-rouge"><div class="highlight"><pre class="highlight"><code>tex <span class="nt">-v</span>
+latex <span class="nt">-v</span>
+xelatex <span class="nt">-v</span>
+pdflatex <span class="nt">-v</span>
+</code></pre></div></div>
+
+<p>应该都没有问题了..环境变量配置成功</p>
+
+<hr />
+
+<h3 id="3-安装vscode">3. 安装VSCode</h3>
+<p>3.1 官网下载:<a href="https://link.zhihu.com/?target=https%3A//code.visualstudio.com/Download">Download Visual Studio Code - Mac, Linux, Windows</a></p>
+
+<p>3.2 安装<a href="https://zhida.zhihu.com/search?content_id=229697152&amp;content_type=Article&amp;match_order=1&amp;q=LaTeX%E6%8F%92%E4%BB%B6&amp;zhida_source=entity">LaTeX插件</a></p>
+
+<p><img src="https://pica.zhimg.com/v2-1122f25968a9066f7d98ff8dac274ed8_1440w.jpg" alt="" /></p>
+
+<p>安装插件</p>
+
+<p>3.3 写内容</p>
+
+<p>文件拓展名为<code class="language-plaintext highlighter-rouge">.tex</code>,随意写一些内容</p>
+
+<div class="language-latex highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">\documentclass</span><span class="p">{</span>article<span class="p">}</span> <span class="c">% 文档类别：文章</span>
+<span class="k">\usepackage</span><span class="p">{</span>amsmath<span class="p">}</span>     <span class="c">% 引入 amsmath 宏包，用于更高级的数学排版</span>
+<span class="k">\usepackage</span><span class="p">{</span>ctex<span class="p">}</span>
+
+<span class="k">\title</span><span class="p">{</span>一个简单的带公式的文档<span class="p">}</span> <span class="c">% 标题</span>
+<span class="k">\author</span><span class="p">{</span>AI 助手<span class="p">}</span>             <span class="c">% 作者</span>
+<span class="k">\date</span><span class="p">{</span><span class="k">\today</span><span class="p">}</span>             <span class="c">% 日期为当前日期</span>
+
+<span class="nt">\begin{document}</span> <span class="c">% 文档主体开始</span>
+
+<span class="k">\maketitle</span> <span class="c">% 生成标题</span>
+
+<span class="k">\section</span><span class="p">{</span>介绍<span class="p">}</span> <span class="c">% 第一节</span>
+
+这是一个简单的 <span class="k">\LaTeX</span><span class="p">{}</span> 文档，展示了如何插入行内公式和独立公式。
+
+<span class="k">\section</span><span class="p">{</span>数学公式<span class="p">}</span> <span class="c">% 第二节</span>
+
+<span class="k">\subsection</span><span class="p">{</span>行内公式<span class="p">}</span> <span class="c">% 第二节的子节</span>
+
+一个简单的行内公式，例如欧拉恒等式 <span class="p">$</span><span class="nb">e</span><span class="p">^{</span><span class="nb">i</span><span class="nv">\pi</span><span class="p">}</span><span class="nb"> </span><span class="o">+</span><span class="nb"> </span><span class="m">1</span><span class="nb"> </span><span class="o">=</span><span class="nb"> </span><span class="m">0</span><span class="p">$</span>，可以像这样嵌入到文本中。
+
+<span class="k">\subsection</span><span class="p">{</span>独立公式<span class="p">}</span> <span class="c">% 第二节的另一个子节</span>
+
+更复杂的公式通常会独立一行并自动编号。例如，二次方程的求根公式为：
+<span class="nt">\begin{equation}</span>
+x = <span class="k">\frac</span><span class="p">{</span>-b <span class="k">\pm</span> <span class="k">\sqrt</span><span class="p">{</span>b<span class="p">^</span>2 - 4ac<span class="p">}}{</span>2a<span class="p">}</span>
+<span class="k">\label</span><span class="p">{</span>eq:quadratic<span class="p">}</span> <span class="c">% 给公式添加标签，方便引用</span>
+<span class="nt">\end{equation}</span>
+我们可以通过引用 <span class="k">\ref</span><span class="p">{</span>eq:quadratic<span class="p">}</span> 来提及这个公式。
+
+另一个不带编号的独立公式:
+<span class="p">\[</span><span class="nb">
+</span><span class="nv">\int</span><span class="p">_{</span><span class="o">-</span><span class="nv">\infty</span><span class="p">}^{</span><span class="nv">\infty</span><span class="p">}</span><span class="nb"> e</span><span class="p">^{</span><span class="o">-</span><span class="nb">x</span><span class="p">^</span><span class="m">2</span><span class="p">}</span><span class="nb"> dx </span><span class="o">=</span><span class="nb"> </span><span class="nv">\sqrt</span><span class="p">{</span><span class="nv">\pi</span><span class="p">}</span><span class="nb">
+</span><span class="p">\]</span>
+
+<span class="nt">\end{document}</span> <span class="c">% 文档主体结束</span>
+</code></pre></div></div>
+
+<p><img src="https://pica.zhimg.com/v2-a37254883f966aac3878d4ebaa8b9e96_1440w.jpg" alt="" /></p>
+
+<p>正确内容截图,注意左侧的文件栏</p>
+
+<p>以上,<strong>VSCode配置LaTeX完整!</strong></p>
+
+<p><strong>附:</strong></p>
+
+<ol>
+  <li>若出现以下问题是环境变量问题.</li>
+</ol>
+
+<p><img src="https://pica.zhimg.com/v2-438677a48643986a9107ad5d7d50201a_1440w.jpg" alt="" /></p>
+
+<p>环境变量导致的出错</p>
+
+<ol>
+  <li>有的参考教程改了json文件.不改也行,有想法的可以参考他人的进行修改</li>
+</ol>
+
+<p>安装好环境和插件只是一小步,这里放两个大佬的帖子,很详细(比我的强太多了,但我比他们多了环境变量的配置,算是特点吧)</p>
+
+<ol>
+  <li>
+    <p>超强配置:<a href="https://zhuanlan.zhihu.com/p/166523064">Visual Studio Code (vscode)配置LaTeX - 知乎 (zhihu.com)</a></p>
+  </li>
+  <li>
+    <p>补充1中反向搜索出错的问题:<a href="https://zhuanlan.zhihu.com/p/95330916">VSCode中LaTeX和SumatraPDF双向搜索 - 知乎 (zhihu.com)</a></p>
+  </li>
+  <li>
+    <table>
+      <tbody>
+        <tr>
+          <td>同2:[Latex+VSCode 正向搜索和反向搜索</td>
+          <td>Jintao Lee (jintaolee-roger.github.io)](https://link.zhihu.com/?target=https%3A//jintaolee-roger.github.io/posts/latexsearch/)</td>
+        </tr>
+      </tbody>
+    </table>
+  </li>
+</ol>
+
+<h3 id="4-vscode-配置环境">4 vscode 配置环境</h3>
+<div class="language-json highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nl">"latex-workshop.latex.tools"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w">
+  </span><span class="p">{</span><span class="w">
+    </span><span class="err">//</span><span class="w"> </span><span class="err">编译工具和命令</span><span class="w">
+    </span><span class="nl">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"xelatex"</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"command"</span><span class="p">:</span><span class="w"> </span><span class="s2">"xelatex"</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"args"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w">
+      </span><span class="s2">"-synctex=1"</span><span class="p">,</span><span class="w">
+      </span><span class="s2">"-interaction=nonstopmode"</span><span class="p">,</span><span class="w">
+      </span><span class="s2">"-file-line-error"</span><span class="p">,</span><span class="w">
+      </span><span class="s2">"-pdf"</span><span class="p">,</span><span class="w">
+      </span><span class="s2">"%DOCFILE%"</span><span class="w">
+    </span><span class="p">]</span><span class="w">
+  </span><span class="p">},</span><span class="w">
+  </span><span class="p">{</span><span class="w">
+    </span><span class="nl">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"pdflatex"</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"command"</span><span class="p">:</span><span class="w"> </span><span class="s2">"pdflatex"</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"args"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w">
+      </span><span class="s2">"-synctex=1"</span><span class="p">,</span><span class="w">
+      </span><span class="s2">"-interaction=nonstopmode"</span><span class="p">,</span><span class="w">
+      </span><span class="s2">"-file-line-error"</span><span class="p">,</span><span class="w">
+      </span><span class="s2">"%DOCFILE%"</span><span class="w">
+    </span><span class="p">]</span><span class="w">
+  </span><span class="p">},</span><span class="w">
+  </span><span class="p">{</span><span class="w">
+    </span><span class="nl">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"bibtex"</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"command"</span><span class="p">:</span><span class="w"> </span><span class="s2">"bibtex"</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"args"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w">
+      </span><span class="s2">"%DOCFILE%"</span><span class="w">
+    </span><span class="p">]</span><span class="w">
+  </span><span class="p">}</span><span class="w">
+</span><span class="p">]</span><span class="err">,</span><span class="w">
+</span><span class="err">//</span><span class="w"> </span><span class="err">用于配置编译链</span><span class="w">
+</span><span class="nl">"latex-workshop.latex.recipes"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w">
+  </span><span class="p">{</span><span class="w">
+    </span><span class="nl">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"xelatex"</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"tools"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w">
+      </span><span class="s2">"xelatex"</span><span class="w">
+    </span><span class="p">],</span><span class="w">
+  </span><span class="p">},</span><span class="w">
+  </span><span class="p">{</span><span class="w">
+    </span><span class="nl">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"pdflatex"</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"tools"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w">
+      </span><span class="s2">"pdflatex"</span><span class="w">
+    </span><span class="p">]</span><span class="w">
+  </span><span class="p">},</span><span class="w">
+  </span><span class="p">{</span><span class="w">
+    </span><span class="nl">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"xe-&gt;bib-&gt;xe-&gt;xe"</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"tools"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w">
+      </span><span class="s2">"xelatex"</span><span class="p">,</span><span class="w">
+      </span><span class="s2">"bibtex"</span><span class="p">,</span><span class="w">
+      </span><span class="s2">"xelatex"</span><span class="p">,</span><span class="w">
+      </span><span class="s2">"xelatex"</span><span class="w">
+    </span><span class="p">]</span><span class="w">
+  </span><span class="p">},</span><span class="w">
+  </span><span class="p">{</span><span class="w">
+    </span><span class="nl">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"pdf-&gt;bib-&gt;pdf-&gt;pdf"</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"tools"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w">
+      </span><span class="s2">"pdflatex"</span><span class="p">,</span><span class="w">
+      </span><span class="s2">"bibtex"</span><span class="p">,</span><span class="w">
+      </span><span class="s2">"pdflatex"</span><span class="p">,</span><span class="w">
+      </span><span class="s2">"pdflatex"</span><span class="w">
+    </span><span class="p">]</span><span class="w">
+  </span><span class="p">}</span><span class="w">
+</span><span class="p">]</span><span class="err">,</span><span class="w">
+</span></code></pre></div></div>
+
+<h3 id="5-latex测试模板">5 latex测试模板</h3>
+<div class="language-latex highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">\documentclass</span><span class="p">{</span>article<span class="p">}</span> <span class="c">% 文档类别：文章</span>
+<span class="k">\usepackage</span><span class="p">{</span>amsmath<span class="p">}</span>     <span class="c">% 引入 amsmath 宏包，用于更高级的数学排版</span>
+<span class="k">\usepackage</span><span class="p">{</span>ctex<span class="p">}</span>
+
+<span class="k">\title</span><span class="p">{</span>一个简单的带公式的文档<span class="p">}</span> <span class="c">% 标题</span>
+<span class="k">\author</span><span class="p">{</span>AI 助手<span class="p">}</span>             <span class="c">% 作者</span>
+<span class="k">\date</span><span class="p">{</span><span class="k">\today</span><span class="p">}</span>             <span class="c">% 日期为当前日期</span>
+
+<span class="nt">\begin{document}</span> <span class="c">% 文档主体开始</span>
+
+<span class="k">\maketitle</span> <span class="c">% 生成标题</span>
+
+<span class="k">\section</span><span class="p">{</span>介绍<span class="p">}</span> <span class="c">% 第一节</span>
+
+这是一个简单的 <span class="k">\LaTeX</span><span class="p">{}</span> 文档，展示了如何插入行内公式和独立公式。
+
+<span class="k">\section</span><span class="p">{</span>数学公式<span class="p">}</span> <span class="c">% 第二节</span>
+
+<span class="k">\subsection</span><span class="p">{</span>行内公式<span class="p">}</span> <span class="c">% 第二节的子节</span>
+
+一个简单的行内公式，例如欧拉恒等式 <span class="p">$</span><span class="nb">e</span><span class="p">^{</span><span class="nb">i</span><span class="nv">\pi</span><span class="p">}</span><span class="nb"> </span><span class="o">+</span><span class="nb"> </span><span class="m">1</span><span class="nb"> </span><span class="o">=</span><span class="nb"> </span><span class="m">0</span><span class="p">$</span>，可以像这样嵌入到文本中。
+
+<span class="k">\subsection</span><span class="p">{</span>独立公式<span class="p">}</span> <span class="c">% 第二节的另一个子节</span>
+
+更复杂的公式通常会独立一行并自动编号。例如，二次方程的求根公式为：
+<span class="nt">\begin{equation}</span>
+x = <span class="k">\frac</span><span class="p">{</span>-b <span class="k">\pm</span> <span class="k">\sqrt</span><span class="p">{</span>b<span class="p">^</span>2 - 4ac<span class="p">}}{</span>2a<span class="p">}</span>
+<span class="k">\label</span><span class="p">{</span>eq:quadratic<span class="p">}</span> <span class="c">% 给公式添加标签，方便引用</span>
+<span class="nt">\end{equation}</span>
+我们可以通过引用 <span class="k">\ref</span><span class="p">{</span>eq:quadratic<span class="p">}</span> 来提及这个公式。
+
+另一个不带编号的独立公式:
+<span class="p">\[</span><span class="nb">
+</span><span class="nv">\int</span><span class="p">_{</span><span class="o">-</span><span class="nv">\infty</span><span class="p">}^{</span><span class="nv">\infty</span><span class="p">}</span><span class="nb"> e</span><span class="p">^{</span><span class="o">-</span><span class="nb">x</span><span class="p">^</span><span class="m">2</span><span class="p">}</span><span class="nb"> dx </span><span class="o">=</span><span class="nb"> </span><span class="nv">\sqrt</span><span class="p">{</span><span class="nv">\pi</span><span class="p">}</span><span class="nb">
+</span><span class="p">\]</span>
+
+<span class="nt">\end{document}</span> <span class="c">% 文档主体结束</span>
+</code></pre></div></div>
+
+<h2 id="linux">Linux</h2>
+
+<h4 id="1-安装linux版本-7-zip">1 安装linux版本 <a href="https://zhida.zhihu.com/search?content_id=722097146&amp;content_type=Answer&amp;match_order=1&amp;q=7-zip&amp;zhida_source=entity">7-zip</a></h4>
+<p>1 . 需要提前在linux中安装镜像解压器pzzip，也就是7-zip的linux版本：</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code> apt <span class="nb">install </span>p7zip-full
+</code></pre></div></div>
+
+<h4 id="2-安装texlive-1">2. 安装texlive</h4>
+
+<p>1 . 首先使用wget 安装镜像：</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>wget https://mirrors.tuna.tsinghua.edu.cn/CTAN/systems/texlive/Images/texlive.iso
+</code></pre></div></div>
+
+<p>2 . 使用7-z进行镜像的解压</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>7z x texlive.iso
+</code></pre></div></div>
+
+<p>3 . 解压后进行安装</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code> <span class="nb">chmod </span>777 install-tl <span class="o">&amp;&amp;</span> ./install-tl   
+安装过程需要注意，使用B可以选择二进制的版本，linux则要安装linux对应的版本
+使用D可以设置安装路径
+R指令是返回
+I指令是执行安装（安装过程时间较长，大概50分钟左右，如果是SSH远程连接服务器建议使用tmux来进行）
+</code></pre></div></div>
+
+<p>一般上面我不修改安装路径</p>
+
+<p>4 . 安装完成texlive之后，可以进行相关环境变量的配置</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>vim ~/.bashrc
+<span class="nb">export </span><span class="nv">PATH</span><span class="o">=</span>your/Path/bin:<span class="nv">$PATH</span> 
+<span class="nb">export </span><span class="nv">MANPATH</span><span class="o">=</span>your/Path/doc/man:<span class="nv">$MANPATH</span> 
+<span class="nb">export </span><span class="nv">INFOPATH</span><span class="o">=</span>your/Path/doc/info:<span class="nv">$INFOPATH</span>
+</code></pre></div></div>
+
+<p>一般默认路径命令：</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># TeX Live 2025 环境变量配置</span>
+<span class="nb">export </span><span class="nv">PATH</span><span class="o">=</span>/usr/local/texlive/2025/bin/x86_64-linux:<span class="nv">$PATH</span>
+<span class="nb">export </span><span class="nv">MANPATH</span><span class="o">=</span>/usr/local/texlive/2025/texmf-dist/doc/man:<span class="nv">$MANPATH</span>
+<span class="nb">export </span><span class="nv">INFOPATH</span><span class="o">=</span>/usr/local/texlive/2025/texmf-dist/doc/info:<span class="nv">$INFOPATH</span>
+</code></pre></div></div>
+
+<p>5 . 最后source ~/.bashrc进行使用</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">source</span> ~/.bashrc
+which xelatex
+</code></pre></div></div>
+
+<ol>
+  <li>vscode里面下面l插件： LaTeX Workshop</li>
+</ol>
+
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code> <span class="o">----------------------------------------------------------------------</span>
+<span class="n">Welcome</span> <span class="n">to</span> <span class="n">TeX</span> <span class="n">Live</span><span class="o">!</span>
+<span class="n">See</span> <span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">local</span><span class="o">/</span><span class="n">texlive</span><span class="o">/</span><span class="mi">2025</span><span class="o">/</span><span class="n">index</span><span class="p">.</span><span class="n">html</span> <span class="k">for</span> <span class="n">links</span> <span class="n">to</span> <span class="n">documentation</span><span class="p">.</span>
+
+<span class="n">The</span> <span class="n">TeX</span> <span class="n">Live</span> <span class="n">web</span> <span class="n">site</span> <span class="p">(</span><span class="n">https</span><span class="o">:</span><span class="c1">//tug.org/texlive/) provides all updates</span>
+<span class="n">and</span> <span class="n">corrections</span><span class="p">.</span> <span class="n">TeX</span> <span class="n">Live</span> <span class="n">is</span> <span class="n">a</span> <span class="n">joint</span> <span class="n">project</span> <span class="n">of</span> <span class="n">the</span> <span class="n">TeX</span> <span class="n">user</span> <span class="n">groups</span>
+<span class="n">around</span> <span class="n">the</span> <span class="n">world</span><span class="p">;</span> <span class="n">please</span> <span class="n">consider</span> <span class="n">supporting</span> <span class="n">it</span> <span class="n">by</span> <span class="n">joining</span> <span class="n">the</span> <span class="n">group</span>
+<span class="n">best</span> <span class="k">for</span> <span class="n">you</span><span class="p">.</span> <span class="n">The</span> <span class="n">list</span> <span class="n">of</span> <span class="n">groups</span> <span class="n">is</span> <span class="n">available</span> <span class="n">on</span> <span class="n">the</span> <span class="n">web</span>
+<span class="n">at</span> <span class="n">https</span><span class="o">:</span><span class="c1">//tug.org/usergroups.html.</span>
+
+<span class="n">Add</span> <span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">local</span><span class="o">/</span><span class="n">texlive</span><span class="o">/</span><span class="mi">2025</span><span class="o">/</span><span class="n">texmf</span><span class="o">-</span><span class="n">dist</span><span class="o">/</span><span class="n">doc</span><span class="o">/</span><span class="n">man</span> <span class="n">to</span> <span class="n">MANPATH</span><span class="p">.</span>
+<span class="n">Add</span> <span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">local</span><span class="o">/</span><span class="n">texlive</span><span class="o">/</span><span class="mi">2025</span><span class="o">/</span><span class="n">texmf</span><span class="o">-</span><span class="n">dist</span><span class="o">/</span><span class="n">doc</span><span class="o">/</span><span class="n">info</span> <span class="n">to</span> <span class="n">INFOPATH</span><span class="p">.</span>
+<span class="n">Most</span> <span class="n">importantly</span><span class="p">,</span> <span class="n">add</span> <span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">local</span><span class="o">/</span><span class="n">texlive</span><span class="o">/</span><span class="mi">2025</span><span class="o">/</span><span class="n">bin</span><span class="o">/</span><span class="n">x86_64</span><span class="o">-</span><span class="n">linux</span>
+<span class="n">to</span> <span class="n">your</span> <span class="n">PATH</span> <span class="k">for</span> <span class="n">current</span> <span class="n">and</span> <span class="n">future</span> <span class="n">sessions</span><span class="p">.</span>
+
+<span class="n">Logfile</span><span class="o">:</span> <span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">local</span><span class="o">/</span><span class="n">texlive</span><span class="o">/</span><span class="mi">2025</span><span class="o">/</span><span class="n">install</span><span class="o">-</span><span class="n">tl</span><span class="p">.</span><span class="n">log</span>
+</code></pre></div></div>
+
+<hr />

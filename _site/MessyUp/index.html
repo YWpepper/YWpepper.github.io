@@ -1,0 +1,193 @@
+<p>这篇博客介绍了一些日常收集整理资料。
+<!-- more --></p>
+
+<h2 id="1-常见的日常积累小技巧">1 常见的日常积累小技巧</h2>
+
+<ol>
+  <li>mac 电脑外接显示屏
+对于屏幕分辨率的问题，其中较好的一个仓库软件叫做 <code class="language-plaintext highlighter-rouge">betterdisaplay</code>，可以用来调整刷新赫兹以及分辨率，但是要注意下载符合mac的系统版本的软件；</li>
+</ol>
+
+<div class="language-shell highlighter-rouge"><div class="highlight"><pre class="highlight"><code>https://github.com/waydabber/BetterDisplay/releases?page<span class="o">=</span>6
+</code></pre></div></div>
+
+<ol>
+  <li>
+    <p>Adobe ps 免费激活版本 :<a href="https://www.cnblogs.com/FRIM/p/18130753">link</a></p>
+  </li>
+  <li>
+    <p>绘图的时候图例位置参数设置</p>
+
+    <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code>     <span class="c1"># 紧凑型图例
+</span>     <span class="n">handles</span><span class="p">,</span> <span class="n">labels</span> <span class="o">=</span> <span class="n">plt</span><span class="p">.</span><span class="nf">gca</span><span class="p">().</span><span class="nf">get_legend_handles_labels</span><span class="p">()</span>
+     <span class="n">plt</span><span class="p">.</span><span class="nf">legend</span><span class="p">(</span><span class="n">handles</span><span class="p">[:</span><span class="mi">35</span><span class="p">],</span> <span class="n">labels</span><span class="p">[:</span><span class="mi">35</span><span class="p">],</span> <span class="n">loc</span><span class="o">=</span><span class="sh">'</span><span class="s">upper right</span><span class="sh">'</span><span class="p">,</span> 
+               <span class="n">ncol</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">columnspacing</span><span class="o">=</span><span class="mf">0.8</span><span class="p">,</span> <span class="n">handletextpad</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>
+        
+     <span class="c1"># 自动检测最佳位置
+</span>     <span class="c1"># plt.legend(
+</span>     <span class="c1">#     loc='best',
+</span>     <span class="c1">#     bbox_to_anchor=(1, 0.5),  # 右侧垂直居中
+</span>     <span class="c1">#     borderaxespad=0.5,
+</span>     <span class="c1">#     framealpha=0.9
+</span>     <span class="c1"># )
+</span>        
+     <span class="c1"># plt.legend(
+</span>     <span class="c1"># loc='upper center',
+</span>     <span class="c1"># bbox_to_anchor=(0.5, -0.15),  # 向下偏移15%
+</span>     <span class="c1"># ncol=2,
+</span>     <span class="c1"># frameon=True,
+</span>     <span class="c1"># shadow=True,
+</span>     <span class="c1"># fancybox=True
+</span>     <span class="c1"># )
+</span></code></pre></div>    </div>
+  </li>
+  <li>
+    <p>google colab 时刻触发脚本</p>
+
+    <div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code>   <span class="n">function</span> <span class="nf">ConnectButton</span><span class="o">(){</span>
+       <span class="n">console</span><span class="o">.</span><span class="na">log</span><span class="o">(</span><span class="s">"Connect pushed"</span><span class="o">);</span>
+       <span class="n">document</span><span class="o">.</span><span class="na">querySelector</span><span class="o">(</span><span class="s">"#top-toolbar &gt; colab-connect-button"</span><span class="o">).</span><span class="na">shadowRoot</span><span class="o">.</span><span class="na">querySelector</span><span class="o">(</span><span class="s">"#connect"</span><span class="o">).</span><span class="na">click</span><span class="o">()</span>
+   <span class="o">}</span>
+   <span class="n">setInterval</span><span class="o">(</span><span class="nc">ConnectButton</span><span class="o">,</span><span class="mi">60000</span><span class="o">);</span>
+</code></pre></div>    </div>
+  </li>
+</ol>
+
+<h2 id="2-代码运行常见">2 代码运行常见</h2>
+
+<h3 id="1-后台进程管理方案">1. 后台进程管理方案</h3>
+
+<ul>
+  <li>
+    <p>使用nohup持久运行</p>
+
+    <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  <span class="nb">nohup </span>python <span class="nt">-u</span> run_script.py <span class="o">&gt;</span> script.log 2&gt;&amp;1 &amp;
+
+  <span class="c"># - 参数说明</span>
+  <span class="c"># nohup:忽略挂断信号</span>
+  <span class="c">#  -u（Python参数）:禁用输出缓冲</span>
+  <span class="c">#  &gt; script.log:标准输出重定向</span>
+  <span class="c">#  2&gt;&amp;1:错误输出合并</span>
+  <span class="c">#   &amp;:后台运行 </span>
+</code></pre></div>    </div>
+  </li>
+  <li>
+    <p>验证进程状态</p>
+
+    <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># 查看进程列表</span>
+ps aux | <span class="nb">grep</span> <span class="s2">"python run_script.py"</span>
+<span class="c"># 实时监控日志</span>
+<span class="nb">tail</span> <span class="nt">-f</span> script.log
+</code></pre></div>    </div>
+  </li>
+  <li>
+    <p>终止进程</p>
+
+    <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># 优雅终止</span>
+pkill <span class="nt">-f</span> <span class="s2">"python run_script.py"</span>
+<span class="c"># 强制终止（无响应时）</span>
+<span class="nb">kill</span> <span class="nt">-9</span> 1708
+</code></pre></div>    </div>
+  </li>
+  <li>
+    <p>高级管理方案（生产环境推荐）, 使用systemd服务 创建服务文件。</p>
+
+    <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">sudo </span>nano /etc/systemd/model.service
+</code></pre></div>    </div>
+  </li>
+  <li>
+    <p>服务内容:</p>
+
+    <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">[</span>Unit]
+<span class="nv">Description</span><span class="o">=</span>Model Training Service
+<span class="o">[</span>Service]
+<span class="nv">User</span><span class="o">=</span>root
+<span class="nv">WorkingDirectory</span><span class="o">=</span>/root/PDFormer
+<span class="nv">ExecStart</span><span class="o">=</span>/root/miniconda3/envs/base/bin/python run_script.py
+<span class="nv">Restart</span><span class="o">=</span>always
+<span class="nv">StandardOutput</span><span class="o">=</span>file:/var/log/model.log
+<span class="nv">StandardError</span><span class="o">=</span>file:/var/log/model_error.log
+<span class="o">[</span>Install]
+<span class="nv">WantedBy</span><span class="o">=</span>multi-user.target
+</code></pre></div>    </div>
+  </li>
+  <li>
+    <p>启用服务:</p>
+
+    <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">sudo </span>systemctl daemon-reload
+<span class="nb">sudo </span>systemctl <span class="nb">enable </span>model
+<span class="nb">sudo </span>systemctl start model
+</code></pre></div>    </div>
+
+    <ul>
+      <li>使用tmux会话管理</li>
+    </ul>
+
+    <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># 安装tmux</span>
+<span class="nb">sudo </span>apt <span class="nb">install </span>tmux <span class="nt">-y</span>
+
+<span class="c"># 创建会话</span>
+tmux new <span class="nt">-s</span> model_train
+
+<span class="c"># 在会话中运行</span>
+python run_script.py
+
+<span class="c"># 分离会话</span>
+Ctrl+B → D
+
+<span class="c"># 重连会话</span>
+tmux attach <span class="nt">-t</span> model_train
+
+<span class="c"># 打开现有会话</span>
+tmux attach <span class="nt">-t</span> python_session
+</code></pre></div>    </div>
+
+    <h3 id="2-markdown常用快捷键">2. Markdown常用快捷键</h3>
+
+    <div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nc">Ctrl</span> <span class="mi">0</span> <span class="n">到</span> <span class="nc">Ctrl</span> <span class="mi">6</span><span class="o">:</span> <span class="n">普通文本</span><span class="err">、</span><span class="n">一级文本</span><span class="o">~</span><span class="n">六级文本</span>
+<span class="nc">Ctrl</span> <span class="nl">B:</span> <span class="n">加粗</span>
+<span class="nc">Ctrl</span> <span class="nl">I:</span> <span class="n">斜体</span>
+<span class="nc">Ctrl</span> <span class="nl">U:</span> <span class="n">下划线</span>
+<span class="nc">Shift</span> <span class="nc">Alt</span> <span class="mi">5</span><span class="o">:</span> <span class="n">删除线</span>
+<span class="nc">Shift</span> <span class="nc">Ctrl</span> <span class="o">~:</span> <span class="n">行内代码块</span>
+<span class="nc">Ctrl</span> <span class="nl">K:</span> <span class="n">超链接</span>
+<span class="nc">Ctrl</span> <span class="nl">T:</span> <span class="n">表格</span>
+<span class="nc">Ctrl</span> <span class="nc">Shift</span> <span class="nl">Q:</span> <span class="n">引用</span>
+<span class="nc">Shift</span> <span class="nc">Ctrl</span> <span class="nl">I:</span> <span class="n">插入图片</span>
+<span class="nc">Shift</span> <span class="nc">Ctrl</span> <span class="nl">M:</span> <span class="n">公式块</span>
+<span class="o">[</span> <span class="o">]:</span> <span class="n">任务列表</span><span class="o">(</span><span class="n">可勾选的序列</span><span class="o">)</span>
+<span class="o">&lt;</span><span class="n">sup</span><span class="o">&gt;</span><span class="n">内容</span><span class="o">&lt;/</span><span class="n">sup</span><span class="o">&gt;:</span> <span class="n">上标</span>
+<span class="o">&lt;</span><span class="n">sub</span><span class="o">&gt;</span><span class="n">内容</span><span class="o">&lt;/</span><span class="n">sub</span><span class="o">&gt;:</span> <span class="n">下标</span>
+<span class="o">:</span><span class="nl">smile:</span><span class="o">:</span> <span class="err">😄</span>
+<span class="o">[</span><span class="n">toc</span><span class="o">]:</span> <span class="n">展示目录</span>
+<span class="nc">Ctrl</span> <span class="nl">L:</span> <span class="n">选中一行</span>
+<span class="nc">Ctrl</span> <span class="nl">D:</span> <span class="n">选中内容</span><span class="o">/</span><span class="n">单词</span>
+<span class="nc">Ctrl</span> <span class="nl">Home:</span> <span class="n">跳转到文章开头</span>
+<span class="nc">Ctrl</span> <span class="nl">End:</span> <span class="n">跳转到文章结尾</span>
+<span class="nc">Ctrl</span> <span class="nl">F:</span> <span class="n">搜索</span>
+<span class="nc">Ctrl</span> <span class="nl">H:</span> <span class="n">替换</span>
+</code></pre></div>    </div>
+
+    <h2 id="3-学习资源">3 学习资源</h2>
+
+    <h3 id="1-书籍资源">1. 书籍资源</h3>
+
+    <p>```java
+主站: http://www.https.ng
+镜像站点:</p>
+    <ul>
+      <li>http://38.147.170.240:5959</li>
+      <li>http://103.74.192.62:1234</li>
+      <li>http://45.145.228.151</li>
+      <li>http://193.134.211.102:1234</li>
+    </ul>
+
+    <p>EPUB资源:
+http://38.147.170.240:5959/c1/baidupan/222222/其它/EPUB</p>
+
+    <p>注意: 使用http协议,不要加https
+``` –&gt;</p>
+  </li>
+</ul>
+
+<hr />

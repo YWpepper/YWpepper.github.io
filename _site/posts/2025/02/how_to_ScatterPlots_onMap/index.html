@@ -1,0 +1,140 @@
+<p>这篇博客撰写了编写相应的代码,将经纬度信息以图形化的方式呈现出来。</p>
+
+<!-- more -->
+
+<hr />
+
+<h2 id="使用英文版本的中国地图">使用英文版本的中国地图</h2>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">fig</span><span class="p">.</span><span class="nf">update_layout</span><span class="p">(</span>
+    <span class="n">mapbox</span><span class="o">=</span><span class="p">{</span>
+        <span class="sh">'</span><span class="s">style</span><span class="sh">'</span><span class="p">:</span> <span class="sh">"</span><span class="s">carto-positron</span><span class="sh">"</span><span class="p">,</span>  <span class="c1"># 使用国际版OSM配置
+</span>        <span class="sh">'</span><span class="s">zoom</span><span class="sh">'</span><span class="p">:</span> <span class="mi">10</span><span class="p">,</span>
+        <span class="sh">'</span><span class="s">center</span><span class="sh">'</span><span class="p">:</span> <span class="p">{</span><span class="sh">'</span><span class="s">lon</span><span class="sh">'</span><span class="p">:</span> <span class="mf">116.25</span><span class="p">,</span> <span class="sh">'</span><span class="s">lat</span><span class="sh">'</span><span class="p">:</span> <span class="mf">40.12</span><span class="p">},</span>
+        <span class="sh">'</span><span class="s">accesstoken</span><span class="sh">'</span><span class="p">:</span> <span class="bp">None</span>
+    <span class="p">},</span>
+    <span class="n">width</span><span class="o">=</span><span class="mi">1200</span><span class="p">,</span>
+    <span class="n">height</span><span class="o">=</span><span class="mi">800</span><span class="p">,</span>
+    <span class="n">margin</span><span class="o">=</span><span class="p">{</span><span class="sh">"</span><span class="s">r</span><span class="sh">"</span><span class="p">:</span><span class="mi">0</span><span class="p">,</span> <span class="sh">"</span><span class="s">t</span><span class="sh">"</span><span class="p">:</span><span class="mi">40</span><span class="p">,</span> <span class="sh">"</span><span class="s">l</span><span class="sh">"</span><span class="p">:</span><span class="mi">0</span><span class="p">,</span> <span class="sh">"</span><span class="s">b</span><span class="sh">"</span><span class="p">:</span><span class="mi">0</span><span class="p">},</span>
+    <span class="n">title</span><span class="o">=</span><span class="sh">"</span><span class="s">China Traffic Prediction Error Heatmap (English Labels)</span><span class="sh">"</span>
+<span class="p">)</span>
+</code></pre></div></div>
+
+<h2 id="在-python-中使用-plotly-express-在-mapbox-上绘制散点图">在 Python 中使用 Plotly Express 在 Mapbox 上绘制散点图</h2>
+
+<p>本教程参考自 <a href="https://isabella-b.com">Isabella Benabaye</a> 的文章。</p>
+
+<p><strong>相关链接:</strong></p>
+
+<ul>
+  <li><a href="https://github.com/isabellabenabaye/los-angeles-police-killings/blob/master/LA-police-killings-map.ipynb">代码仓库</a></li>
+  <li><a href="https://github.com/datadesk/los-angeles-police-killings-data">数据来源</a></li>
+</ul>
+
+<Center>
+  <img src="https://images.weserv.nl/?url=cdn.nlark.com/yuque/0/2025/png/40742019/1762870316241-305be9e7-b868-4e58-b5e9-d398f22186a0.png?x-oss-process=image%2Fformat%2Cwebp" style="zoom:50%" />
+</Center>
+
+<h3 id="背景介绍">背景介绍</h3>
+
+<p>上周我在探索洛杉矶时报关于洛杉矶县警察杀人事件的<a href="https://github.com/datadesk/los-angeles-police-killings-data">数据库</a>,试图根据 2000 年以来的数据了解更多受警察暴力不成比例影响的黑人和拉丁裔社区。我制作了一个简单的图表,你可以在我的<a href="https://isabella-b.com/blog/los-angeles-police-killings">博客文章</a>中找到。</p>
+
+<p>我还使用这些数据在 Python 中练习了一些探索性数据分析和数据可视化。数据包含每个被警察杀害的人死亡地点的经纬度,所以我尝试的一件事是使用 Mapbox 和 Plotly Express 绘制地图。这张地图显示了被杀害的黑人的死亡地点。</p>
+
+<h3 id="准备工作">准备工作</h3>
+
+<p>要使用 Plotly 制作这个 Mapbox 地图,你需要一个 Mapbox 账户和一个公共 Mapbox 访问令牌。这很容易获得,创建地图的代码也相当简单。我将介绍整个过程。</p>
+
+<p>首先,导入 Plotly Express:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">import</span> <span class="n">plotly.express</span> <span class="k">as</span> <span class="n">px</span>
+</code></pre></div></div>
+
+<h3 id="设置-mapbox-访问令牌">设置 Mapbox 访问令牌</h3>
+
+<p>接下来,你需要设置 Mapbox 访问令牌,并从目录中名为 <code class="language-plaintext highlighter-rouge">.mapbox_token</code> 的文件中调用它,该文件包含你的 Mapbox 访问令牌。</p>
+
+<p>如果你还没有令牌,要获取令牌,你必须创建一个 Mapbox 账户,转到 <code class="language-plaintext highlighter-rouge">Account</code> &gt; <code class="language-plaintext highlighter-rouge">+ Create a token</code>,命名你的令牌,然后点击 <code class="language-plaintext highlighter-rouge">Create token</code>。复制令牌并将其粘贴到目录中的 <code class="language-plaintext highlighter-rouge">.mapbox_token</code> 文件中。</p>
+
+<p>现在我们来设置它:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">px</span><span class="p">.</span><span class="nf">set_mapbox_access_token</span><span class="p">(</span><span class="nf">open</span><span class="p">(</span><span class="sh">"</span><span class="s">.mapbox_token</span><span class="sh">"</span><span class="p">).</span><span class="nf">read</span><span class="p">())</span>
+</code></pre></div></div>
+
+<h3 id="创建散点图">创建散点图</h3>
+
+<p>要创建图表,使用 <code class="language-plaintext highlighter-rouge">px.scatter_mapbox()</code>,并输入你的数据框和要使用的经纬度字段:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">fig</span> <span class="o">=</span> <span class="n">px</span><span class="p">.</span><span class="nf">scatter_mapbox</span><span class="p">(</span>
+    <span class="n">data_frame</span><span class="o">=</span><span class="n">black_killings</span><span class="p">,</span> 
+    <span class="n">lat</span><span class="o">=</span><span class="sh">'</span><span class="s">y</span><span class="sh">'</span><span class="p">,</span> 
+    <span class="n">lon</span><span class="o">=</span><span class="sh">'</span><span class="s">x</span><span class="sh">'</span><span class="p">,</span> 
+    <span class="n">opacity</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> 
+    <span class="n">hover_name</span><span class="o">=</span><span class="sh">"</span><span class="s">full_name</span><span class="sh">"</span><span class="p">,</span> 
+    <span class="n">hover_data</span><span class="o">=</span><span class="p">[</span><span class="sh">"</span><span class="s">year</span><span class="sh">"</span><span class="p">,</span><span class="sh">"</span><span class="s">neighborhood</span><span class="sh">"</span><span class="p">,</span><span class="sh">"</span><span class="s">cause</span><span class="sh">"</span><span class="p">],</span> 
+    <span class="n">zoom</span><span class="o">=</span><span class="mi">10</span>
+<span class="p">)</span>
+
+<span class="n">fig</span><span class="p">.</span><span class="nf">update_layout</span><span class="p">(</span>
+    <span class="n">margin</span><span class="o">=</span><span class="p">{</span><span class="sh">"</span><span class="s">r</span><span class="sh">"</span><span class="p">:</span><span class="mi">0</span><span class="p">,</span><span class="sh">"</span><span class="s">t</span><span class="sh">"</span><span class="p">:</span><span class="mi">0</span><span class="p">,</span><span class="sh">"</span><span class="s">l</span><span class="sh">"</span><span class="p">:</span><span class="mi">0</span><span class="p">,</span><span class="sh">"</span><span class="s">b</span><span class="sh">"</span><span class="p">:</span><span class="mi">0</span><span class="p">},</span>  <span class="c1"># 移除框架和地图之间的白色间隙
+</span>    <span class="c1"># 悬停外观
+</span>    <span class="n">hoverlabel</span><span class="o">=</span><span class="nf">dict</span><span class="p">(</span> 
+        <span class="n">bgcolor</span><span class="o">=</span><span class="sh">"</span><span class="s">white</span><span class="sh">"</span><span class="p">,</span>      <span class="c1"># 白色背景
+</span>        <span class="n">font_size</span><span class="o">=</span><span class="mi">16</span><span class="p">,</span>         <span class="c1"># 标签字体大小
+</span>        <span class="n">font_family</span><span class="o">=</span><span class="sh">"</span><span class="s">Inter</span><span class="sh">"</span>   <span class="c1"># 标签字体
+</span>    <span class="p">)</span>
+<span class="p">)</span>
+
+<span class="n">fig</span><span class="p">.</span><span class="nf">show</span><span class="p">()</span>
+</code></pre></div></div>
+
+<p><strong>可选参数:</strong></p>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">opacity</code> - 点的不透明度</li>
+  <li><code class="language-plaintext highlighter-rouge">hover_name</code> - 控制哪一列以粗体显示为工具提示标题</li>
+  <li><code class="language-plaintext highlighter-rouge">hover_data</code> - 值将显示在工具提示正文中的列列表</li>
+  <li><code class="language-plaintext highlighter-rouge">zoom</code> - 设置地图的初始缩放级别</li>
+</ul>
+
+<h3 id="嵌入图表">嵌入图表</h3>
+
+<p>要在网站上嵌入 Plotly 图表,如果你的数据源很小,最简单的方法是将其托管在 Plotly 的 Chart Studio 中,然后嵌入其 <code class="language-plaintext highlighter-rouge">&lt;iframe&gt;</code>。或者,你可以生成可视化的 HTML 文件,将其托管在 GitHub Pages(免费)或你的个人网站等地方,然后在 <code class="language-plaintext highlighter-rouge">&lt;iframe&gt;</code> 中调用该页面来嵌入它。在这篇文章中,我将使用 Chart Studio 路线,它适用于你创建的任何 Plotly 可视化。</p>
+
+<h4 id="安装-chart-studio">安装 Chart Studio</h4>
+
+<p>如果你还没有 Chart Studio Python 包,可以在终端中使用包管理器 <strong>pip</strong> 安装它:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>pip <span class="nb">install </span>chart_studio
+</code></pre></div></div>
+
+<p>你需要一个 <a href="https://chart-studio.plotly.com/feed/#/">Plotly Chart Studio</a> 账户和你的 API 密钥。</p>
+
+<p><strong>获取 API 密钥:</strong>
+点击右上角的用户名 &gt; <code class="language-plaintext highlighter-rouge">Profile</code> &gt; <code class="language-plaintext highlighter-rouge">API Keys</code> &gt; <code class="language-plaintext highlighter-rouge">Regenerate Key</code></p>
+
+<h4 id="设置凭据">设置凭据</h4>
+
+<p>现在导入 <code class="language-plaintext highlighter-rouge">chart_studio</code> 并设置你的凭据:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">import</span> <span class="n">chart_studio</span>
+
+<span class="n">username</span> <span class="o">=</span> <span class="sh">'</span><span class="s">your-username</span><span class="sh">'</span> 
+<span class="n">api_key</span> <span class="o">=</span> <span class="sh">'</span><span class="s">your-api-key</span><span class="sh">'</span> 
+<span class="n">chart_studio</span><span class="p">.</span><span class="n">tools</span><span class="p">.</span><span class="nf">set_credentials_file</span><span class="p">(</span><span class="n">username</span><span class="o">=</span><span class="n">username</span><span class="p">,</span> <span class="n">api_key</span><span class="o">=</span><span class="n">api_key</span><span class="p">)</span>
+</code></pre></div></div>
+
+<h4 id="上传图表">上传图表</h4>
+
+<p>使用 <code class="language-plaintext highlighter-rouge">py.plot()</code> 将你的图表保存到你的 Chart Studio 云账户。它会为你的图表创建一个唯一的 URL,Plotly 在生成的 <code class="language-plaintext highlighter-rouge">&lt;iframe&gt;</code> 中使用该 URL,你将使用它在网站上嵌入你的可视化。</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">import</span> <span class="n">chart_studio.plotly</span> <span class="k">as</span> <span class="n">py</span>
+
+<span class="n">py</span><span class="p">.</span><span class="nf">plot</span><span class="p">(</span><span class="n">fig</span><span class="p">,</span> <span class="n">filename</span><span class="o">=</span><span class="sh">'</span><span class="s">file-name</span><span class="sh">'</span><span class="p">,</span> <span class="n">auto_open</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p>运行该命令应该会在浏览器中的 Chart Studio 中打开图表。在右下角有一个图标,Plotly 在那里提供了你可以使用的 <code class="language-plaintext highlighter-rouge">&lt;iframe&gt;</code> 代码。</p>
+
+<p>现在你可以使用 <code class="language-plaintext highlighter-rouge">&lt;iframe&gt;</code> 在任何网站上嵌入你的交互式 Plotly 可视化!</p>
+
+<hr />

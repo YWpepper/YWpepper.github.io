@@ -1,0 +1,954 @@
+<!DOCTYPE html>
+<html>
+  <head>
+  <title>开发-EasyDataset登录验证开发 – Pepper – 一个随心记录的地方</title>
+
+      <meta charset="utf-8" />
+    <meta content='text/html; charset=utf-8' http-equiv='Content-Type'>
+    <meta http-equiv='X-UA-Compatible' content='IE=edge'>
+    <meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1.0'>
+
+    
+    <meta name="description" content="这篇博客介绍了Easy Dataset项目的架构，并指导你如何添加登录验证页面。
+
+" />
+    <meta property="og:description" content="这篇博客介绍了Easy Dataset项目的架构，并指导你如何添加登录验证页面。
+
+" />
+    
+    <meta name="author" content="Pepper" />
+
+    
+    <meta property="og:title" content="开发-EasyDataset登录验证开发" />
+    <meta property="twitter:title" content="开发-EasyDataset登录验证开发" />
+    
+  <!-- Async font loading -->
+<script>
+  window.WebFontConfig = {
+      custom: {
+          families: ['Spoqa Han Sans:100,300,400,700'],
+          urls: ['https://spoqa.github.io/spoqa-han-sans/css/SpoqaHanSans-kr.css']
+      },
+      timeout: 60000
+  };
+  (function(d) {
+      var wf = d.createElement('script'), s = d.scripts[0];
+      wf.src = 'https://ajax.googleapis.com/ajax/libs/webfont/1.5.18/webfont.js';
+      s.parentNode.insertBefore(wf, s);
+  })(document);
+</script>
+
+<!--adobe fonts-->
+<script>
+    (function(d) {
+      var config = {
+        kitId: 'vbt3gjx',
+        scriptTimeout: 3000,
+        async: true
+      },
+      h=d.documentElement,t=setTimeout(function(){h.className=h.className.replace(/\bwf-loading\b/g,"")+" wf-inactive";},config.scriptTimeout),tk=d.createElement("script"),f=false,s=d.getElementsByTagName("script")[0],a;h.className+=" wf-loading";tk.src='https://use.typekit.net/'+config.kitId+'.js';tk.async=true;tk.onload=tk.onreadystatechange=function(){a=this.readyState;if(f||a&&a!="complete"&&a!="loaded")return;f=true;clearTimeout(t);try{Typekit.load(config)}catch(e){}};s.parentNode.insertBefore(tk,s)
+    })(document);
+</script> 
+
+  <!--[if lt IE 9]>
+    <script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+  <![endif]-->
+
+  <link rel="stylesheet" type="text/css" href="/style.css" />
+  <link rel="alternate" type="application/rss+xml" title="Pepper - 一个随心记录的地方" href="/feed.xml" />
+  <link rel="shortcut icon" href="https://images.weserv.nl/?url=cdn.nlark.com/yuque/0/2025/png/40742019/1766300112246-d1fc30f4-d036-46b5-98b0-073628c06a88.png?x-oss-process=image%2Fformat%2Cwebp">
+  <script src="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js"></script>
+  <script src="https://unpkg.com/feather-icons"></script>
+  <script type="text/javascript" async
+  src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+  </script>
+  <script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+      tex2jax: {
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre'],
+        inlineMath: [['$','$']]
+      }
+    });
+  </script>
+
+  <!-- Created with Jekyll Now - http://github.com/barryclark/jekyll-now -->
+
+</head>
+
+  <body>
+    
+
+
+    
+      <aside class="toc">
+        <ul>
+  <li><a href="#">开发-EasyDataset登录验证开发</a>
+    <ul>
+      <li><a href="#-项目架构分析">📋 项目架构分析</a></li>
+      <li><a href="#-登录验证实现方案">🎯 登录验证实现方案</a>
+        <ul>
+          <li><a href="#1-拉取仓库">1. 拉取仓库</a></li>
+          <li><a href="#2-需要修改的核心文件">2. 需要修改的核心文件</a>
+            <ul>
+              <li><a href="#后端部分api-routes">后端部分（API Routes）:</a></li>
+              <li><a href="#前端部分">前端部分：</a></li>
+            </ul>
+          </li>
+          <li><a href="#3-详细实现步骤">3. 详细实现步骤</a>
+            <ul>
+              <li><a href="#步骤1-修改数据库模型">步骤1: 修改数据库模型</a></li>
+              <li><a href="#步骤2-创建认证api">步骤2: 创建认证API</a></li>
+              <li><a href="#步骤3-创建登录页面">步骤3: 创建登录页面</a></li>
+              <li><a href="#步骤4-创建认证上下文">步骤4: 创建认证上下文</a></li>
+              <li><a href="#步骤5-修改主布局">步骤5: 修改主布局</a></li>
+              <li><a href="#步骤6-添加路由保护">步骤6: 添加路由保护</a></li>
+            </ul>
+          </li>
+          <li><a href="#4-本地构建和部署流程">4. 本地构建和部署流程</a>
+            <ul>
+              <li><a href="#安装依赖">安装依赖</a></li>
+              <li><a href="#环境变量配置">环境变量配置</a></li>
+              <li><a href="#数据库管理">数据库管理</a></li>
+              <li><a href="#开发模式运行">开发模式运行</a></li>
+              <li><a href="#生产构建">生产构建</a></li>
+              <li><a href="#docker部署">Docker部署</a>
+                <ul>
+                  <li><a href="#1-镜像源npmrc文件优化">1. 镜像源.npmrc文件优化</a></li>
+                  <li><a href="#2-dockerfile优化">2. Dockerfile优化</a></li>
+                  <li><a href="#3-运行容器">3. 运行容器</a></li>
+                  <li><a href="#4-容器报错管理">4. 容器报错管理</a></li>
+                  <li><a href="#4-启动容器内数据库管理功能">4. 启动容器内数据库管理功能</a></li>
+                </ul>
+              </li>
+            </ul>
+          </li>
+          <li><a href="#5-常见登录问题">5. 常见登录问题</a>
+            <ul>
+              <li><a href="#51-公网访问问题">5.1 公网访问问题</a></li>
+              <li><a href="#52-数据库权限问题">5.2 数据库权限问题</a></li>
+            </ul>
+          </li>
+        </ul>
+      </li>
+      <li><a href="#-额外建议">🔧 额外建议</a></li>
+    </ul>
+  </li>
+</ul>
+      </aside>
+    
+
+    <div id="main" role="main" class="wrapper-content">
+      <div class="container">
+        <article class="posts">
+  <div class="back-to-home">
+    <a href="/" class="btn-home">← 返回主页</a>
+  </div>
+  
+  <h1>开发-EasyDataset登录验证开发</h1>
+  
+
+  <div clsss="meta">
+    <span class="author">
+      pepper
+    </span>
+
+    <span class="date">
+      2026-04-07
+    </span>
+
+    <ul class="tag">
+      
+      <li>
+        <a href="http://localhost:4000/tags#easydataset">
+          easydataset
+        </a>
+      </li>
+      
+      <li>
+        <a href="http://localhost:4000/tags#java">
+          java
+        </a>
+      </li>
+      
+    </ul>
+  </div>
+
+  <div class="entry">
+    <p>这篇博客介绍了Easy Dataset项目的架构，并指导你如何添加登录验证页面。</p>
+
+<!-- more -->
+
+<h2 id="-项目架构分析">📋 项目架构分析</h2>
+
+<p>Easy Dataset是一个基于Next.js的全栈应用，使用：</p>
+
+<ul>
+  <li><strong>前端</strong>: Next.js 14 + React 18 + Material-UI</li>
+  <li><strong>后端</strong>: Next.js API Routes + Prisma ORM</li>
+  <li><strong>数据库</strong>: SQLite (Prisma)</li>
+  <li><strong>状态管理</strong>: Jotai</li>
+  <li><strong>主题</strong>: next-themes</li>
+</ul>
+
+<p>当前项目<strong>没有身份验证系统</strong>，所有页面都是公开访问的,所以本博客将介绍如何添加一个简单的登录验证系统，保护敏感页面，并提供用户管理功能。</p>
+
+<h2 id="-登录验证实现方案">🎯 登录验证实现方案</h2>
+
+<h3 id="1-拉取仓库">1. 拉取仓库</h3>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>git clone https://github.com/ConardLi/easy-dataset.git
+<span class="nb">cd </span>easy-dataset
+<span class="c">## 这个是本地构建的时候的命令行</span>
+npm <span class="nb">install</span>
+</code></pre></div></div>
+
+<h3 id="2-需要修改的核心文件">2. 需要修改的核心文件</h3>
+
+<h4 id="后端部分api-routes">后端部分（API Routes）:</h4>
+
+<ol>
+  <li><strong>创建认证API</strong>：
+    <ul>
+      <li><code class="language-plaintext highlighter-rouge">app/api/auth/login/route.js</code> - 登录验证</li>
+      <li><code class="language-plaintext highlighter-rouge">app/api/auth/logout/route.js</code> - 登出</li>
+      <li><code class="language-plaintext highlighter-rouge">app/api/auth/me/route.js</code> - 获取当前用户信息</li>
+      <li><code class="language-plaintext highlighter-rouge">app/api/auth/register/route.js</code> - 用户注册（可选）</li>
+    </ul>
+  </li>
+  <li><strong>数据库模型</strong>：
+    <ul>
+      <li><code class="language-plaintext highlighter-rouge">prisma/schema.prisma</code> - 添加User模型</li>
+      <li><code class="language-plaintext highlighter-rouge">lib/db/users.js</code> - 用户数据库操作</li>
+    </ul>
+  </li>
+  <li><strong>中间件</strong>：
+    <ul>
+      <li><code class="language-plaintext highlighter-rouge">middleware.js</code> - 路由保护中间件</li>
+    </ul>
+  </li>
+</ol>
+
+<h4 id="前端部分">前端部分：</h4>
+
+<ol>
+  <li><strong>登录页面</strong>：
+    <ul>
+      <li><code class="language-plaintext highlighter-rouge">app/login/page.js</code> - 登录页面组件</li>
+    </ul>
+  </li>
+  <li><strong>上下文和状态</strong>：
+    <ul>
+      <li><code class="language-plaintext highlighter-rouge">contexts/AuthContext.js</code> - 认证状态管理</li>
+      <li><code class="language-plaintext highlighter-rouge">hooks/useAuth.js</code> - 认证相关hook</li>
+    </ul>
+  </li>
+  <li><strong>现有组件修改</strong>：
+    <ul>
+      <li><code class="language-plaintext highlighter-rouge">app/layout.js</code> - 添加认证provider</li>
+      <li><code class="language-plaintext highlighter-rouge">app/page.js</code> - 添加登录检查</li>
+      <li><code class="language-plaintext highlighter-rouge">components/Navbar/index.js</code> - 添加登录/登出按钮</li>
+    </ul>
+  </li>
+</ol>
+
+<h3 id="3-详细实现步骤">3. 详细实现步骤</h3>
+
+<h4 id="步骤1-修改数据库模型">步骤1: 修改数据库模型</h4>
+
+<p>在<code class="language-plaintext highlighter-rouge">prisma/schema.prisma</code>中添加用户模型：</p>
+
+<pre><code class="language-prisma">model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  password  String
+  name      String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+</code></pre>
+
+<h4 id="步骤2-创建认证api">步骤2: 创建认证API</h4>
+
+<p>在<code class="language-plaintext highlighter-rouge">app/api/auth/login/route.js</code>：</p>
+
+<div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">import</span> <span class="nx">bcrypt</span> <span class="k">from</span> <span class="dl">"</span><span class="s2">bcryptjs</span><span class="dl">"</span><span class="p">;</span>
+<span class="k">import</span> <span class="nx">jwt</span> <span class="k">from</span> <span class="dl">"</span><span class="s2">jsonwebtoken</span><span class="dl">"</span><span class="p">;</span>
+<span class="k">import</span> <span class="p">{</span> <span class="nx">getUserByEmail</span> <span class="p">}</span> <span class="k">from</span> <span class="dl">"</span><span class="s2">@/lib/db/users</span><span class="dl">"</span><span class="p">;</span>
+
+<span class="k">export</span> <span class="k">async</span> <span class="kd">function</span> <span class="nf">POST</span><span class="p">(</span><span class="nx">request</span><span class="p">)</span> <span class="p">{</span>
+  <span class="k">try</span> <span class="p">{</span>
+    <span class="kd">const</span> <span class="p">{</span> <span class="nx">email</span><span class="p">,</span> <span class="nx">password</span> <span class="p">}</span> <span class="o">=</span> <span class="k">await</span> <span class="nx">request</span><span class="p">.</span><span class="nf">json</span><span class="p">();</span>
+
+    <span class="c1">// 验证用户</span>
+    <span class="kd">const</span> <span class="nx">user</span> <span class="o">=</span> <span class="k">await</span> <span class="nf">getUserByEmail</span><span class="p">(</span><span class="nx">email</span><span class="p">);</span>
+    <span class="k">if </span><span class="p">(</span><span class="o">!</span><span class="nx">user</span> <span class="o">||</span> <span class="o">!</span><span class="nx">bcrypt</span><span class="p">.</span><span class="nf">compareSync</span><span class="p">(</span><span class="nx">password</span><span class="p">,</span> <span class="nx">user</span><span class="p">.</span><span class="nx">password</span><span class="p">))</span> <span class="p">{</span>
+      <span class="k">return</span> <span class="nx">Response</span><span class="p">.</span><span class="nf">json</span><span class="p">({</span> <span class="na">error</span><span class="p">:</span> <span class="dl">"</span><span class="s2">Invalid credentials</span><span class="dl">"</span> <span class="p">},</span> <span class="p">{</span> <span class="na">status</span><span class="p">:</span> <span class="mi">401</span> <span class="p">});</span>
+    <span class="p">}</span>
+
+    <span class="c1">// 生成JWT token</span>
+    <span class="kd">const</span> <span class="nx">token</span> <span class="o">=</span> <span class="nx">jwt</span><span class="p">.</span><span class="nf">sign</span><span class="p">(</span>
+      <span class="p">{</span> <span class="na">userId</span><span class="p">:</span> <span class="nx">user</span><span class="p">.</span><span class="nx">id</span><span class="p">,</span> <span class="na">email</span><span class="p">:</span> <span class="nx">user</span><span class="p">.</span><span class="nx">email</span> <span class="p">},</span>
+      <span class="nx">process</span><span class="p">.</span><span class="nx">env</span><span class="p">.</span><span class="nx">JWT_SECRET</span><span class="p">,</span>
+      <span class="p">{</span> <span class="na">expiresIn</span><span class="p">:</span> <span class="dl">"</span><span class="s2">7d</span><span class="dl">"</span> <span class="p">},</span>
+    <span class="p">);</span>
+
+    <span class="k">return</span> <span class="nx">Response</span><span class="p">.</span><span class="nf">json</span><span class="p">({</span>
+      <span class="nx">token</span><span class="p">,</span>
+      <span class="na">user</span><span class="p">:</span> <span class="p">{</span> <span class="na">id</span><span class="p">:</span> <span class="nx">user</span><span class="p">.</span><span class="nx">id</span><span class="p">,</span> <span class="na">email</span><span class="p">:</span> <span class="nx">user</span><span class="p">.</span><span class="nx">email</span><span class="p">,</span> <span class="na">name</span><span class="p">:</span> <span class="nx">user</span><span class="p">.</span><span class="nx">name</span> <span class="p">},</span>
+    <span class="p">});</span>
+  <span class="p">}</span> <span class="k">catch </span><span class="p">(</span><span class="nx">error</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="nx">Response</span><span class="p">.</span><span class="nf">json</span><span class="p">({</span> <span class="na">error</span><span class="p">:</span> <span class="dl">"</span><span class="s2">Login failed</span><span class="dl">"</span> <span class="p">},</span> <span class="p">{</span> <span class="na">status</span><span class="p">:</span> <span class="mi">500</span> <span class="p">});</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<h4 id="步骤3-创建登录页面">步骤3: 创建登录页面</h4>
+
+<p>在<code class="language-plaintext highlighter-rouge">app/login/page.js</code>：</p>
+
+<div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="dl">"</span><span class="s2">use client</span><span class="dl">"</span><span class="p">;</span>
+<span class="k">import</span> <span class="p">{</span> <span class="nx">useState</span> <span class="p">}</span> <span class="k">from</span> <span class="dl">"</span><span class="s2">react</span><span class="dl">"</span><span class="p">;</span>
+<span class="k">import</span> <span class="p">{</span> <span class="nx">useRouter</span> <span class="p">}</span> <span class="k">from</span> <span class="dl">"</span><span class="s2">next/navigation</span><span class="dl">"</span><span class="p">;</span>
+<span class="k">import</span> <span class="p">{</span> <span class="nx">useAuth</span> <span class="p">}</span> <span class="k">from</span> <span class="dl">"</span><span class="s2">@/hooks/useAuth</span><span class="dl">"</span><span class="p">;</span>
+<span class="k">import</span> <span class="p">{</span>
+  <span class="nx">Container</span><span class="p">,</span>
+  <span class="nx">TextField</span><span class="p">,</span>
+  <span class="nx">Button</span><span class="p">,</span>
+  <span class="nx">Typography</span><span class="p">,</span>
+  <span class="nx">Box</span><span class="p">,</span>
+  <span class="nx">Paper</span><span class="p">,</span>
+<span class="p">}</span> <span class="k">from</span> <span class="dl">"</span><span class="s2">@mui/material</span><span class="dl">"</span><span class="p">;</span>
+
+<span class="k">export</span> <span class="k">default</span> <span class="kd">function</span> <span class="nf">LoginPage</span><span class="p">()</span> <span class="p">{</span>
+  <span class="kd">const</span> <span class="p">[</span><span class="nx">email</span><span class="p">,</span> <span class="nx">setEmail</span><span class="p">]</span> <span class="o">=</span> <span class="nf">useState</span><span class="p">(</span><span class="dl">""</span><span class="p">);</span>
+  <span class="kd">const</span> <span class="p">[</span><span class="nx">password</span><span class="p">,</span> <span class="nx">setPassword</span><span class="p">]</span> <span class="o">=</span> <span class="nf">useState</span><span class="p">(</span><span class="dl">""</span><span class="p">);</span>
+  <span class="kd">const</span> <span class="p">{</span> <span class="nx">login</span> <span class="p">}</span> <span class="o">=</span> <span class="nf">useAuth</span><span class="p">();</span>
+  <span class="kd">const</span> <span class="nx">router</span> <span class="o">=</span> <span class="nf">useRouter</span><span class="p">();</span>
+
+  <span class="kd">const</span> <span class="nx">handleSubmit</span> <span class="o">=</span> <span class="k">async </span><span class="p">(</span><span class="nx">e</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="p">{</span>
+    <span class="nx">e</span><span class="p">.</span><span class="nf">preventDefault</span><span class="p">();</span>
+    <span class="k">try</span> <span class="p">{</span>
+      <span class="k">await</span> <span class="nf">login</span><span class="p">(</span><span class="nx">email</span><span class="p">,</span> <span class="nx">password</span><span class="p">);</span>
+      <span class="nx">router</span><span class="p">.</span><span class="nf">push</span><span class="p">(</span><span class="dl">"</span><span class="s2">/</span><span class="dl">"</span><span class="p">);</span>
+    <span class="p">}</span> <span class="k">catch </span><span class="p">(</span><span class="nx">error</span><span class="p">)</span> <span class="p">{</span>
+      <span class="nf">alert</span><span class="p">(</span><span class="dl">"</span><span class="s2">登录失败</span><span class="dl">"</span><span class="p">);</span>
+    <span class="p">}</span>
+  <span class="p">};</span>
+
+  <span class="k">return </span><span class="p">(</span>
+    <span class="o">&lt;</span><span class="nx">Container</span> <span class="nx">maxWidth</span><span class="o">=</span><span class="dl">"</span><span class="s2">sm</span><span class="dl">"</span><span class="o">&gt;</span>
+      <span class="o">&lt;</span><span class="nx">Box</span>
+        <span class="nx">sx</span><span class="o">=</span>
+      <span class="o">&gt;</span>
+        <span class="o">&lt;</span><span class="nx">Paper</span> <span class="nx">elevation</span><span class="o">=</span><span class="p">{</span><span class="mi">3</span><span class="p">}</span> <span class="nx">sx</span><span class="o">=&gt;</span>
+          <span class="o">&lt;</span><span class="nx">Typography</span> <span class="nx">component</span><span class="o">=</span><span class="dl">"</span><span class="s2">h1</span><span class="dl">"</span> <span class="nx">variant</span><span class="o">=</span><span class="dl">"</span><span class="s2">h5</span><span class="dl">"</span> <span class="nx">align</span><span class="o">=</span><span class="dl">"</span><span class="s2">center</span><span class="dl">"</span><span class="o">&gt;</span>
+            <span class="nx">登录</span>
+          <span class="o">&lt;</span><span class="sr">/Typography</span><span class="err">&gt;
+</span>          <span class="o">&lt;</span><span class="nx">Box</span> <span class="nx">component</span><span class="o">=</span><span class="dl">"</span><span class="s2">form</span><span class="dl">"</span> <span class="nx">onSubmit</span><span class="o">=</span><span class="p">{</span><span class="nx">handleSubmit</span><span class="p">}</span> <span class="nx">sx</span><span class="o">=&gt;</span>
+            <span class="o">&lt;</span><span class="nx">TextField</span>
+              <span class="nx">margin</span><span class="o">=</span><span class="dl">"</span><span class="s2">normal</span><span class="dl">"</span>
+              <span class="nx">required</span>
+              <span class="nx">fullWidth</span>
+              <span class="nx">id</span><span class="o">=</span><span class="dl">"</span><span class="s2">email</span><span class="dl">"</span>
+              <span class="nx">label</span><span class="o">=</span><span class="dl">"</span><span class="s2">邮箱</span><span class="dl">"</span>
+              <span class="nx">name</span><span class="o">=</span><span class="dl">"</span><span class="s2">email</span><span class="dl">"</span>
+              <span class="nx">autoComplete</span><span class="o">=</span><span class="dl">"</span><span class="s2">email</span><span class="dl">"</span>
+              <span class="nx">autoFocus</span>
+              <span class="nx">value</span><span class="o">=</span><span class="p">{</span><span class="nx">email</span><span class="p">}</span>
+              <span class="nx">onChange</span><span class="o">=</span><span class="p">{(</span><span class="nx">e</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="nf">setEmail</span><span class="p">(</span><span class="nx">e</span><span class="p">.</span><span class="nx">target</span><span class="p">.</span><span class="nx">value</span><span class="p">)}</span>
+            <span class="sr">/</span><span class="err">&gt;
+</span>            <span class="o">&lt;</span><span class="nx">TextField</span>
+              <span class="nx">margin</span><span class="o">=</span><span class="dl">"</span><span class="s2">normal</span><span class="dl">"</span>
+              <span class="nx">required</span>
+              <span class="nx">fullWidth</span>
+              <span class="nx">name</span><span class="o">=</span><span class="dl">"</span><span class="s2">password</span><span class="dl">"</span>
+              <span class="nx">label</span><span class="o">=</span><span class="dl">"</span><span class="s2">密码</span><span class="dl">"</span>
+              <span class="nx">type</span><span class="o">=</span><span class="dl">"</span><span class="s2">password</span><span class="dl">"</span>
+              <span class="nx">id</span><span class="o">=</span><span class="dl">"</span><span class="s2">password</span><span class="dl">"</span>
+              <span class="nx">autoComplete</span><span class="o">=</span><span class="dl">"</span><span class="s2">current-password</span><span class="dl">"</span>
+              <span class="nx">value</span><span class="o">=</span><span class="p">{</span><span class="nx">password</span><span class="p">}</span>
+              <span class="nx">onChange</span><span class="o">=</span><span class="p">{(</span><span class="nx">e</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="nf">setPassword</span><span class="p">(</span><span class="nx">e</span><span class="p">.</span><span class="nx">target</span><span class="p">.</span><span class="nx">value</span><span class="p">)}</span>
+            <span class="sr">/</span><span class="err">&gt;
+</span>            <span class="o">&lt;</span><span class="nx">Button</span>
+              <span class="nx">type</span><span class="o">=</span><span class="dl">"</span><span class="s2">submit</span><span class="dl">"</span>
+              <span class="nx">fullWidth</span>
+              <span class="nx">variant</span><span class="o">=</span><span class="dl">"</span><span class="s2">contained</span><span class="dl">"</span>
+              <span class="nx">sx</span><span class="o">=</span>
+            <span class="o">&gt;</span>
+              <span class="nx">登录</span>
+            <span class="o">&lt;</span><span class="sr">/Button</span><span class="err">&gt;
+</span>          <span class="o">&lt;</span><span class="sr">/Box</span><span class="err">&gt;
+</span>        <span class="o">&lt;</span><span class="sr">/Paper</span><span class="err">&gt;
+</span>      <span class="o">&lt;</span><span class="sr">/Box</span><span class="err">&gt;
+</span>    <span class="o">&lt;</span><span class="sr">/Container</span><span class="err">&gt;
+</span>  <span class="p">);</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<h4 id="步骤4-创建认证上下文">步骤4: 创建认证上下文</h4>
+
+<p>在<code class="language-plaintext highlighter-rouge">contexts/AuthContext.js</code>：</p>
+
+<div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="dl">"</span><span class="s2">use client</span><span class="dl">"</span><span class="p">;</span>
+<span class="k">import</span> <span class="p">{</span> <span class="nx">createContext</span><span class="p">,</span> <span class="nx">useState</span><span class="p">,</span> <span class="nx">useContext</span><span class="p">,</span> <span class="nx">useEffect</span> <span class="p">}</span> <span class="k">from</span> <span class="dl">"</span><span class="s2">react</span><span class="dl">"</span><span class="p">;</span>
+<span class="k">import</span> <span class="p">{</span> <span class="nx">useRouter</span> <span class="p">}</span> <span class="k">from</span> <span class="dl">"</span><span class="s2">next/navigation</span><span class="dl">"</span><span class="p">;</span>
+
+<span class="kd">const</span> <span class="nx">AuthContext</span> <span class="o">=</span> <span class="nf">createContext</span><span class="p">();</span>
+
+<span class="k">export</span> <span class="kd">const</span> <span class="nx">AuthProvider</span> <span class="o">=</span> <span class="p">({</span> <span class="nx">children</span> <span class="p">})</span> <span class="o">=&gt;</span> <span class="p">{</span>
+  <span class="kd">const</span> <span class="p">[</span><span class="nx">user</span><span class="p">,</span> <span class="nx">setUser</span><span class="p">]</span> <span class="o">=</span> <span class="nf">useState</span><span class="p">(</span><span class="kc">null</span><span class="p">);</span>
+  <span class="kd">const</span> <span class="p">[</span><span class="nx">loading</span><span class="p">,</span> <span class="nx">setLoading</span><span class="p">]</span> <span class="o">=</span> <span class="nf">useState</span><span class="p">(</span><span class="kc">true</span><span class="p">);</span>
+  <span class="kd">const</span> <span class="nx">router</span> <span class="o">=</span> <span class="nf">useRouter</span><span class="p">();</span>
+
+  <span class="nf">useEffect</span><span class="p">(()</span> <span class="o">=&gt;</span> <span class="p">{</span>
+    <span class="c1">// 检查本地存储的token</span>
+    <span class="kd">const</span> <span class="nx">token</span> <span class="o">=</span> <span class="nx">localStorage</span><span class="p">.</span><span class="nf">getItem</span><span class="p">(</span><span class="dl">"</span><span class="s2">token</span><span class="dl">"</span><span class="p">);</span>
+    <span class="k">if </span><span class="p">(</span><span class="nx">token</span><span class="p">)</span> <span class="p">{</span>
+      <span class="c1">// 验证token有效性</span>
+      <span class="nf">fetchUser</span><span class="p">(</span><span class="nx">token</span><span class="p">);</span>
+    <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+      <span class="nf">setLoading</span><span class="p">(</span><span class="kc">false</span><span class="p">);</span>
+    <span class="p">}</span>
+  <span class="p">},</span> <span class="p">[]);</span>
+
+  <span class="kd">const</span> <span class="nx">fetchUser</span> <span class="o">=</span> <span class="k">async </span><span class="p">(</span><span class="nx">token</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="p">{</span>
+    <span class="k">try</span> <span class="p">{</span>
+      <span class="kd">const</span> <span class="nx">response</span> <span class="o">=</span> <span class="k">await</span> <span class="nf">fetch</span><span class="p">(</span><span class="dl">"</span><span class="s2">/api/auth/me</span><span class="dl">"</span><span class="p">,</span> <span class="p">{</span>
+        <span class="na">headers</span><span class="p">:</span> <span class="p">{</span> <span class="na">Authorization</span><span class="p">:</span> <span class="s2">`Bearer </span><span class="p">${</span><span class="nx">token</span><span class="p">}</span><span class="s2">`</span> <span class="p">},</span>
+      <span class="p">});</span>
+      <span class="k">if </span><span class="p">(</span><span class="nx">response</span><span class="p">.</span><span class="nx">ok</span><span class="p">)</span> <span class="p">{</span>
+        <span class="kd">const</span> <span class="nx">userData</span> <span class="o">=</span> <span class="k">await</span> <span class="nx">response</span><span class="p">.</span><span class="nf">json</span><span class="p">();</span>
+        <span class="nf">setUser</span><span class="p">(</span><span class="nx">userData</span><span class="p">);</span>
+      <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+        <span class="nx">localStorage</span><span class="p">.</span><span class="nf">removeItem</span><span class="p">(</span><span class="dl">"</span><span class="s2">token</span><span class="dl">"</span><span class="p">);</span>
+      <span class="p">}</span>
+    <span class="p">}</span> <span class="k">catch </span><span class="p">(</span><span class="nx">error</span><span class="p">)</span> <span class="p">{</span>
+      <span class="nx">localStorage</span><span class="p">.</span><span class="nf">removeItem</span><span class="p">(</span><span class="dl">"</span><span class="s2">token</span><span class="dl">"</span><span class="p">);</span>
+    <span class="p">}</span> <span class="k">finally</span> <span class="p">{</span>
+      <span class="nf">setLoading</span><span class="p">(</span><span class="kc">false</span><span class="p">);</span>
+    <span class="p">}</span>
+  <span class="p">};</span>
+
+  <span class="kd">const</span> <span class="nx">login</span> <span class="o">=</span> <span class="k">async </span><span class="p">(</span><span class="nx">email</span><span class="p">,</span> <span class="nx">password</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="p">{</span>
+    <span class="kd">const</span> <span class="nx">response</span> <span class="o">=</span> <span class="k">await</span> <span class="nf">fetch</span><span class="p">(</span><span class="dl">"</span><span class="s2">/api/auth/login</span><span class="dl">"</span><span class="p">,</span> <span class="p">{</span>
+      <span class="na">method</span><span class="p">:</span> <span class="dl">"</span><span class="s2">POST</span><span class="dl">"</span><span class="p">,</span>
+      <span class="na">headers</span><span class="p">:</span> <span class="p">{</span> <span class="dl">"</span><span class="s2">Content-Type</span><span class="dl">"</span><span class="p">:</span> <span class="dl">"</span><span class="s2">application/json</span><span class="dl">"</span> <span class="p">},</span>
+      <span class="na">body</span><span class="p">:</span> <span class="nx">JSON</span><span class="p">.</span><span class="nf">stringify</span><span class="p">({</span> <span class="nx">email</span><span class="p">,</span> <span class="nx">password</span> <span class="p">}),</span>
+    <span class="p">});</span>
+
+    <span class="k">if </span><span class="p">(</span><span class="nx">response</span><span class="p">.</span><span class="nx">ok</span><span class="p">)</span> <span class="p">{</span>
+      <span class="kd">const</span> <span class="nx">data</span> <span class="o">=</span> <span class="k">await</span> <span class="nx">response</span><span class="p">.</span><span class="nf">json</span><span class="p">();</span>
+      <span class="nx">localStorage</span><span class="p">.</span><span class="nf">setItem</span><span class="p">(</span><span class="dl">"</span><span class="s2">token</span><span class="dl">"</span><span class="p">,</span> <span class="nx">data</span><span class="p">.</span><span class="nx">token</span><span class="p">);</span>
+      <span class="nf">setUser</span><span class="p">(</span><span class="nx">data</span><span class="p">.</span><span class="nx">user</span><span class="p">);</span>
+      <span class="k">return</span> <span class="nx">data</span><span class="p">;</span>
+    <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+      <span class="k">throw</span> <span class="k">new</span> <span class="nc">Error</span><span class="p">(</span><span class="dl">"</span><span class="s2">Login failed</span><span class="dl">"</span><span class="p">);</span>
+    <span class="p">}</span>
+  <span class="p">};</span>
+
+  <span class="kd">const</span> <span class="nx">logout</span> <span class="o">=</span> <span class="p">()</span> <span class="o">=&gt;</span> <span class="p">{</span>
+    <span class="nx">localStorage</span><span class="p">.</span><span class="nf">removeItem</span><span class="p">(</span><span class="dl">"</span><span class="s2">token</span><span class="dl">"</span><span class="p">);</span>
+    <span class="nf">setUser</span><span class="p">(</span><span class="kc">null</span><span class="p">);</span>
+    <span class="nx">router</span><span class="p">.</span><span class="nf">push</span><span class="p">(</span><span class="dl">"</span><span class="s2">/login</span><span class="dl">"</span><span class="p">);</span>
+  <span class="p">};</span>
+
+  <span class="k">return </span><span class="p">(</span>
+    <span class="o">&lt;</span><span class="nx">AuthContext</span><span class="p">.</span><span class="nx">Provider</span> <span class="nx">value</span><span class="o">=&gt;</span>
+      <span class="p">{</span><span class="nx">children</span><span class="p">}</span>
+    <span class="o">&lt;</span><span class="sr">/AuthContext.Provider</span><span class="err">&gt;
+</span>  <span class="p">);</span>
+<span class="p">};</span>
+
+<span class="k">export</span> <span class="kd">const</span> <span class="nx">useAuth</span> <span class="o">=</span> <span class="p">()</span> <span class="o">=&gt;</span> <span class="p">{</span>
+  <span class="kd">const</span> <span class="nx">context</span> <span class="o">=</span> <span class="nf">useContext</span><span class="p">(</span><span class="nx">AuthContext</span><span class="p">);</span>
+  <span class="k">if </span><span class="p">(</span><span class="o">!</span><span class="nx">context</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">throw</span> <span class="k">new</span> <span class="nc">Error</span><span class="p">(</span><span class="dl">"</span><span class="s2">useAuth must be used within AuthProvider</span><span class="dl">"</span><span class="p">);</span>
+  <span class="p">}</span>
+  <span class="k">return</span> <span class="nx">context</span><span class="p">;</span>
+<span class="p">};</span>
+</code></pre></div></div>
+
+<h4 id="步骤5-修改主布局">步骤5: 修改主布局</h4>
+
+<p>更新<code class="language-plaintext highlighter-rouge">app/layout.js</code>：</p>
+
+<div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">import</span> <span class="p">{</span> <span class="nx">AuthProvider</span> <span class="p">}</span> <span class="k">from</span> <span class="dl">"</span><span class="s2">@/contexts/AuthContext</span><span class="dl">"</span><span class="p">;</span>
+
+<span class="k">export</span> <span class="k">default</span> <span class="kd">function</span> <span class="nf">RootLayout</span><span class="p">({</span> <span class="nx">children</span> <span class="p">})</span> <span class="p">{</span>
+  <span class="k">return </span><span class="p">(</span>
+    <span class="o">&lt;</span><span class="nx">html</span> <span class="nx">lang</span><span class="o">=</span><span class="dl">"</span><span class="s2">zh</span><span class="dl">"</span> <span class="nx">suppressHydrationWarning</span><span class="o">&gt;</span>
+      <span class="o">&lt;</span><span class="nx">body</span> <span class="nx">suppressHydrationWarning</span><span class="o">&gt;</span>
+        <span class="o">&lt;</span><span class="nx">AuthProvider</span><span class="o">&gt;</span>
+          <span class="o">&lt;</span><span class="nx">Provider</span><span class="o">&gt;</span>
+            <span class="o">&lt;</span><span class="nx">ThemeRegistry</span><span class="o">&gt;</span>
+              <span class="o">&lt;</span><span class="nx">I18nProvider</span><span class="o">&gt;</span>
+                <span class="p">{</span><span class="nx">children</span><span class="p">}</span>
+                <span class="o">&lt;</span><span class="nx">Toaster</span> <span class="nx">richColors</span> <span class="nx">position</span><span class="o">=</span><span class="dl">"</span><span class="s2">top-right</span><span class="dl">"</span> <span class="nx">duration</span><span class="o">=</span><span class="p">{</span><span class="mi">1000</span><span class="p">}</span> <span class="sr">/</span><span class="err">&gt;
+</span>              <span class="o">&lt;</span><span class="sr">/I18nProvider</span><span class="err">&gt;
+</span>            <span class="o">&lt;</span><span class="sr">/ThemeRegistry</span><span class="err">&gt;
+</span>          <span class="o">&lt;</span><span class="sr">/Provider</span><span class="err">&gt;
+</span>        <span class="o">&lt;</span><span class="sr">/AuthProvider</span><span class="err">&gt;
+</span>      <span class="o">&lt;</span><span class="sr">/body</span><span class="err">&gt;
+</span>    <span class="o">&lt;</span><span class="sr">/html</span><span class="err">&gt;
+</span>  <span class="p">);</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<h4 id="步骤6-添加路由保护">步骤6: 添加路由保护</h4>
+
+<p>创建<code class="language-plaintext highlighter-rouge">middleware.js</code>：</p>
+
+<div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">import</span> <span class="p">{</span> <span class="nx">NextResponse</span> <span class="p">}</span> <span class="k">from</span> <span class="dl">"</span><span class="s2">next/server</span><span class="dl">"</span><span class="p">;</span>
+<span class="k">import</span> <span class="p">{</span> <span class="nx">jwtVerify</span> <span class="p">}</span> <span class="k">from</span> <span class="dl">"</span><span class="s2">jose</span><span class="dl">"</span><span class="p">;</span>
+
+<span class="k">export</span> <span class="k">async</span> <span class="kd">function</span> <span class="nf">middleware</span><span class="p">(</span><span class="nx">request</span><span class="p">)</span> <span class="p">{</span>
+  <span class="kd">const</span> <span class="nx">token</span> <span class="o">=</span> <span class="nx">request</span><span class="p">.</span><span class="nx">cookies</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="dl">"</span><span class="s2">token</span><span class="dl">"</span><span class="p">)?.</span><span class="nx">value</span><span class="p">;</span>
+  <span class="kd">const</span> <span class="nx">isAuthPage</span> <span class="o">=</span> <span class="nx">request</span><span class="p">.</span><span class="nx">nextUrl</span><span class="p">.</span><span class="nx">pathname</span><span class="p">.</span><span class="nf">startsWith</span><span class="p">(</span><span class="dl">"</span><span class="s2">/login</span><span class="dl">"</span><span class="p">);</span>
+
+  <span class="k">if </span><span class="p">(</span><span class="o">!</span><span class="nx">token</span> <span class="o">&amp;&amp;</span> <span class="o">!</span><span class="nx">isAuthPage</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="nx">NextResponse</span><span class="p">.</span><span class="nf">redirect</span><span class="p">(</span><span class="k">new</span> <span class="nc">URL</span><span class="p">(</span><span class="dl">"</span><span class="s2">/login</span><span class="dl">"</span><span class="p">,</span> <span class="nx">request</span><span class="p">.</span><span class="nx">url</span><span class="p">));</span>
+  <span class="p">}</span>
+
+  <span class="k">if </span><span class="p">(</span><span class="nx">token</span> <span class="o">&amp;&amp;</span> <span class="nx">isAuthPage</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="nx">NextResponse</span><span class="p">.</span><span class="nf">redirect</span><span class="p">(</span><span class="k">new</span> <span class="nc">URL</span><span class="p">(</span><span class="dl">"</span><span class="s2">/</span><span class="dl">"</span><span class="p">,</span> <span class="nx">request</span><span class="p">.</span><span class="nx">url</span><span class="p">));</span>
+  <span class="p">}</span>
+
+  <span class="k">return</span> <span class="nx">NextResponse</span><span class="p">.</span><span class="nf">next</span><span class="p">();</span>
+<span class="p">}</span>
+
+<span class="k">export</span> <span class="kd">const</span> <span class="nx">config</span> <span class="o">=</span> <span class="p">{</span>
+  <span class="na">matcher</span><span class="p">:</span> <span class="p">[</span><span class="dl">"</span><span class="s2">/((?!api|_next/static|_next/image|favicon.ico).*)</span><span class="dl">"</span><span class="p">],</span>
+<span class="p">};</span>
+</code></pre></div></div>
+
+<h3 id="4-本地构建和部署流程">4. 本地构建和部署流程</h3>
+
+<h4 id="安装依赖">安装依赖</h4>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>npm <span class="nb">install </span>bcryptjs jsonwebtoken jose
+</code></pre></div></div>
+
+<h4 id="环境变量配置">环境变量配置</h4>
+
+<p>创建<code class="language-plaintext highlighter-rouge">.env.local</code>文件：</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>JWT_SECRET=your-secret-key-here
+</code></pre></div></div>
+
+<h4 id="数据库管理">数据库管理</h4>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># 由于本项目添加了一个登陆账号验证的功能，新创建了一张表来做管理员账户</span>
+<span class="c"># 1. 把你的数据库结构 → 同步到真实数据库</span>
+npm run db:push
+<span class="c"># 2. 启动一个网页版数据库可视化管理工具</span>
+npm rum db:studio
+
+</code></pre></div></div>
+
+<h4 id="开发模式运行">开发模式运行</h4>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>npm run dev
+</code></pre></div></div>
+
+<h4 id="生产构建">生产构建</h4>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>npm run build
+npm run start
+<span class="c"># 访问 http://localhost:1717</span>
+</code></pre></div></div>
+
+<h4 id="docker部署">Docker部署</h4>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># 构建镜像</span>
+docker build <span class="nt">-t</span> easy-dataset-with-auth <span class="nb">.</span>
+docker build <span class="nt">-t</span> easy-dataset-v1 <span class="nb">.</span>
+docker build <span class="nt">-t</span> easy-dataset-v2 <span class="nb">.</span>
+</code></pre></div></div>
+
+<h5 id="1-镜像源npmrc文件优化">1. 镜像源.npmrc文件优化</h5>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># 下载慢，镜像源更改，配置.npmrc文件</span>
+<span class="nv">registry</span><span class="o">=</span>https://registry.npmjs.org  <span class="c"># 比https://registry.npmmirror.com要好用</span>
+strict-ssl<span class="o">=</span><span class="nb">false
+</span>fetch-retry-mintimeout<span class="o">=</span>20000
+fetch-retry-maxtimeout<span class="o">=</span>120000
+fetch-timeout<span class="o">=</span>300000
+<span class="nv">electron_mirror</span><span class="o">=</span>https://npmmirror.com/mirrors/electron/
+<span class="nv">canvas_binary_host_mirror</span><span class="o">=</span>https://npmmirror.com/mirrors/node-canvas-prebuilt/
+<span class="nv">prisma_engines_mirror</span><span class="o">=</span>https://registry.npmmirror.com/-/binary/prisma
+</code></pre></div></div>
+
+<h5 id="2-dockerfile优化">2. Dockerfile优化</h5>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># 创建包含pnpm的基础镜像</span>
+<span class="c"># http://r.cnpmjs.org/</span>
+FROM node:20-alpine AS pnpm-base
+
+<span class="c"># 1. 修改 Alpine 软件源为阿里云镜像 (加速 apk add)</span>
+RUN <span class="nb">sed</span> <span class="nt">-i</span> <span class="s1">'s/dl-cdn.alpinelinux.org/mirrors.aliyun.com/g'</span> /etc/apk/repositories
+
+<span class="c"># 2. 设置 pnpm 镜像源并安装</span>
+RUN npm config <span class="nb">set </span>registry https://registry.npmjs.org <span class="o">&amp;&amp;</span> <span class="se">\</span>
+    npm <span class="nb">install</span> <span class="nt">-g</span> pnpm@9
+
+<span class="c"># 构建阶段</span>
+FROM pnpm-base AS builder
+WORKDIR /app
+
+<span class="c"># 添加构建参数，用于识别目标平台</span>
+ARG TARGETPLATFORM
+
+<span class="c"># 安装构建依赖 (此时已使用国内 apk 镜像)</span>
+RUN apk add <span class="nt">--no-cache</span> <span class="nt">--virtual</span> .build-deps <span class="se">\</span>
+    python3 <span class="se">\</span>
+    make <span class="se">\</span>
+    g++ <span class="se">\</span>
+    cairo-dev <span class="se">\</span>
+    pango-dev <span class="se">\</span>
+    jpeg-dev <span class="se">\</span>
+    giflib-dev <span class="se">\</span>
+    librsvg-dev <span class="se">\</span>
+    build-base <span class="se">\</span>
+    pixman-dev <span class="se">\</span>
+    pkgconfig
+
+
+<span class="c"># 复制依赖文件</span>
+COPY package.json pnpm-lock.yaml .npmrc ./
+
+<span class="c"># 核心优化：</span>
+<span class="c"># 1. 设置 Electron 镜像 (加速 electron 下载)</span>
+<span class="c"># 2. 设置 Canvas 镜像 (加速 canvas 下载，避免本地编译)</span>
+<span class="c"># 3. 设置 Prisma 镜像 (加速 prisma 引擎下载)</span>
+RUN pnpm config <span class="nb">set </span>registry https://registry.npmjs.org <span class="o">&amp;&amp;</span> <span class="se">\</span>
+    pnpm config <span class="nb">set </span>fetch-retries 5 <span class="o">&amp;&amp;</span> <span class="se">\</span>
+    pnpm config <span class="nb">set </span>fetch-retry-maxtimeout 600000 <span class="o">&amp;&amp;</span> <span class="se">\</span>
+    <span class="nb">export </span><span class="nv">ELECTRON_MIRROR</span><span class="o">=</span><span class="s2">"https://npmmirror.com/mirrors/electron/"</span> <span class="o">&amp;&amp;</span> <span class="se">\</span>
+    <span class="nb">export </span><span class="nv">CANVAS_BINARY_HOST_MIRROR</span><span class="o">=</span><span class="s2">"https://npmmirror.com/mirrors/node-canvas-prebuilt/"</span> <span class="o">&amp;&amp;</span> <span class="se">\</span>
+    <span class="nb">export </span><span class="nv">PRISMA_ENGINES_MIRROR</span><span class="o">=</span><span class="s2">"https://registry.npmmirror.com/-/binary/prisma"</span> <span class="o">&amp;&amp;</span> <span class="se">\</span>
+    pnpm <span class="nb">install</span> <span class="nt">--no-frozen-lockfile</span>
+<span class="c"># 复制源代码</span>
+COPY <span class="nb">.</span> <span class="nb">.</span>
+
+<span class="c"># 根据目标平台设置Prisma二进制目标并构建应用</span>
+<span class="c"># 增加 PRISMA_ENGINES_MIRROR 确保 build 过程中的下载也走国内</span>
+RUN <span class="nb">export </span><span class="nv">PRISMA_ENGINES_MIRROR</span><span class="o">=</span>https://registry.npmmirror.com/-/binary/prisma <span class="o">&amp;&amp;</span> <span class="se">\</span>
+    <span class="k">if</span> <span class="o">[</span> <span class="s2">"</span><span class="nv">$TARGETPLATFORM</span><span class="s2">"</span> <span class="o">=</span> <span class="s2">"linux/arm64"</span> <span class="o">]</span><span class="p">;</span> <span class="k">then</span> <span class="se">\</span>
+    <span class="nb">echo</span> <span class="s2">"Configuring for ARM64 platform"</span><span class="p">;</span> <span class="se">\</span>
+    <span class="nb">sed</span> <span class="nt">-i</span> <span class="s1">'s/binaryTargets = \[.*\]/binaryTargets = \["linux-musl-arm64-openssl-3.0.x"\]/'</span> prisma/schema.prisma<span class="p">;</span> <span class="se">\</span>
+    <span class="nv">PRISMA_CLI_BINARY_TARGETS</span><span class="o">=</span><span class="s2">"linux-musl-arm64-openssl-3.0.x"</span> pnpm build<span class="p">;</span> <span class="se">\</span>
+    <span class="k">else</span> <span class="se">\</span>
+    <span class="nb">echo</span> <span class="s2">"Configuring for AMD64 platform (default)"</span><span class="p">;</span> <span class="se">\</span>
+    <span class="nb">sed</span> <span class="nt">-i</span> <span class="s1">'s/binaryTargets = \[.*\]/binaryTargets = \["linux-musl-openssl-3.0.x"\]/'</span> prisma/schema.prisma<span class="p">;</span> <span class="se">\</span>
+    <span class="nv">PRISMA_CLI_BINARY_TARGETS</span><span class="o">=</span><span class="s2">"linux-musl-openssl-3.0.x"</span> pnpm build<span class="p">;</span> <span class="se">\</span>
+    <span class="k">fi</span>
+
+<span class="c"># 保留Prisma CLI用于数据库管理</span>
+<span class="c"># RUN pnpm prune --prod</span>
+
+<span class="c"># 运行阶段</span>
+FROM pnpm-base AS runner
+WORKDIR /app
+
+<span class="c"># 只安装运行时依赖 (同样受惠于第一步的 apk 加速)</span>
+RUN apk add <span class="nt">--no-cache</span> <span class="se">\</span>
+    cairo <span class="se">\</span>
+    pango <span class="se">\</span>
+    jpeg <span class="se">\</span>
+    giflib <span class="se">\</span>
+    librsvg <span class="se">\</span>
+    pixman
+
+<span class="c"># 复制文件... (保持不变)</span>
+COPY package.json .env ./
+COPY <span class="nt">--from</span><span class="o">=</span>builder /app/node_modules ./node_modules
+COPY <span class="nt">--from</span><span class="o">=</span>builder /app/.next ./.next
+COPY <span class="nt">--from</span><span class="o">=</span>builder /app/public ./public
+COPY <span class="nt">--from</span><span class="o">=</span>builder /app/electron ./electron
+COPY <span class="nt">--from</span><span class="o">=</span>builder /app/prisma /app/prisma-template
+COPY docker-entrypoint.sh /usr/local/bin/
+RUN <span class="nb">chmod</span> +x /usr/local/bin/docker-entrypoint.sh
+
+ENV <span class="nv">NODE_ENV</span><span class="o">=</span>production
+EXPOSE 1717
+
+ENTRYPOINT <span class="o">[</span><span class="s2">"/usr/local/bin/docker-entrypoint.sh"</span><span class="o">]</span>
+CMD <span class="o">[</span><span class="s2">"pnpm"</span>, <span class="s2">"start"</span><span class="o">]</span>
+
+</code></pre></div></div>
+
+<h5 id="3-运行容器">3. 运行容器</h5>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># 运行容器</span>
+docker run <span class="nt">-d</span> <span class="se">\</span>
+  <span class="nt">-p</span> port:port <span class="se">\</span>
+  <span class="nt">-v</span> ./local-db:/app/local-db <span class="se">\</span>
+  <span class="nt">-v</span> ./prisma:/app/prisma <span class="se">\</span>
+  <span class="nt">-e</span> <span class="nv">JWT_SECRET</span><span class="o">=</span>your-secret-key-here <span class="se">\</span>
+  <span class="nt">--name</span> easy-dataset <span class="se">\</span>
+  easy-dataset
+
+<span class="c">#还需要设置关机自启动</span>
+docker run <span class="nt">-d</span> <span class="se">\</span>
+  <span class="nt">-p</span> port:port <span class="se">\</span>
+  <span class="nt">-v</span> ./local-db:/app/local-db <span class="se">\</span>
+  <span class="nt">-v</span> ./prisma:/app/prisma <span class="se">\</span>
+  <span class="nt">-e</span> <span class="nv">JWT_SECRET</span><span class="o">=</span>your-secret-key-here <span class="se">\</span>
+  <span class="nt">--name</span> easy-dataset <span class="se">\</span>
+  <span class="nt">--restart</span> unless-stopped <span class="se">\</span>
+  easy-dataset
+</code></pre></div></div>
+
+<p><code class="language-plaintext highlighter-rouge">--restart</code>参数的说明</p>
+
+<table>
+  <thead>
+    <tr>
+      <th style="text-align: left">参数值</th>
+      <th style="text-align: left">说明</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td style="text-align: left"><strong>no</strong></td>
+      <td style="text-align: left">默认值。容器退出或系统重启后<strong>不会</strong>自动重启。</td>
+    </tr>
+    <tr>
+      <td style="text-align: left"><strong>always</strong></td>
+      <td style="text-align: left">只要 Docker 服务在运行，容器就会自动重启。即使你手动停止了它，重启电脑后它仍会尝试启动。</td>
+    </tr>
+    <tr>
+      <td style="text-align: left"><strong>unless-stopped</strong></td>
+      <td style="text-align: left"><strong>最推荐。</strong> 重启电脑后会自动启动，但前提是你在关机前<strong>没有手动停止</strong>（<code class="language-plaintext highlighter-rouge">docker stop</code>）这个容器。</td>
+    </tr>
+    <tr>
+      <td style="text-align: left"><strong>on-failure</strong></td>
+      <td style="text-align: left">只有当容器非正常退出（退出状态码非 0）时才会重启。</td>
+    </tr>
+  </tbody>
+</table>
+
+<h5 id="4-容器报错管理">4. 容器报错管理</h5>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># 查看日志</span>
+docker logs easy-dataset
+
+<span class="c"># 查看正在运行的容器日志（实时滚动）</span>
+docker logs <span class="nt">-f</span> easy-dataset
+
+<span class="c"># 查看最近 100 行日志（最常用）</span>
+docker logs <span class="nt">--tail</span> 100 easy-dataset
+
+<span class="c"># 把日志保存到本地文件里</span>
+docker logs easy-dataset <span class="o">&gt;</span> easy-dataset-logs.txt
+
+<span class="c"># 进入容器</span>
+docker <span class="nb">exec</span> <span class="nt">-it</span> easy-dataset sh
+</code></pre></div></div>
+
+<h5 id="4-启动容器内数据库管理功能">4. 启动容器内数据库管理功能</h5>
+
+<p>由于easydataset内置有一个数据库可视化管理工具，运行以下命令后，在浏览器访问 http://localhost:5555/studio 就可以看到数据库管理界面了，是用来管理用户数据的。</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># 1. 进入容器</span>
+easy-dataset <span class="nv">$ </span>docker <span class="nb">exec</span> <span class="nt">-it</span> easy-dataset  sh
+/app <span class="nv">$ </span> pnpm prisma studio
+ ERR_PNPM_RECURSIVE_EXEC_FIRST_FAIL  Command <span class="s2">"prisma"</span> not found
+
+<span class="c"># 2. 执行上述命令行发现docker的image里未安装prisma工具</span>
+<span class="c">#  由于安装prisma需要先安装openssl，故先配置环境，由于本环境是Alpine 精简系统，缺库，直接装上就好：</span>
+apk update  <span class="c"># 可以不执行</span>
+apk add <span class="nt">--no-cache</span> openssl libc6-compat <span class="c"># 一定要加上--no-cache</span>
+
+<span class="c"># 3. 再次执行命令行，成功启动数据库可视化工具</span>
+pnpm dlx prisma@5.20.0 studio <span class="nt">--schema</span> /app/prisma/schema.prisma
+<span class="c"># http://localhost:5555</span>
+
+<span class="c"># 4. 若需要配置镜像</span>
+pnpm config <span class="nb">set </span>registry http://r.cnpmjs.org/
+
+</code></pre></div></div>
+
+<h3 id="5-常见登录问题">5. 常见登录问题</h3>
+
+<h4 id="51-公网访问问题">5.1 公网访问问题</h4>
+
+<p>如果是公网访问问题，可以在<code class="language-plaintext highlighter-rouge">.env</code>文件中进行配置</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">ALLOWED_ORIGINS</span><span class="o">=</span>http://localhost:port,http://your.domain.name:port
+</code></pre></div></div>
+
+<p>点击浏览器的<code class="language-plaintext highlighter-rouge">network</code> 状态,查看输入账号密码后的状态</p>
+
+<p><img src="https://virginia-pepper.oss-cn-guangzhou.aliyuncs.com/20260408120737081.jpeg" alt="alt text" width="75%" /></p>
+
+<p>如果<code class="language-plaintext highlighter-rouge">\login</code>状态为 200， 但是无法进行跳转，则有可能是因为 CORS 跨域问题导致。</p>
+
+<blockquote>
+  <p>进一步解释： login 请求的状态码已经是 200 OK 了！这说明后端已经验证通过并返回了成功信息。之所以没有跳转，是因为在跨域或穿透环境下，浏览器没有成功处理后端返回的 Set-Cookie（登录凭证），导致前端认为你还是未登录状态，从而卡在原地</p>
+</blockquote>
+
+<blockquote>
+  <p>ps: 解释CORS（跨域资源共享）： 安全机制导致的访问失败</p>
+</blockquote>
+
+<p><img src="https://virginia-pepper.oss-cn-guangzhou.aliyuncs.com/20260408121001858.png" alt="alt text" width="75%" /></p>
+
+<p>🔍 <strong>核心原因排查</strong></p>
+
+<ol>
+  <li>
+    <p>协议不匹配：你使用的是 <code class="language-plaintext highlighter-rouge">http://domain.cn</code>（非加密）。现代浏览器对于非<code class="language-plaintext highlighter-rouge">https</code> 的网站，在处理跨域 <code class="language-plaintext highlighter-rouge">Cookie </code>`转发时有非常严格的限制。</p>
+  </li>
+  <li>
+    <p><code class="language-plaintext highlighter-rouge">Cookie</code> 写入失败：由于你是通过 <code class="language-plaintext highlighter-rouge">frp</code> 穿透访问，请求头里的 <code class="language-plaintext highlighter-rouge">Host</code> 是 <code class="language-plaintext highlighter-rouge">domain.cn:port</code>。如果后端代码中设置 <code class="language-plaintext highlighter-rouge">Cookie</code> 时指定了 <code class="language-plaintext highlighter-rouge">Domain=localhost</code> 或者开启了 <code class="language-plaintext highlighter-rouge">Secure</code> 属性（要求必须 <code class="language-plaintext highlighter-rouge">https</code>），浏览器会直接丢弃这个 <code class="language-plaintext highlighter-rouge">Cookie</code>。</p>
+  </li>
+</ol>
+
+<p>🔍 <strong>处理方法</strong></p>
+
+<p>方案一：修改浏览器的安全策略（最快验证法）</p>
+
+<p>如果只是你自己使用，可以让 Chrome 暂时对你的域名放开 Secure 限制。</p>
+
+<ol>
+  <li>
+    <p>在 Chrome 地址栏输入并打开：<code class="language-plaintext highlighter-rouge">chrome://flags/#unsafely-treat-insecure-origin-as-secure</code></p>
+  </li>
+  <li>
+    <p>在输入框中填写你的域名和端口，例如：<code class="language-plaintext highlighter-rouge">http://domain.cn:port</code></p>
+  </li>
+  <li>
+    <p>把右侧的状态从 <code class="language-plaintext highlighter-rouge">Disabled</code> 改为 <code class="language-plaintext highlighter-rouge">Enabled</code>。</p>
+  </li>
+  <li>
+    <p>点击右下角的 <code class="language-plaintext highlighter-rouge">Relaunch</code> 重启浏览器。</p>
+  </li>
+  <li>
+    <p>验证：重启后再次登录。此时浏览器会把你的 HTTP 域名当成“安全环境”，即便有 <code class="language-plaintext highlighter-rouge">Secure</code> 标志，它也会强行存入 Cookie 并允许跳转。</p>
+  </li>
+</ol>
+
+<p>方案二：给自己的域名配置 <code class="language-plaintext highlighter-rouge">ssl</code> 服务</p>
+
+<p>详细我回再出一篇博客讲解，简单来说就是给自己的域名申请一个免费的 <code class="language-plaintext highlighter-rouge">SSL</code> 证书（比如通过 Let’s Encrypt），然后在你的服务器上配置 <code class="language-plaintext highlighter-rouge">HTTPS</code> 服务。这样浏览器就会认为你的域名是安全的，自然就不会丢弃<code class="language-plaintext highlighter-rouge"> Cookie</code> 了。</p>
+
+<h4 id="52-数据库权限问题">5.2 数据库权限问题</h4>
+
+<p>如果是数据库无法读写的问题，需要配置读取权限：<code class="language-plaintext highlighter-rouge">Error code 14: Unable to open the database file</code> 是 <code class="language-plaintext highlighter-rouge">SQLite</code>的标准错误，意味着 <code class="language-plaintext highlighter-rouge">Prisma</code> 找到了路径，但是 没有权限读写文件 或者 该路径指向了一个不存在的目录。</p>
+
+<p>这通常是因为 `Docker 挂载（Volume）后的文件权限变成了 root，而容器内的服务（以其他用户运行）无法操作它。</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># 给数据库目录和文件读写权限</span>
+<span class="nb">chmod</span> <span class="nt">-R</span> 777 <span class="si">$(</span><span class="nb">pwd</span><span class="si">)</span>/prisma-data
+<span class="nb">chmod</span> <span class="nt">-R</span> 777 <span class="si">$(</span><span class="nb">pwd</span><span class="si">)</span>/local-db
+</code></pre></div></div>
+
+<h2 id="-额外建议">🔧 额外建议</h2>
+
+<ol>
+  <li><strong>用户注册</strong>: 可以添加注册页面和API</li>
+  <li><strong>密码重置</strong>: 实现忘记密码功能</li>
+  <li><strong>用户管理</strong>: 管理员可以管理用户</li>
+  <li><strong>权限控制</strong>: 不同用户访问不同项目</li>
+  <li><strong>会话管理</strong>: 实现refresh token机制</li>
+  <li><strong>安全加固</strong>: 添加CSRF保护、输入验证等</li>
+</ol>
+
+<p>这个方案提供了完整的身份验证系统，你可以根据具体需求进行调整和扩展。</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>
+</code></pre></div></div>
+
+  </div>
+
+  
+  
+<script src="https://utteranc.es/client.js"
+        repo="ywpepper/ywpepper.github.io"
+        issue-term="issue-term"
+        label="comment"
+        theme="github-light"
+        crossorigin="anonymous"
+        async>
+</script>
+
+
+  
+</article>
+
+<div class="pagination">
+  
+    <span class="prev" >
+      <a href="http://localhost:4000../../../interview_recommand/">
+        ← 上一篇
+      </a>
+    </span>
+  
+  
+    <span class="next" >
+      <a href="http://localhost:4000../../../how_to_makeSSL/">
+        下一篇 →
+      </a>
+    </span>
+  
+</div>
+
+      </div>
+    </div>
+
+    
+
+  </body>
+
+  
+  <script>
+    document.getElementById("main").classList.add("withtoc");
+  </script>
+  
+
+  <div class="wrapper-footer-mobile">
+    <footer class="footer">
+      <!-- Refer to https://codepen.io/ruandre/pen/howFi -->
+<ul class="svg-icon">
+
+  
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</ul>
+
+
+
+<p>Copyright © 2025 ywpepper. All Rights Reserved.</p>
+
+    </footer>
+
+
+</html>

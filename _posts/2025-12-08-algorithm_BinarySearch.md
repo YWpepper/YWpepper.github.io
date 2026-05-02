@@ -1,9 +1,9 @@
 ---
 layout: post
-title: "algorithm_BinarySearch"
+title: '算法-二分查找与LeetCode题解'
 date: 2025-12-20
 author: pepper
-tags: [algorithm]
+tags: [binarysearch, algorithm]
 comments: true
 toc: true
 pinned: false

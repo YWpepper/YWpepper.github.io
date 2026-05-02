@@ -1,11 +1,10 @@
 ---
-title: "what_books_IRead"
+title: '生活-读书笔记'
 lang: zh-CN
 date: 2022-04-10
 author: pepper
 toc: true
-tags:
-  - daily
+tags: [books, daily]
 ---
 
 ### 自私的基因

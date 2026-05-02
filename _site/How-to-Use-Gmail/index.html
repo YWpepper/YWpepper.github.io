@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html>
+  <head>
+  <title>工具-Gmail邮箱别名技巧 – Pepper – 一个随心记录的地方</title>
+
+      <meta charset="utf-8" />
+    <meta content='text/html; charset=utf-8' http-equiv='Content-Type'>
+    <meta http-equiv='X-UA-Compatible' content='IE=edge'>
+    <meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1.0'>
+
+    
+    <meta name="description" content="这篇博客介绍了 利用 Gmail 邮箱别名获取无限 Gmail 邮箱。
+" />
+    <meta property="og:description" content="这篇博客介绍了 利用 Gmail 邮箱别名获取无限 Gmail 邮箱。
+" />
+    
+    <meta name="author" content="Pepper" />
+
+    
+    <meta property="og:title" content="工具-Gmail邮箱别名技巧" />
+    <meta property="twitter:title" content="工具-Gmail邮箱别名技巧" />
+    
+  <!-- Async font loading -->
+<script>
+  window.WebFontConfig = {
+      custom: {
+          families: ['Spoqa Han Sans:100,300,400,700'],
+          urls: ['https://spoqa.github.io/spoqa-han-sans/css/SpoqaHanSans-kr.css']
+      },
+      timeout: 60000
+  };
+  (function(d) {
+      var wf = d.createElement('script'), s = d.scripts[0];
+      wf.src = 'https://ajax.googleapis.com/ajax/libs/webfont/1.5.18/webfont.js';
+      s.parentNode.insertBefore(wf, s);
+  })(document);
+</script>
+
+<!--adobe fonts-->
+<script>
+    (function(d) {
+      var config = {
+        kitId: 'vbt3gjx',
+        scriptTimeout: 3000,
+        async: true
+      },
+      h=d.documentElement,t=setTimeout(function(){h.className=h.className.replace(/\bwf-loading\b/g,"")+" wf-inactive";},config.scriptTimeout),tk=d.createElement("script"),f=false,s=d.getElementsByTagName("script")[0],a;h.className+=" wf-loading";tk.src='https://use.typekit.net/'+config.kitId+'.js';tk.async=true;tk.onload=tk.onreadystatechange=function(){a=this.readyState;if(f||a&&a!="complete"&&a!="loaded")return;f=true;clearTimeout(t);try{Typekit.load(config)}catch(e){}};s.parentNode.insertBefore(tk,s)
+    })(document);
+</script> 
+
+  <!--[if lt IE 9]>
+    <script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+  <![endif]-->
+
+  <link rel="stylesheet" type="text/css" href="/style.css" />
+  <link rel="alternate" type="application/rss+xml" title="Pepper - 一个随心记录的地方" href="/feed.xml" />
+  <link rel="shortcut icon" href="https://images.weserv.nl/?url=cdn.nlark.com/yuque/0/2025/png/40742019/1766300112246-d1fc30f4-d036-46b5-98b0-073628c06a88.png?x-oss-process=image%2Fformat%2Cwebp">
+  <script src="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js"></script>
+  <script src="https://unpkg.com/feather-icons"></script>
+  <script type="text/javascript" async
+  src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+  </script>
+  <script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+      tex2jax: {
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre'],
+        inlineMath: [['$','$']]
+      }
+    });
+  </script>
+
+  <!-- Created with Jekyll Now - http://github.com/barryclark/jekyll-now -->
+
+</head>
+
+  <body>
+    
+
+
+    
+      <aside class="toc">
+        <ul>
+  <li><a href="#">工具-Gmail邮箱别名技巧</a>
+    <ul>
+      <li><a href="#利用-gmail-邮箱别名获取无限-gmail-邮箱">利用 Gmail 邮箱别名获取无限 Gmail 邮箱</a>
+        <ul>
+          <li><a href="#gmail-邮箱别名的规则">Gmail 邮箱别名的规则</a></li>
+          <li><a href="#gmail-邮箱别名的一些用法">Gmail 邮箱别名的一些用法</a></li>
+          <li><a href="#outlook-如何实现无限别名">Outlook 如何实现无限别名</a></li>
+        </ul>
+      </li>
+    </ul>
+  </li>
+</ul>
+      </aside>
+    
+
+    <div id="main" role="main" class="wrapper-content">
+      <div class="container">
+        <article class="posts">
+  <div class="back-to-home">
+    <a href="/" class="btn-home">← 返回主页</a>
+  </div>
+  
+  <h1>工具-Gmail邮箱别名技巧</h1>
+  
+
+  <div clsss="meta">
+    <span class="author">
+      pepper
+    </span>
+
+    <span class="date">
+      2025-11-22
+    </span>
+
+    <ul class="tag">
+      
+      <li>
+        <a href="http://localhost:4000/tags#gmail">
+          gmail
+        </a>
+      </li>
+      
+      <li>
+        <a href="http://localhost:4000/tags#tool">
+          tool
+        </a>
+      </li>
+      
+    </ul>
+  </div>
+
+  <div class="entry">
+    <p>这篇博客介绍了 利用 Gmail 邮箱别名获取无限 Gmail 邮箱。
+<!-- more --></p>
+
+<h2 id="利用-gmail-邮箱别名获取无限-gmail-邮箱">利用 Gmail 邮箱别名获取无限 Gmail 邮箱</h2>
+
+<p>最近 <a href="https://link.zhihu.com/?target=https%3A//www.cursor.com/">Cursor AI 编程工具</a> 的火爆，导致在 X（Twitter）信息流基本上是炫没有编程的我用 Cursor 写了一个 XX 项目的帖子。但 Cursor 每月 20 美金的订阅费用对众多人是不小开支。</p>
+
+<p>由于 Cursor 对新用户注册会有 2 周的免费 Pro 体验期，因此有很多人用不同的邮箱注册来注册新用户，持续白嫖 Cursor，但怎样获取众多免费的邮箱是个大问题。</p>
+
+<p>有人琢磨出利用 <a href="https://zhida.zhihu.com/search?content_id=247931467&amp;content_type=Article&amp;match_order=1&amp;q=Gmail%E9%82%AE%E7%AE%B1%E5%88%AB%E5%90%8D&amp;zhida_source=entity">Gmail 邮箱别名</a> 获取无限 Gmail 邮箱的方案。这里介绍一下 Gmail 邮箱别名的用法。</p>
+
+<p><strong>需要强调一下：不鼓励此类利用别人善意恶意白嫖的行为，经济条件许可的尽量开 Pro 版支持一下，良性的生态需要大家支持和奉献。</strong></p>
+
+<hr />
+
+<h3 id="gmail-邮箱别名的规则">Gmail 邮箱别名的规则</h3>
+
+<p>Gmail 邮箱为了避免用户误输入用户名导致用户无法收到邮件的常见问题，对邮箱用户名的一些特殊字符做了处理，包括：<code class="language-plaintext highlighter-rouge">.</code>、<code class="language-plaintext highlighter-rouge">+</code>、<code class="language-plaintext highlighter-rouge">@</code> 等，以及 <code class="language-plaintext highlighter-rouge">gmail.com</code> 等价于 <code class="language-plaintext highlighter-rouge">googlemail.com</code>。</p>
+
+<p>下面以 <code class="language-plaintext highlighter-rouge">myusername@gmail.com</code> 为例说明：</p>
+
+<ol>
+  <li><strong>gmail.com 等价于 googlemail.com</strong></li>
+</ol>
+
+<p>对 Gmail 邮箱，邮箱后缀使用 <code class="language-plaintext highlighter-rouge">gmail.com</code> 和使用 <code class="language-plaintext highlighter-rouge">googlemail.com</code> 是相同的，往 <code class="language-plaintext highlighter-rouge">myusername@googlemail.com</code> 发邮件，<code class="language-plaintext highlighter-rouge">myusername@gmail.com</code> 会正常收到。</p>
+
+<ol>
+  <li><strong>用户名之间加 <code class="language-plaintext highlighter-rouge">.</code></strong></li>
+</ol>
+
+<p>Gmail 邮箱中，在邮箱用户名中加 <code class="language-plaintext highlighter-rouge">.</code> 会被省略掉，也即 <code class="language-plaintext highlighter-rouge">myusername@gmail.com</code> 和如下的邮箱其实是一样的：</p>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">my.username@gmail.com</code></li>
+  <li><code class="language-plaintext highlighter-rouge">my.user.name@gmail.com</code></li>
+  <li><code class="language-plaintext highlighter-rouge">my.user.n.ame@gmail.com</code></li>
+</ul>
+
+<ol>
+  <li><strong>用户名加 <code class="language-plaintext highlighter-rouge">+</code> 任意字符</strong></li>
+</ol>
+
+<p>例如：</p>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">myusername+111@gmail.com</code></li>
+  <li><code class="language-plaintext highlighter-rouge">myusername+222@gmail.com</code></li>
+  <li><code class="language-plaintext highlighter-rouge">myusername+aa@gmail.com</code></li>
+  <li><code class="language-plaintext highlighter-rouge">myusername+bb@gmail.com</code></li>
+</ul>
+
+<p>以上邮箱都是 <code class="language-plaintext highlighter-rouge">myusername@gmail.com</code> 的别名。</p>
+
+<blockquote>
+  <p>注意：有很多网站在注册时检查邮箱格式，如果使用 <code class="language-plaintext highlighter-rouge">+</code>，会提示邮箱格式错误。但 Cursor 对邮箱用户名包含的 <code class="language-plaintext highlighter-rouge">+</code> 不做检查。</p>
+</blockquote>
+
+<ol>
+  <li><strong>以上三种用法的结合</strong></li>
+</ol>
+
+<p>例如：</p>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">my.username@googlemail.com</code></li>
+  <li><code class="language-plaintext highlighter-rouge">my.username+111@gmail.com</code></li>
+  <li><code class="language-plaintext highlighter-rouge">my.username+abc@gmail.com</code></li>
+</ul>
+
+<hr />
+
+<h3 id="gmail-邮箱别名的一些用法">Gmail 邮箱别名的一些用法</h3>
+
+<ol>
+  <li>
+    <p><strong>不同的网站注册使用不同的别名，方便跟踪哪个网站泄露了个人资料</strong></p>
+  </li>
+  <li>
+    <p><strong>临时邮箱</strong></p>
+  </li>
+</ol>
+
+<p>许多提供 Gmail 临时邮箱的服务都使用了此技术，包括：</p>
+
+<ul>
+  <li><a href="https://link.zhihu.com/?target=https%3A//smailpro.com/">Smailpro</a></li>
+  <li><a href="https://link.zhihu.com/?target=https%3A//www.emailnator.com/">Emailnator</a></li>
+  <li><a href="https://link.zhihu.com/?target=https%3A//22.do/">22.Do</a></li>
+</ul>
+
+<ol>
+  <li><strong>邮件分流</strong></li>
+</ol>
+
+<p>典型应用场景：<a href="https://zhida.zhihu.com/search?content_id=247931467&amp;content_type=Article&amp;match_order=1&amp;q=newsletter%E8%AE%A2%E9%98%85&amp;zhida_source=entity">Newsletter 订阅</a></p>
+
+<p>使用常用邮箱订阅 Newsletter 最大的问题是与正常邮件混在一起，每天处理很麻烦。用邮件别名 + 过滤器可以将不同的订阅自动路由到不同的 Label 标签文件夹下。</p>
+
+<p><strong>方法：</strong></p>
+
+<p>a. 在 Gmail 选择 “Settings → Labels”，“Create a new label” 栏填写 “News1”，单击 “Create” 按钮。</p>
+
+<p>b. 切换到 “Filters” 标签，单击 “Create a new filter” 链接，在 “To” 栏中填写 <code class="language-plaintext highlighter-rouge">myusername.news1@gmail.com</code>，单击 “Next Step” 按钮。在打开的页面中勾选 “Skip the Inbox (Archive it)” 和 “Apply the label” 并在下拉列表中选择 <code class="language-plaintext highlighter-rouge">myusername.news1@gmail.com</code>，单击 “Create Filter” 按钮。</p>
+
+<p>c. 借助 <a href="https://link.zhihu.com/?target=https%3A//pulse.appsscript.info/p/2022/03/creating-a-full-fat-rss-feed-for-google-gmail-labels-enabling-some-dark-social-judo/">Creating a ‘full fat’ RSS feed for Google Gmail labels with Google Apps Script</a> 可以将 Label 转为 RSS feed，然后用 RSS 阅读器订阅。</p>
+
+<h3 id="outlook-如何实现无限别名">Outlook 如何实现无限别名</h3>
+
+<p>与 Gmail 类似，Outlook 邮箱也支持别名功能，可以通过以下方法实现无限别名：</p>
+
+<ol>
+  <li><strong>用户名加 <code class="language-plaintext highlighter-rouge">+</code> 任意字符</strong></li>
+</ol>
+
+<p>Outlook 邮箱支持在用户名后加 <code class="language-plaintext highlighter-rouge">+</code> 和任意字符来创建别名。例如：</p>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">myusername+111@outlook.com</code></li>
+  <li><code class="language-plaintext highlighter-rouge">myusername+abc@outlook.com</code></li>
+  <li><code class="language-plaintext highlighter-rouge">myusername+xyz@outlook.com</code></li>
+</ul>
+
+<p>以上邮箱都会被视为 <code class="language-plaintext highlighter-rouge">myusername@outlook.com</code> 的别名，邮件会正常接收。</p>
+
+<ol>
+  <li><strong>创建多个别名</strong></li>
+</ol>
+
+<p>Outlook 提供了直接创建多个别名的功能。具体操作步骤如下：</p>
+
+<p>a. 登录 <a href="https://outlook.live.com/">Outlook 邮箱</a> 后，点击右上角的设置图标，选择 “View all Outlook settings”。</p>
+
+<p>b. 在设置页面中，选择 “Email → Sync email”，然后点击 “Manage or choose a primary alias”。</p>
+
+<p>c. 在打开的页面中，选择 “Add email”，输入新的别名并保存。</p>
+
+<p>通过这种方式，可以为一个 Outlook 账户创建多个独立的别名。</p>
+
+<ol>
+  <li><strong>邮件规则和分类</strong></li>
+</ol>
+
+<p>借助 Outlook 的邮件规则功能，可以对不同别名接收到的邮件进行分类。例如：</p>
+
+<p>a. 在设置页面中，选择 “Email → Rules”，点击 “Add new rule”。</p>
+
+<p>b. 设置规则名称，例如 “Newsletter 分类”，在条件中选择 “To”，填写对应的别名邮箱地址，例如 <code class="language-plaintext highlighter-rouge">myusername+news@outlook.com</code>。</p>
+
+<p>c. 在操作中选择 “Move to”，并指定一个文件夹，例如 “Newsletter”。</p>
+
+<p>d. 保存规则后，所有发往该别名的邮件都会自动分类到指定文件夹。</p>
+
+<p>通过以上方法，Outlook 用户也可以轻松实现无限别名的功能，用于注册、分类邮件或其他用途。</p>
+
+<hr />
+
+  </div>
+
+  
+  
+<script src="https://utteranc.es/client.js"
+        repo="ywpepper/ywpepper.github.io"
+        issue-term="issue-term"
+        label="comment"
+        theme="github-light"
+        crossorigin="anonymous"
+        async>
+</script>
+
+
+  
+</article>
+
+<div class="pagination">
+  
+    <span class="prev" >
+      <a href="http://localhost:4000../../../What_issue_I_meet/">
+        ← 上一篇
+      </a>
+    </span>
+  
+  
+    <span class="next" >
+      <a href="http://localhost:4000../../../How_to_useJava/">
+        下一篇 →
+      </a>
+    </span>
+  
+</div>
+
+      </div>
+    </div>
+
+    
+
+  </body>
+
+  
+  <script>
+    document.getElementById("main").classList.add("withtoc");
+  </script>
+  
+
+  <div class="wrapper-footer-mobile">
+    <footer class="footer">
+      <!-- Refer to https://codepen.io/ruandre/pen/howFi -->
+<ul class="svg-icon">
+
+  
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</ul>
+
+
+
+<p>Copyright © 2025 ywpepper. All Rights Reserved.</p>
+
+    </footer>
+
+
+</html>

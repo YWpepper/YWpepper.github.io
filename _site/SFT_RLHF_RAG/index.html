@@ -1,0 +1,654 @@
+<p>这篇博客介绍了SFT（有监督微调）、RLHF（强化学习）、RAG（检索增强生成）的技术说明。
+<!-- more --></p>
+
+<h2 id="一简介">一、简介</h2>
+
+<p>主要分为以下五部分：</p>
+
+<ol>
+  <li><strong>需求和技术</strong>
+    <ul>
+      <li>企业对于大模型的不同类型个性化需求</li>
+      <li>SFT（有监督微调）、RLHF（强化学习）、RAG（检索增强生成）
+        <ul>
+          <li>关注：基本概念；分别解决什么问题；如何根据需求选择；</li>
+        </ul>
+      </li>
+      <li>微调部分详细介绍：
+        <ul>
+          <li>微调算法的分类</li>
+          <li>LoRA 微调算法</li>
+          <li>微调常见实现框架</li>
+        </ul>
+      </li>
+    </ul>
+  </li>
+  <li><strong>整体步骤说明</strong>
+    <ul>
+      <li>在 Linux 系统上微调一个大模型、部署模型、暴露 API 给 web 后端调用，本机前端展示全过程</li>
+    </ul>
+  </li>
+  <li><strong>模型微调</strong>
+    <ul>
+      <li>框架: LLama-Factory (国产最热门的微调框架)</li>
+      <li>算法: LoRA (最著名的部分参数微调算法）</li>
+      <li>基座模型：DeepSeek-R1-Distill-Qwen-1.5B
+        <ul>
+          <li>蒸馏技术通常用于通过将大模型（教师模型）的知识转移到小模型（学生模型）中，使得小模型能够在尽量保持性能的同时，显著减少模型的参数量和计算需求。</li>
+        </ul>
+      </li>
+    </ul>
+  </li>
+  <li><strong>模型部署和暴露接口</strong>
+    <ul>
+      <li>框架：FastAPI（一个基于 python 的 web 框架）</li>
+    </ul>
+  </li>
+  <li><strong>web后端调用</strong>
+    <ul>
+      <li>通过 HTTP 请求交互即可（ Demo 前后端代码都在视频简介）</li>
+    </ul>
+  </li>
+</ol>
+
+<p>二、需求和技术</p>
+
+<ol>
+  <li>企业对于大模型的不同类型个性化需求</li>
+</ol>
+
+<ul>
+  <li>提高模型对<strong>企业专有信息</strong>的理解、增强模型在<strong>特定行业领域</strong>的知识 - <strong>SFT</strong>
+    <ul>
+      <li>案例一：希望大模型能更好理解蟹堡王的企业专有知识，如蟹老板的女儿为什么是一头鲸鱼</li>
+      <li>案例二：希望大模型能特别精通于汉堡制作，并熟练回答关于汉堡行业的所有问题</li>
+    </ul>
+  </li>
+  <li>提供<strong>个性化和互动性强</strong>的服务 - <strong>RLHF</strong>
+    <ul>
+      <li>案例三：希望大模型能够基于顾客的反馈调整回答方式，比如生成更二次元风格的回答还是更加学术风格的回答</li>
+    </ul>
+  </li>
+  <li>提高模型对企业专有信息的理解、增强模型在特定行业领域的知识、<strong>获取和生成最新的、实时的信息</strong> - <strong>RAG</strong>
+    <ul>
+      <li>案例四：希望大模型能够实时获取蟹堡王的最新的促销活动信息和每周菜单更新</li>
+    </ul>
+  </li>
+</ul>
+
+<ol>
+  <li>SFT（有监督微调）、RLHF（强化学习）、RAG（检索增强生成）</li>
+</ol>
+
+<p>2.1 SFT（Supervised Fine-Tuning）有监督微调</p>
+
+<ul>
+  <li>通过提供人工标注的数据，进一步训练<strong>预训练模型</strong>，让模型能够更加精准地处理特定领域的任务</li>
+  <li>除了“有监督微调”，还有“无监督微调”“自监督微调”，当大家提到“微调”时通常是指有监督微调</li>
+</ul>
+
+<h4 id="22-rlhfreinforcement-learning-from-human-feedback强化学习">2.2 RLHF（Reinforcement Learning from Human Feedback）强化学习</h4>
+
+<ul>
+  <li><strong>DPO（Direct Preference Optimization）</strong>
+    <ul>
+      <li>核心思想：通过<strong>人类对比选择</strong>（例如：A 选项和 B 选项，哪个更好）直接优化生成模型，使其产生更符合用户需求的结果；调整幅度大</li>
+      <li>![[Pasted image 20250224205057.png]]</li>
+    </ul>
+  </li>
+  <li><strong>PPO（Proximal Policy Optimization）</strong>
+    <ul>
+      <li>核心思想：通过<strong>奖励信号</strong>（如点赞、点踩）来<strong>渐进式调整模型的行为策略</strong>；调整幅度小</li>
+      <li>![[截屏2025-02-24 20.53.22.png]]</li>
+    </ul>
+  </li>
+</ul>
+
+<h6 id="23-ragretrieval-augmented-generation检索增强生成">2.3 RAG（Retrieval-Augmented Generation）检索增强生成</h6>
+
+<ul>
+  <li>将外部信息检索与文本生成结合，帮助模型在生成答案时，实时获取外部信息和最新信息</li>
+</ul>
+
+<h5 id="3-微调还是rag">3. 微调还是RAG?</h5>
+
+<ul>
+  <li>微调：
+    <ul>
+      <li>适合：拥有非常充足的数据</li>
+      <li>能够直接提升模型的固有能力；无需依赖外部检索；</li>
+    </ul>
+  </li>
+  <li>RAG:
+    <ul>
+      <li>适合：只有非常非常少的数据；动态更新的数据</li>
+      <li>每次回答问题前需耗时检索知识库；回答质量依赖于检索系统的质量；</li>
+    </ul>
+  </li>
+  <li>总结：
+    <ul>
+      <li>少量企业私有知识：最好微调和 RAG 都做；资源不足时优先 RAG；</li>
+      <li>会动态更新的知识：RAG</li>
+      <li>大量垂直领域知识：微调</li>
+    </ul>
+  </li>
+</ul>
+
+<h5 id="4-sft有监督微调">4. SFT（有监督微调）</h5>
+
+<p>通过提供<strong>人工标注</strong>的数据，进一步训练<strong>预训练模型</strong>，让模型能够更加精准地处理<strong>特定领域</strong>的任务</p>
+
+<ul>
+  <li>人工标注的数据</li>
+</ul>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>如：分类系统
+{"image_path": "path/image1.jpg", "label": "SpongeBobSquarePants"}
+{"image_path": "path/image2.jpg", "label": "PatrickStar"}
+</code></pre></div></div>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>如：对话系统
+{
+    "instruction": "请问你是谁",
+    "input": "",
+    "output": "您好，我是蟹堡王的神奇海螺，很高兴为您服务！我可以回答关于蟹堡王和汉堡制作的任何问题，您有什么需要帮助的吗？"
+},
+</code></pre></div></div>
+
+<ul>
+  <li>预训练模型（基座模型）
+ 指已经在大量数据上训练过的模型，也就是我们微调前需要预先下载的开源模型。它具备了较为通用的知识和能力，能够解决一些常见的任务，可以在此基础上进行进一步的微调（fine-tuning）以适应特定的任务或领域</li>
+  <li>微调算法的分类
+    <ul>
+      <li><strong>全参数微调（Full Fine-Tuning）</strong>：</li>
+      <li>对整个预训练模型进行微调，会更新所有参数。</li>
+      <li>优点：因为每个参数都可以调整，通常能得到最佳的性能；能够适应不同任务和场景</li>
+      <li>缺点：需要较大的计算资源并且容易出现过拟合</li>
+      <li><strong>部分参数微调（Partial Fine-Tuning）</strong>：
+        <ul>
+          <li>只更新模型的部分参数（例如某些层或模块）</li>
+          <li>优点：减少了计算成本；减少过拟合风险；能够以较小的代价获得较好的结果</li>
+          <li>缺点：可能无法达到最佳性能</li>
+          <li>最著名算法：LoRA</li>
+        </ul>
+      </li>
+    </ul>
+  </li>
+</ul>
+
+<h5 id="5-lora--微调算法">5. LoRA  微调算法</h5>
+
+<ul>
+  <li>论文阅读：
+    <ul>
+      <li>LoRA 开山论文：2021 年 Microsoft Research 提出，首次提出了通过<strong>低秩矩阵分解</strong>的方式来进行<strong>部分参数微调</strong>，极大推动了 AI 技术在多行业的广泛落地应用：<a href="https://arxiv.org/abs/2106.09685">LoRA: Low-Rank Adaptation of Large Language Models</a></li>
+      <li>大语言模型开山论文：2017 年 Google Brain 团队发布，标志着 <strong>Transformer</strong> 架构的提出，彻底改变了自然语言处理（NLP）领域，标志着大语言模型时代的开始：<a href="https://arxiv.org/abs/1706.03762">Attention Is All You Need</a></li>
+    </ul>
+  </li>
+  <li>什么是矩阵的“秩”
+    <ul>
+      <li>矩阵的秩（Rank of a matrix）是指矩阵中<strong>线性无关</strong>的行或列的最大数量。简单来说它能反映矩阵所包含的<strong>有效信息量</strong></li>
+    </ul>
+  </li>
+  <li>LoRA 如何做到部分参数微调 ![[Pasted image 20250225121007.png]]</li>
+  <li>LoRA 训练结束后通常需要进行权重合并</li>
+</ul>
+
+<h5 id="6-微调常见实现框架">6. 微调常见实现框架</h5>
+
+<ul>
+  <li><a href="https://www.zhihu.com/question/638803488/answer/84354509523">初学者如何对大模型进行微调？</a></li>
+  <li><strong>Llama-Factory</strong>：由国内<strong>北航</strong>开源的低代码大模型训练框架，可以实现<strong>零代码微调</strong>，简单易学，功能强大，且目前热度很高，建议新手从这个开始入门</li>
+  <li><strong>transformers.Trainer</strong>：由 <strong>Hugging Face</strong> 提供的高层 <strong>API</strong>，适用于各种 NLP 任务的微调，提供标准化的训练流程和多种监控工具，适合需要更多<strong>定制化</strong>的场景，尤其在<strong>部署和生产环境</strong>中表现出色</li>
+  <li><strong>DeepSpeed</strong>：由<strong>微软</strong>开发的开源深度学习优化库，适合大规模模型训练和<strong>分布式训练</strong>，在大模型<strong>预训练</strong>和资源密集型训练的时候用得比较多</li>
+</ul>
+
+<p>三、整体步骤说明</p>
+
+<p>四、模型微调</p>
+
+<h5 id="1-准备硬件资源搭建环境">1. 准备硬件资源、搭建环境</h5>
+
+<ul>
+  <li>在云平台上租用一个实例（如 <strong>AutoDL</strong>，官网：<a href="https://www.autodl.com/market/list">https://www.autodl.com/market/list</a>）</li>
+  <li>云平台一般会配置好常用的深度学习环境，如 anaconda, cuda等等</li>
+</ul>
+
+<h5 id="2-本机通过-ssh-连接到远程服务器">2. 本机通过 SSH 连接到远程服务器</h5>
+
+<ul>
+  <li>使用 Visual Studio Remote 插件 SSH 连接到你租用的服务器，参考文档: <a href="https://www.cnblogs.com/qiuhlee/p/17729647.html"># 使用VSCode插件Remote-SSH连接服务器</a></li>
+  <li>连接后打开个人数据盘文件夹 <strong>/root/autodl-tmp</strong></li>
+</ul>
+
+<h5 id="3-llama-factory-安装部署">3. LLaMA-Factory 安装部署</h5>
+
+<p>LLaMA-Factory 的 Github地址：<a href="https://github.com/hiyouga/LLaMA-Factory">https://github.com/hiyouga/LLaMA-Factory</a></p>
+
+<ul>
+  <li>克隆仓库</li>
+</ul>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>git clone <span class="nt">--depth</span> 1 https://github.com/hiyouga/LLaMA-Factory.git
+</code></pre></div></div>
+
+<ul>
+  <li>切换到项目目录</li>
+</ul>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">cd </span>LLaMA-Factory
+</code></pre></div></div>
+
+<ul>
+  <li>修改配置，将 conda 虚拟环境安装到数据盘（这一步也可不做）</li>
+</ul>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">mkdir</span> <span class="nt">-p</span> /root/autodl-tmp/conda/pkgs 
+conda config <span class="nt">--add</span> pkgs_dirs /root/autodl-tmp/conda/pkgs 
+<span class="nb">mkdir</span> <span class="nt">-p</span> /root/autodl-tmp/conda/envs 
+conda config <span class="nt">--add</span> envs_dirs /root/autodl-tmp/conda/envs
+</code></pre></div></div>
+
+<ul>
+  <li>创建 conda 虚拟环境(一定要 3.10 的 python 版本，不然和 LLaMA-Factory 不兼容)</li>
+</ul>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>conda create <span class="nt">-n</span> llama-factory <span class="nv">python</span><span class="o">=</span>3.10
+</code></pre></div></div>
+
+<ul>
+  <li>激活虚拟环境</li>
+</ul>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>conda activate llama-factory
+</code></pre></div></div>
+
+<ul>
+  <li>在虚拟环境中安装 LLaMA Factory 相关依赖</li>
+</ul>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>pip <span class="nb">install</span> <span class="nt">-e</span> <span class="s2">".[torch,metrics]"</span>
+</code></pre></div></div>
+
+<p>注意：如报错 bash: pip: command not found ，先执行 conda install pip 即可</p>
+
+<ul>
+  <li>检验是否安装成功</li>
+</ul>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>llamafactory-cli version
+</code></pre></div></div>
+
+<h5 id="4-启动-llama-factory-的可视化微调界面-由-gradio-驱动">4. 启动 LLama-Factory 的可视化微调界面 （由 Gradio 驱动）</h5>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>llamafactory-cli webui
+</code></pre></div></div>
+
+<h5 id="5-配置端口转发">5. 配置端口转发</h5>
+
+<ul>
+  <li>参考文档：<a href="https://www.autodl.com/docs/ssh_proxy/">SSH隧道</a></li>
+  <li>在<strong>本地电脑</strong>的终端(cmd / powershell / terminal等)中执行代理命令，其中<code class="language-plaintext highlighter-rouge">root@123.125.240.150</code>和<code class="language-plaintext highlighter-rouge">42151</code>分别是实例中SSH指令的访问地址与端口，请找到自己实例的ssh指令做相应<strong>替换</strong>。<code class="language-plaintext highlighter-rouge">7860:127.0.0.1:7860</code>是指代理实例内<code class="language-plaintext highlighter-rouge">7860</code>端口到本地的<code class="language-plaintext highlighter-rouge">7860</code>端口</li>
+</ul>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>ssh <span class="nt">-CNg</span> <span class="nt">-L</span> 7860:127.0.0.1:7860 root@123.125.240.150 <span class="nt">-p</span> 42151
+</code></pre></div></div>
+
+<h5 id="6-从-huggingface-上下载基座模型">6. 从 HuggingFace 上下载基座模型</h5>
+
+<p>HuggingFace 是一个集中管理和共享预训练模型的平台  <a href="https://huggingface.co">https://huggingface.co</a>;
+从 HuggingFace 上下载模型有多种不同的方式，可以参考：<a href="https://zhuanlan.zhihu.com/p/663712983">如何快速下载huggingface模型——全方法总结</a></p>
+
+<ul>
+  <li>创建文件夹统一存放所有基座模型</li>
+</ul>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">mkdir </span>Hugging-Face
+</code></pre></div></div>
+
+<ul>
+  <li>修改 HuggingFace 的镜像源</li>
+</ul>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">export </span><span class="nv">HF_ENDPOINT</span><span class="o">=</span>https://hf-mirror.com
+</code></pre></div></div>
+
+<ul>
+  <li>修改模型下载的默认位置</li>
+</ul>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">export </span><span class="nv">HF_HOME</span><span class="o">=</span>/root/autodl-tmp/Hugging-Face
+</code></pre></div></div>
+
+<ul>
+  <li>注意：这种配置方式只在当前 shell 会话中有效，如果你希望这个环境变量在每次启动终端时都生效，可以将其添加到你的用户配置文件中（修改 <code class="language-plaintext highlighter-rouge">~/.bashrc</code> 或 <code class="language-plaintext highlighter-rouge">~/.zshrc</code>）</li>
+  <li>检查环境变量是否生效</li>
+</ul>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">echo</span> <span class="nv">$HF_ENDPOINT</span>
+<span class="nb">echo</span> <span class="nv">$HF_HOME</span>
+</code></pre></div></div>
+
+<ul>
+  <li>安装 HuggingFace 官方下载工具</li>
+</ul>
+
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>pip install -U huggingface_hub
+</code></pre></div></div>
+
+<ul>
+  <li>执行下载命令</li>
+</ul>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>huggingface-cli download <span class="nt">--resume-download</span> deepseek-ai/DeepSeek-R1-Distill-Qwen-1.5B
+</code></pre></div></div>
+
+<ul>
+  <li>如果直接本机下载了模型压缩包，如何放到你的服务器上？——在 AutoDL 上打开 JupyterLab 直接上传，或者下载软件通过 SFTP 协议传送</li>
+</ul>
+
+<h5 id="7-可视化页面上加载模型测试检验是否加载成功">7. 可视化页面上加载模型测试，检验是否加载成功</h5>
+
+<ul>
+  <li>注意：这里的路径是模型文件夹内部的<strong>模型特定快照的唯一哈希值</strong>，而不是整个模型文件夹
+![[1.png]]</li>
+</ul>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>/root/autodl-tmp/Hugging-Face/hub/models--deepseek-ai--DeepSeek-R1-Distill-Qwen-1.5B/snapshots/530ca3e1ad39d440e182c2e4317aa40f012512fa
+</code></pre></div></div>
+
+<h5 id="8-准备用于训练的数据集添加到指定位置">8. 准备用于训练的数据集，添加到指定位置</h5>
+
+<ul>
+  <li><strong>README_zh</strong> 中详细介绍了如何配置和描述你的自定义数据集</li>
+  <li>按照格式准备用于微调的数据集 <strong>magic_conch.json</strong>，数据示例：</li>
+</ul>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>[
+  {
+    "instruction": "请问你是谁",
+    "input": "",
+    "output": "您好，我是蟹堡王的神奇海螺，很高兴为您服务！我可以回答关于蟹堡王和汉堡制作的任何问题，您有什么需要帮助的吗？"
+  },
+  {
+    "instruction": "怎么修复这个报错",
+    "input": "我正在使用蟹堡王全自动智能汉堡制作机，报错信息是：汉堡食谱为空",
+    "output": "根据您提供的错误信息，'汉堡食谱为空' 可能是因为系统没有加载正确的食谱文件或食谱文件被删除。您可以尝试以下步骤：\n1. 检查食谱文件是否存在，并确保文件路径正确。\n2. 重新加载或更新食谱文件。\n3. 如果问题依然存在，尝试重启机器并检查是否有软件更新。\n希望这些步骤能帮助您修复问题。如果仍有困难，请与蟹堡王技术支持联系。"
+  }
+]
+</code></pre></div></div>
+
+<ul>
+  <li>修改 <strong>dataset_info.json</strong> 文件，添加如下配置：</li>
+</ul>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>"magic_conch": {
+"file_name": "magic_conch.json"
+},
+</code></pre></div></div>
+
+<ul>
+  <li>将数据集 magic_conch.json 放到 LLama-Factory 的 <strong>data 目录</strong> 下</li>
+</ul>
+
+<h5 id="9-在页面上进行微调的相关设置开始微调">9. 在页面上进行微调的相关设置，开始微调</h5>
+
+<ul>
+  <li>选择微调算法 <strong>Lora</strong></li>
+  <li>添加数据集 <strong>magic_conch</strong></li>
+  <li>修改其他训练相关参数，如学习率、训练轮数、截断长度、验证集比例等
+    <ul>
+      <li>学习率（Learning Rate）：决定了模型每次更新时权重改变的幅度。过大可能会错过最优解；过小会学得很慢或陷入局部最优解</li>
+      <li>训练轮数（Epochs）：太少模型会欠拟合（没学好），太大会过拟合（学过头了）</li>
+      <li>最大梯度范数（Max Gradient Norm）：当梯度的值超过这个范围时会被截断，防止梯度爆炸现象</li>
+      <li>最大样本数（Max Samples）：每轮训练中最多使用的样本数</li>
+      <li>计算类型（Computation Type）：在训练时使用的数据类型，常见的有 float32 和 float16。在性能和精度之间找平衡</li>
+      <li>截断长度（Truncation Length）：处理长文本时如果太长超过这个阈值的部分会被截断掉，避免内存溢出</li>
+      <li>批处理大小（Batch Size）：由于内存限制，每轮训练我们要将训练集数据分批次送进去，这个批次大小就是 Batch Size</li>
+      <li>梯度累积（Gradient Accumulation）：默认情况下模型会在每个 batch 处理完后进行一次更新一个参数，但你可以通过设置这个梯度累计，让他直到处理完多个小批次的数据后才进行一次更新</li>
+      <li>验证集比例（Validation Set Proportion）：数据集分为训练集和验证集两个部分，训练集用来学习训练，验证集用来验证学习效果如何</li>
+      <li>学习率调节器（Learning Rate Scheduler）：在训练的过程中帮你自动调整优化学习率</li>
+    </ul>
+  </li>
+  <li>页面上点击<strong>启动训练</strong>，或复制命令到终端启动训练
+    <ul>
+      <li>实践中推荐用 <code class="language-plaintext highlighter-rouge">nohup</code> 命令将训练任务放到后台执行，这样即使关闭终端任务也会继续运行。同时将日志重定向到文件中保存下来</li>
+    </ul>
+  </li>
+  <li>在训练过程中注意观察损失曲线，<strong>尽可能将损失降到最低</strong>
+    <ul>
+      <li>如损失降低太慢，尝试增大学习率</li>
+      <li>如训练结束损失还呈下降趋势，增大训练轮数确保拟合</li>
+    </ul>
+  </li>
+</ul>
+
+<h5 id="10-微调结束评估微调效果">10. 微调结束，评估微调效果</h5>
+
+<ul>
+  <li>观察损失曲线的变化；观察最终损失</li>
+  <li>在交互页面上通过预测/对话等方式测试微调好的效果</li>
+  <li><strong>检查点</strong>：保存的是模型在训练过程中的一个中间状态，包含了模型权重、训练过程中使用的配置（如学习率、批次大小）等信息，对LoRA来说，检查点包含了<strong>训练得到的 B 和 A 这两个低秩矩阵的权重</strong></li>
+  <li>若微调效果不理想，你可以：
+    <ul>
+      <li>使用更强的预训练模型</li>
+      <li>增加数据量</li>
+      <li>优化数据质量（数据清洗、数据增强等，可学习相关论文如何实现）</li>
+      <li>调整训练参数，如学习率、训练轮数、优化器、批次大小等等</li>
+    </ul>
+  </li>
+</ul>
+
+<h5 id="11-导出合并后的模型">11. 导出合并后的模型</h5>
+
+<ul>
+  <li>为什么要合并：因为 LoRA 只是通过<strong>低秩矩阵</strong>调整原始模型的部分权重，而<strong>不直接修改原模型的权重</strong>。合并步骤将 LoRA 权重与原始模型权重融合生成一个完整的模型</li>
+  <li>先创建目录，用于存放导出后的模型</li>
+</ul>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>mkdir -p Models/deepseek-r1-1.5b-merged
+</code></pre></div></div>
+
+<ul>
+  <li>在页面上配置导出路径，导出即可
+![[截屏2025-02-23 21.09.52.png]]</li>
+</ul>
+
+<h2 id="五模型部署和暴露接口">五、模型部署和暴露接口</h2>
+
+<h5 id="1-创建新的-conda-虚拟环境用于部署模型">1. 创建新的 conda 虚拟环境用于部署模型</h5>
+
+<ul>
+  <li>创建环境</li>
+</ul>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>conda create <span class="nt">-n</span> fastApi <span class="nv">python</span><span class="o">=</span>3.10
+</code></pre></div></div>
+
+<ul>
+  <li>激活环境</li>
+</ul>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>conda activate fastApi
+</code></pre></div></div>
+
+<ul>
+  <li>在该环境中下载部署模型需要的依赖</li>
+</ul>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>conda <span class="nb">install</span> <span class="nt">-c</span> conda-forge fastapi uvicorn transformers pytorch
+</code></pre></div></div>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>pip <span class="nb">install </span>safetensors sentencepiece protobuf
+</code></pre></div></div>
+
+<h5 id="2-通过-fastapi-部署模型并暴露-http-接口">2. 通过 FastAPI 部署模型并暴露 HTTP 接口</h5>
+
+<ul>
+  <li>创建 App 文件夹</li>
+</ul>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">mkdir </span>App
+</code></pre></div></div>
+
+<ul>
+  <li>创建 main.py 文件，作为启动应用的入口</li>
+</ul>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">touch </span>main.py
+</code></pre></div></div>
+
+<ul>
+  <li>修改 main.py 文件并保存</li>
+</ul>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="n">fastapi</span> <span class="kn">import</span> <span class="n">FastAPI</span>
+<span class="kn">from</span> <span class="n">transformers</span> <span class="kn">import</span> <span class="n">AutoModelForCausalLM</span><span class="p">,</span> <span class="n">AutoTokenizer</span>
+<span class="kn">import</span> <span class="n">torch</span>
+
+<span class="n">app</span> <span class="o">=</span> <span class="nc">FastAPI</span><span class="p">()</span>
+
+<span class="c1"># 模型路径
+</span><span class="n">model_path</span> <span class="o">=</span> <span class="sh">"</span><span class="s">/root/autodl-tmp/Models/deepseek-r1-1.5b-merged</span><span class="sh">"</span>
+
+<span class="c1"># 加载 tokenizer （分词器）
+</span><span class="n">tokenizer</span> <span class="o">=</span> <span class="n">AutoTokenizer</span><span class="p">.</span><span class="nf">from_pretrained</span><span class="p">(</span><span class="n">model_path</span><span class="p">)</span>
+
+<span class="c1"># 加载模型并移动到可用设备（GPU/CPU）
+</span><span class="n">device</span> <span class="o">=</span> <span class="sh">"</span><span class="s">cuda</span><span class="sh">"</span> <span class="k">if</span> <span class="n">torch</span><span class="p">.</span><span class="n">cuda</span><span class="p">.</span><span class="nf">is_available</span><span class="p">()</span> <span class="k">else</span> <span class="sh">"</span><span class="s">cpu</span><span class="sh">"</span>
+<span class="n">model</span> <span class="o">=</span> <span class="n">AutoModelForCausalLM</span><span class="p">.</span><span class="nf">from_pretrained</span><span class="p">(</span><span class="n">model_path</span><span class="p">).</span><span class="nf">to</span><span class="p">(</span><span class="n">device</span><span class="p">)</span>
+
+<span class="nd">@app.get</span><span class="p">(</span><span class="sh">"</span><span class="s">/generate</span><span class="sh">"</span><span class="p">)</span>
+<span class="k">async</span> <span class="k">def</span> <span class="nf">generate_text</span><span class="p">(</span><span class="n">prompt</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+    <span class="c1"># 使用 tokenizer 编码输入的 prompt
+</span>    <span class="n">inputs</span> <span class="o">=</span> <span class="nf">tokenizer</span><span class="p">(</span><span class="n">prompt</span><span class="p">,</span> <span class="n">return_tensors</span><span class="o">=</span><span class="sh">"</span><span class="s">pt</span><span class="sh">"</span><span class="p">).</span><span class="nf">to</span><span class="p">(</span><span class="n">device</span><span class="p">)</span>
+    
+    <span class="c1"># 使用模型生成文本
+</span>    <span class="n">outputs</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="nf">generate</span><span class="p">(</span><span class="n">inputs</span><span class="p">[</span><span class="sh">"</span><span class="s">input_ids</span><span class="sh">"</span><span class="p">],</span> <span class="n">max_length</span><span class="o">=</span><span class="mi">150</span><span class="p">)</span>
+    
+    <span class="c1"># 解码生成的输出
+</span>    <span class="n">generated_text</span> <span class="o">=</span> <span class="n">tokenizer</span><span class="p">.</span><span class="nf">decode</span><span class="p">(</span><span class="n">outputs</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">skip_special_tokens</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+    
+    <span class="k">return</span> <span class="p">{</span><span class="sh">"</span><span class="s">generated_text</span><span class="sh">"</span><span class="p">:</span> <span class="n">generated_text</span><span class="p">}</span>
+
+</code></pre></div></div>
+
+<ul>
+  <li>进入包含 <code class="language-plaintext highlighter-rouge">main.py</code> 文件的目录，然后运行以下命令来启动 FastAPI 应用</li>
+</ul>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>uvicorn main:app --reload --host 0.0.0.0
+</code></pre></div></div>
+
+<ul>
+  <li>
+    <p><code class="language-plaintext highlighter-rouge">main</code> 是 Python 文件名（要注意不包含 <code class="language-plaintext highlighter-rouge">.py</code> 扩展名）</p>
+  </li>
+  <li><code class="language-plaintext highlighter-rouge">app</code> 是 FastAPI 实例的变量名（代码中 <code class="language-plaintext highlighter-rouge">app = FastAPI()</code>）</li>
+  <li><code class="language-plaintext highlighter-rouge">--reload</code> 使代码更改后可以自动重载，适用于开发环境</li>
+  <li>
+    <p><code class="language-plaintext highlighter-rouge">host 0.0.0.0</code>：将 FastAPI 应用绑定到所有可用的网络接口，这样我们的本机就可以通过内网穿透访问该服务</p>
+  </li>
+  <li>配置端口转发，使得本机可以访问该服务 <a href="https://www.autodl.com/docs/ssh_proxy/">SSH隧道</a></li>
+  <li>浏览器输入以下 url，测试服务是否启动成功</li>
+</ul>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>http://localhost:8000/docs
+</code></pre></div></div>
+
+<p>![[Pasted image 20250223232930.png]]</p>
+
+<ul>
+  <li>或者你也可以通过 postMan 来测试</li>
+</ul>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>http://localhost:8000/generate?prompt=你是谁？
+</code></pre></div></div>
+
+<p>![[Pasted image 20250223232958.png]]</p>
+
+<h2 id="六web后端调用">六、web后端调用</h2>
+
+<h5 id="1-pomxml-导入依赖">1. pom.xml 导入依赖</h5>
+
+<div class="language-xml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nt">&lt;dependency&gt;</span>  
+    <span class="nt">&lt;groupId&gt;</span>org.apache.httpcomponents.client5<span class="nt">&lt;/groupId&gt;</span>  
+    <span class="nt">&lt;artifactId&gt;</span>httpclient5<span class="nt">&lt;/artifactId&gt;</span>  
+    <span class="nt">&lt;version&gt;</span>5.2.1<span class="nt">&lt;/version&gt;</span>  
+<span class="nt">&lt;/dependency&gt;</span>
+</code></pre></div></div>
+
+<h5 id="2-自定义方法发送并处理-http-请求实现对话功能">2. 自定义方法发送并处理 HTTP 请求，实现对话功能</h5>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nd">@Service</span>  
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">ChatServiceImpl</span> <span class="kd">implements</span> <span class="nc">ChatService</span> <span class="o">{</span>  
+      
+    <span class="nd">@Autowired</span>  
+    <span class="kd">private</span> <span class="nc">RestTemplate</span> <span class="n">restTemplate</span><span class="o">;</span>  
+    <span class="nd">@Autowired</span>  
+    <span class="kd">private</span> <span class="nc">AiServiceConfig</span> <span class="n">aiServiceConfig</span><span class="o">;</span>  
+  
+    <span class="nd">@Override</span>  
+    <span class="kd">public</span> <span class="nc">String</span> <span class="nf">callAiForOneReply</span><span class="o">(</span><span class="nc">String</span> <span class="n">prompt</span><span class="o">)</span> <span class="o">{</span>  
+        <span class="c1">// 获取基础URL http://localhost:8000  </span>
+        <span class="nc">String</span> <span class="n">baseUrl</span> <span class="o">=</span> <span class="n">aiServiceConfig</span><span class="o">.</span><span class="na">getBaseUrl</span><span class="o">();</span>  
+        <span class="c1">// 构建完整的请求URL http://localhost:8000/generate?prompt=XXX  </span>
+        <span class="nc">String</span> <span class="n">url</span> <span class="o">=</span> <span class="nc">String</span><span class="o">.</span><span class="na">format</span><span class="o">(</span><span class="s">"%s/generate?prompt=%s"</span><span class="o">,</span> <span class="n">baseUrl</span><span class="o">,</span> <span class="n">prompt</span><span class="o">);</span>  
+        <span class="c1">// 发送GET请求并获取响应  </span>
+        <span class="nc">GenerateResponse</span> <span class="n">response</span> <span class="o">=</span> <span class="n">restTemplate</span><span class="o">.</span><span class="na">getForObject</span><span class="o">(</span><span class="n">url</span><span class="o">,</span> <span class="nc">GenerateResponse</span><span class="o">.</span><span class="na">class</span><span class="o">);</span>  
+        <span class="c1">// 从响应中取出 generated_text 字段值返回  </span>
+        <span class="k">return</span> <span class="n">response</span> <span class="o">!=</span> <span class="kc">null</span> <span class="o">?</span> <span class="n">response</span><span class="o">.</span><span class="na">getGenerated_text</span><span class="o">()</span> <span class="o">:</span> <span class="s">""</span><span class="o">;</span>  
+    <span class="o">}</span>  
+<span class="o">}</span>
+</code></pre></div></div>
+
+<h5 id="3-本机启动-demo-前后端工程测试对话效果">3. 本机启动 Demo 前后端工程，测试对话效果</h5>
+
+<h6 id="31-启动前端工程">3.1 启动前端工程</h6>
+
+<ul>
+  <li>前端项目地址：</li>
+</ul>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>https://github.com/huangyf2013320506/magic_conch_frontend.git
+</code></pre></div></div>
+
+<ul>
+  <li>执行：</li>
+</ul>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>npm <span class="nb">install</span>
+</code></pre></div></div>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>npm run dev
+</code></pre></div></div>
+
+<h6 id="32-启动后端工程">3.2 启动后端工程</h6>
+
+<ul>
+  <li>后端项目地址：</li>
+</ul>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>https://github.com/huangyf2013320506/magic_conch_backend.git
+</code></pre></div></div>
+
+<ul>
+  <li>执行：</li>
+</ul>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>mvn clean <span class="nb">install</span>
+</code></pre></div></div>
+
+<ul>
+  <li>在 <code class="language-plaintext highlighter-rouge">MagicConchBackendApplication.java</code> 类中启动</li>
+</ul>
+
+<h5 id="4-fastapi-支持自定义多种请求响应格式可自行探索">4. FastAPI 支持自定义多种请求响应格式，可自行探索</h5>
+
+<h5 id="5-如何开放服务端口到公网">5. 如何开放服务端口到公网</h5>
+
+<ul>
+  <li>AutoDL 当前仅支持个人用户通过端口转发在本地访问服务，如需开放服务端口到公网一般需要企业认证，请参考：<a href="https://www.autodl.com/docs/port/">开放端口</a></li>
+</ul>
+
+<hr />

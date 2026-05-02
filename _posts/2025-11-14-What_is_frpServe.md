@@ -1,9 +1,9 @@
 ---
 layout: post
-title: "How_to_make_frpServe"
+title: '服务器-frp内网穿透部署'
 date: 2025-11-14
 author: pepper
-tags: [server]
+tags: [frp, server]
 comments: true
 toc: true
 pinned: false

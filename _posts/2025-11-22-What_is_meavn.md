@@ -1,9 +1,9 @@
 ---
 layout: post
-title: 'What_is_Meavn'
+title: '开发-Maven项目管理与配置'
 date: 2025-11-22
 author: pepper
-tags: [Java]
+tags: [maven, java]
 comments: true
 toc: true
 pinned: false

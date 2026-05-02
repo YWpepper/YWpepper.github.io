@@ -1,13 +1,11 @@
 ---
-title: 'how_to_ScatterPlotsOnMap'
+title: '论文-地图散点图可视化'
 date: 2025-02-28
 author: pepper
 permalink: /posts/2025/02/how_to_ScatterPlots_onMap/
 pinned: false
 toc: true
-tags:
-  - Rearch
-  - Papper
+tags: [plot, traffic]
 ---
 
 这篇博客撰写了编写相应的代码,将经纬度信息以图形化的方式呈现出来。

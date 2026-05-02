@@ -1,14 +1,12 @@
 ---
-title: "How_to_useUbuntu"
+title: '服务器-Ubuntu命令与服务管理'
 lang: zh-CN
 date: 2024-02-07
 author: pepper
 permalink: /posts/2024/02/how_to_use_ubuntu/
 toc: true
 pinned: false
-tags:
-  - Server
-  - Command
+tags: [ubuntu, server]
 ---
 
 这篇笔记汇总了在 Ubuntu 下常用的快速命令与进程/服务管理方法，包含文件/目录操作、显卡查看、后台进程管理（nohup、systemd、tmux）及自检与故障排查常用命令。便于快速查阅与实际操作参考。

@@ -1,9 +1,9 @@
 ---
 layout: post
-title: 'What_issue_I_meet'
+title: '开发-SpringBoot配置错误排查'
 date: 2025-11-19
 author: pepper
-tags: [java]
+tags: [springboot, bug]
 comments: true
 toc: true
 pinned: false

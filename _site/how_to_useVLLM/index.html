@@ -1,0 +1,627 @@
+<!DOCTYPE html>
+<html>
+  <head>
+  <title>服务器-vLLM多端口部署LLM – Pepper – 一个随心记录的地方</title>
+
+      <meta charset="utf-8" />
+    <meta content='text/html; charset=utf-8' http-equiv='Content-Type'>
+    <meta http-equiv='X-UA-Compatible' content='IE=edge'>
+    <meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1.0'>
+
+    
+    <meta name="description" content="这篇博客介绍了如何管理本地的LLM，本文将详细梳理使用xinference管理LLM模型的常用命令，以及通过vllm部署LLM模型的核心操作步骤与命令示例，帮助读者快速掌握本地LLM的管理与部署流程。
+
+" />
+    <meta property="og:description" content="这篇博客介绍了如何管理本地的LLM，本文将详细梳理使用xinference管理LLM模型的常用命令，以及通过vllm部署LLM模型的核心操作步骤与命令示例，帮助读者快速掌握本地LLM的管理与部署流程。
+
+" />
+    
+    <meta name="author" content="Pepper" />
+
+    
+    <meta property="og:title" content="服务器-vLLM多端口部署LLM" />
+    <meta property="twitter:title" content="服务器-vLLM多端口部署LLM" />
+    
+  <!-- Async font loading -->
+<script>
+  window.WebFontConfig = {
+      custom: {
+          families: ['Spoqa Han Sans:100,300,400,700'],
+          urls: ['https://spoqa.github.io/spoqa-han-sans/css/SpoqaHanSans-kr.css']
+      },
+      timeout: 60000
+  };
+  (function(d) {
+      var wf = d.createElement('script'), s = d.scripts[0];
+      wf.src = 'https://ajax.googleapis.com/ajax/libs/webfont/1.5.18/webfont.js';
+      s.parentNode.insertBefore(wf, s);
+  })(document);
+</script>
+
+<!--adobe fonts-->
+<script>
+    (function(d) {
+      var config = {
+        kitId: 'vbt3gjx',
+        scriptTimeout: 3000,
+        async: true
+      },
+      h=d.documentElement,t=setTimeout(function(){h.className=h.className.replace(/\bwf-loading\b/g,"")+" wf-inactive";},config.scriptTimeout),tk=d.createElement("script"),f=false,s=d.getElementsByTagName("script")[0],a;h.className+=" wf-loading";tk.src='https://use.typekit.net/'+config.kitId+'.js';tk.async=true;tk.onload=tk.onreadystatechange=function(){a=this.readyState;if(f||a&&a!="complete"&&a!="loaded")return;f=true;clearTimeout(t);try{Typekit.load(config)}catch(e){}};s.parentNode.insertBefore(tk,s)
+    })(document);
+</script> 
+
+  <!--[if lt IE 9]>
+    <script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+  <![endif]-->
+
+  <link rel="stylesheet" type="text/css" href="/style.css" />
+  <link rel="alternate" type="application/rss+xml" title="Pepper - 一个随心记录的地方" href="/feed.xml" />
+  <link rel="shortcut icon" href="https://images.weserv.nl/?url=cdn.nlark.com/yuque/0/2025/png/40742019/1766300112246-d1fc30f4-d036-46b5-98b0-073628c06a88.png?x-oss-process=image%2Fformat%2Cwebp">
+  <script src="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js"></script>
+  <script src="https://unpkg.com/feather-icons"></script>
+  <script type="text/javascript" async
+  src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+  </script>
+  <script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+      tex2jax: {
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre'],
+        inlineMath: [['$','$']]
+      }
+    });
+  </script>
+
+  <!-- Created with Jekyll Now - http://github.com/barryclark/jekyll-now -->
+
+</head>
+
+  <body>
+    
+
+
+    
+      <aside class="toc">
+        <ul>
+  <li><a href="#">服务器-vLLM多端口部署LLM</a></li>
+  <li><a href="#vllm-多端口部署-llm-模型">vllm 多端口部署 LLM 模型</a>
+    <ul>
+      <li><a href="#目录结构">目录结构</a></li>
+      <li><a href="#-目录设计核心思路">🎯 目录设计核心思路</a>
+        <ul>
+          <li><a href="#1-配置分离config">1. 配置分离（config/）</a></li>
+          <li><a href="#2-脚本标准化scripts">2. 脚本标准化（scripts/）</a></li>
+          <li><a href="#3-日志隔离logs">3. 日志隔离（logs/）</a></li>
+          <li><a href="#4-模型与环境解耦models--env">4. 模型与环境解耦（models/ + env/）</a></li>
+        </ul>
+      </li>
+      <li><a href="#-核心文件模板直接可用">📝 核心文件模板（直接可用）</a>
+        <ul>
+          <li><a href="#1-单模型配置文件configmodel_7b_8000yaml">1. 单模型配置文件（config/model_7b_8000.yaml）</a></li>
+          <li><a href="#2-单模型启动脚本scriptsstart_singlesh">2. 单模型启动脚本（scripts/start_single.sh）</a></li>
+          <li><a href="#3-一键启动所有服务脚本scriptsstart_allsh">3. 一键启动所有服务脚本（scripts/start_all.sh）</a></li>
+          <li><a href="#4-端口检查工具utilsport_checksh">4. 端口检查工具（utils/port_check.sh）</a></li>
+        </ul>
+      </li>
+      <li><a href="#️-多端口部署关键优化建议">⚙️ 多端口部署关键优化建议</a>
+        <ul>
+          <li><a href="#1-gpu-资源分配">1. GPU 资源分配</a></li>
+          <li><a href="#2-高可用保障">2. 高可用保障</a></li>
+          <li><a href="#3-运维便捷性">3. 运维便捷性</a></li>
+        </ul>
+      </li>
+      <li><a href="#-部署步骤快速上手">📌 部署步骤（快速上手）</a></li>
+      <li><a href="#-额外优化生产环境必看">💡 额外优化（生产环境必看）</a>
+        <ul>
+          <li><a href="#其他冷知识">其他冷知识</a>
+            <ul>
+              <li><a href="#1-权重本身的大小weights">1. 权重本身的大小（Weights）</a></li>
+              <li><a href="#2-vllm-的显存预分配机制kv-cache">2. vLLM 的显存预分配机制（KV Cache）</a></li>
+              <li><a href="#3-其他隐形开销">3. 其他“隐形”开销</a></li>
+              <li><a href="#总结你的显存去哪了">总结：你的显存去哪了？</a></li>
+              <li><a href="#小贴士如何让它变小">小贴士：如何让它变小？</a></li>
+            </ul>
+          </li>
+        </ul>
+      </li>
+      <li><a href="#常见精度对比表">常见精度对比表</a></li>
+    </ul>
+  </li>
+</ul>
+      </aside>
+    
+
+    <div id="main" role="main" class="wrapper-content">
+      <div class="container">
+        <article class="posts">
+  <div class="back-to-home">
+    <a href="/" class="btn-home">← 返回主页</a>
+  </div>
+  
+  <h1>服务器-vLLM多端口部署LLM</h1>
+  
+
+  <div clsss="meta">
+    <span class="author">
+      pepper
+    </span>
+
+    <span class="date">
+      2026-04-06
+    </span>
+
+    <ul class="tag">
+      
+      <li>
+        <a href="http://localhost:4000/tags#vllm">
+          vllm
+        </a>
+      </li>
+      
+      <li>
+        <a href="http://localhost:4000/tags#llm">
+          llm
+        </a>
+      </li>
+      
+      <li>
+        <a href="http://localhost:4000/tags#server">
+          server
+        </a>
+      </li>
+      
+    </ul>
+  </div>
+
+  <div class="entry">
+    <p>这篇博客介绍了如何管理本地的LLM，本文将详细梳理使用xinference管理LLM模型的常用命令，以及通过vllm部署LLM模型的核心操作步骤与命令示例，帮助读者快速掌握本地LLM的管理与部署流程。</p>
+
+<!-- more -->
+<h1 id="vllm-多端口部署-llm-模型">vllm 多端口部署 LLM 模型</h1>
+<p>针对<strong>后端多端口部署多个 LLM 模型</strong>的需求，本文设计了一套高可维护、易扩展、符合生产环境规范的目录结构，同时配套了核心配置与启动脚本模板，直接可用。</p>
+
+<h2 id="目录结构">目录结构</h2>
+<pre><code class="language-plain">vllm/
+├── config/                  # 🔧 模型配置中心（核心）
+│   ├── model_7b_8000.yaml   # 7B 模型，端口 8000 配置
+│   ├── model_14b_8001.yaml  # 14B 模型，端口 8001 配置
+│   ├── model_70b_8002.yaml  # 70B 模型，端口 8002 配置
+│   └── common.yaml          # 全局通用配置（日志、监控、超时等）
+├── scripts/                 # 🚀 启动/管理脚本
+│   ├── start_all.sh         # 一键启动所有模型服务
+│   ├── start_single.sh      # 单模型启动脚本（传参指定端口/模型）
+│   ├── stop_all.sh          # 一键停止所有服务
+│   ├── stop_single.sh       # 单模型停止脚本
+│   ├── restart_single.sh    # 单模型重启脚本
+│   └── health_check.sh      # 服务健康巡检脚本
+├── logs/                    # 📝 日志目录（按模型/端口分类）
+│   ├── model_7b_8000/
+│   │   ├── access.log       # 访问日志
+│   │   ├── error.log        # 错误日志
+│   │   └── server.log       # 服务运行日志
+│   ├── model_14b_8001/
+│   └── model_70b_8002/
+├── models/                  # 🧠 模型权重目录（软链接/实际存储）
+│   ├── qwen2-7b-instruct/
+│   ├── qwen2-14b-instruct/
+│   └── qwen2-72b-instruct/
+├── utils/                   # 🛠️ 工具脚本
+│   ├── port_check.py        # 端口占用检查工具
+│   ├── gpu_monitor.py       # GPU 资源监控工具
+│   └── log_rotate.py        # 日志轮转工具
+├── env/                     # ⚙️ 环境配置
+│   ├── .env.base            # 基础环境变量（Python 路径、CUDA 等）
+│   ├── .env.7b_8000         # 7B 模型专属环境变量
+│   └── .env.14b_8001        # 14B 模型专属环境变量
+└── README.md                # 📖 项目说明文档
+</code></pre>
+
+<hr />
+
+<h2 id="-目录设计核心思路">🎯 目录设计核心思路</h2>
+<h3 id="1-配置分离config">1. 配置分离（config/）</h3>
+<ul>
+  <li><strong>按模型/端口拆分配置</strong>：每个模型一个独立 YAML 文件，避免配置冲突，方便单独调整参数（如 <code class="language-plaintext highlighter-rouge">max_num_batched_tokens</code>、<code class="language-plaintext highlighter-rouge">tensor_parallel_size</code>）</li>
+  <li><strong>全局配置复用</strong>：<code class="language-plaintext highlighter-rouge">common.yaml</code> 统一管理日志格式、超时时间、监控地址等，减少重复配置</li>
+  <li><strong>支持热更新</strong>：修改配置后无需改脚本，直接重启对应服务即可生效</li>
+</ul>
+
+<h3 id="2-脚本标准化scripts">2. 脚本标准化（scripts/）</h3>
+<ul>
+  <li><strong>一键启停</strong>：<code class="language-plaintext highlighter-rouge">start_all.sh</code>/<code class="language-plaintext highlighter-rouge">stop_all.sh</code> 适合批量管理，<code class="language-plaintext highlighter-rouge">start_single.sh</code> 适合单独调试</li>
+  <li><strong>参数化启动</strong>：单模型脚本支持传参指定端口、模型路径、GPU 编号，灵活适配多场景</li>
+  <li><strong>健康巡检</strong>：<code class="language-plaintext highlighter-rouge">health_check.sh</code> 定期检查服务状态，自动重启异常服务，保障高可用</li>
+</ul>
+
+<h3 id="3-日志隔离logs">3. 日志隔离（logs/）</h3>
+<ul>
+  <li><strong>按模型分类存储</strong>：每个模型独立日志目录，避免日志混杂，方便问题排查</li>
+  <li><strong>日志轮转</strong>：配套 <code class="language-plaintext highlighter-rouge">log_rotate.py</code> 自动清理旧日志，防止磁盘占满</li>
+  <li><strong>日志分级</strong>：区分访问日志、错误日志、运行日志，定位问题更高效</li>
+</ul>
+
+<h3 id="4-模型与环境解耦models--env">4. 模型与环境解耦（models/ + env/）</h3>
+<ul>
+  <li><strong>模型目录独立</strong>：支持软链接挂载外部存储，避免代码与权重耦合，方便模型版本管理</li>
+  <li><strong>环境变量隔离</strong>：不同模型可配置不同的 Python 环境、CUDA 版本、环境变量，适配多模型部署需求</li>
+</ul>
+
+<hr />
+
+<h2 id="-核心文件模板直接可用">📝 核心文件模板（直接可用）</h2>
+<h3 id="1-单模型配置文件configmodel_7b_8000yaml">1. 单模型配置文件（config/model_7b_8000.yaml）</h3>
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># 模型基础配置</span>
+<span class="na">model</span><span class="pi">:</span> <span class="s">/path/to/vllm_script/models/qwen2-7b-instruct</span>
+<span class="na">tokenizer</span><span class="pi">:</span> <span class="s">/path/to/vllm_script/models/qwen2-7b-instruct</span>
+<span class="na">host</span><span class="pi">:</span> <span class="s">0.0.0.0</span>
+<span class="na">port</span><span class="pi">:</span> <span class="m">8000</span>
+
+<span class="c1"># 服务性能配置</span>
+<span class="na">tensor_parallel_size</span><span class="pi">:</span> <span class="m">1</span>  <span class="c1"># GPU 并行数，多卡部署时调整</span>
+<span class="na">max_num_batched_tokens</span><span class="pi">:</span> <span class="m">32768</span>
+<span class="na">max_num_seqs</span><span class="pi">:</span> <span class="m">256</span>
+<span class="na">max_model_len</span><span class="pi">:</span> <span class="m">8192</span>
+<span class="na">gpu_memory_utilization</span><span class="pi">:</span> <span class="m">0.9</span>  <span class="c1"># GPU 显存利用率，避免 OOM</span>
+
+<span class="c1"># 日志配置（继承 common.yaml 可覆盖）</span>
+<span class="na">log_level</span><span class="pi">:</span> <span class="s">INFO</span>
+<span class="na">log_file</span><span class="pi">:</span> <span class="s">/path/to/vllm_script/logs/model_7b_8000/server.log</span>
+<span class="na">access_log_file</span><span class="pi">:</span> <span class="s">/path/to/vllm_script/logs/model_7b_8000/access.log</span>
+<span class="na">error_log_file</span><span class="pi">:</span> <span class="s">/path/to/vllm_script/logs/model_7b_8000/error.log</span>
+
+<span class="c1"># 其他可选配置</span>
+<span class="na">trust_remote_code</span><span class="pi">:</span> <span class="kc">true</span>
+<span class="na">enable_prefix_caching</span><span class="pi">:</span> <span class="kc">true</span>
+<span class="na">api_key</span><span class="pi">:</span> <span class="s">your_secure_api_key</span>  <span class="c1"># 接口鉴权，生产环境必加</span>
+</code></pre></div></div>
+
+<h3 id="2-单模型启动脚本scriptsstart_singlesh">2. 单模型启动脚本（scripts/start_single.sh）</h3>
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">#!/bin/bash</span>
+<span class="nb">set</span> <span class="nt">-e</span>
+
+<span class="c"># 加载基础环境变量</span>
+<span class="nb">source</span> /path/to/vllm_script/env/.env.base
+
+<span class="c"># 检查参数</span>
+<span class="k">if</span> <span class="o">[</span> <span class="nv">$# </span><span class="nt">-ne</span> 3 <span class="o">]</span><span class="p">;</span> <span class="k">then
+    </span><span class="nb">echo</span> <span class="s2">"Usage: </span><span class="nv">$0</span><span class="s2"> &lt;config_file&gt; &lt;port&gt; &lt;gpu_ids&gt;"</span>
+    <span class="nb">echo</span> <span class="s2">"Example: </span><span class="nv">$0</span><span class="s2"> ../config/model_7b_8000.yaml 8000 0"</span>
+    <span class="nb">exit </span>1
+<span class="k">fi
+
+</span><span class="nv">CONFIG_FILE</span><span class="o">=</span><span class="nv">$1</span>
+<span class="nv">PORT</span><span class="o">=</span><span class="nv">$2</span>
+<span class="nv">GPU_IDS</span><span class="o">=</span><span class="nv">$3</span>
+
+<span class="c"># 检查端口是否被占用</span>
+bash /path/to/vllm_script/utils/port_check.sh <span class="nv">$PORT</span>
+<span class="k">if</span> <span class="o">[</span> <span class="nv">$?</span> <span class="nt">-ne</span> 0 <span class="o">]</span><span class="p">;</span> <span class="k">then
+    </span><span class="nb">echo</span> <span class="s2">"Error: Port </span><span class="nv">$PORT</span><span class="s2"> is already in use!"</span>
+    <span class="nb">exit </span>1
+<span class="k">fi</span>
+
+<span class="c"># 加载模型专属环境变量</span>
+<span class="nv">ENV_FILE</span><span class="o">=</span><span class="s2">"/path/to/vllm_script/env/.env.</span><span class="k">${</span><span class="nv">PORT</span><span class="k">}</span><span class="s2">"</span>
+<span class="k">if</span> <span class="o">[</span> <span class="nt">-f</span> <span class="s2">"</span><span class="nv">$ENV_FILE</span><span class="s2">"</span> <span class="o">]</span><span class="p">;</span> <span class="k">then
+    </span><span class="nb">source</span> <span class="nv">$ENV_FILE</span>
+<span class="k">fi</span>
+
+<span class="c"># 启动 vLLM 服务</span>
+<span class="nb">echo</span> <span class="s2">"Starting vLLM service on port </span><span class="nv">$PORT</span><span class="s2">, GPU: </span><span class="nv">$GPU_IDS</span><span class="s2">, config: </span><span class="nv">$CONFIG_FILE</span><span class="s2">"</span>
+<span class="nv">CUDA_VISIBLE_DEVICES</span><span class="o">=</span><span class="nv">$GPU_IDS</span> <span class="nb">nohup </span>python <span class="nt">-m</span> vllm.entrypoints.openai.api_server <span class="se">\</span>
+    <span class="nt">--config</span> <span class="nv">$CONFIG_FILE</span> <span class="se">\</span>
+    <span class="o">&gt;</span> /path/to/vllm_script/logs/model_<span class="k">${</span><span class="nv">PORT</span><span class="k">}</span>/nohup.out 2&gt;&amp;1 &amp;
+
+<span class="c"># 记录进程 PID</span>
+<span class="nb">echo</span> <span class="nv">$!</span> <span class="o">&gt;</span> /path/to/vllm_script/logs/model_<span class="k">${</span><span class="nv">PORT</span><span class="k">}</span>/service.pid
+<span class="nb">echo</span> <span class="s2">"Service started with PID: </span><span class="si">$(</span><span class="nb">cat</span> /path/to/vllm_script/logs/model_<span class="k">${</span><span class="nv">PORT</span><span class="k">}</span>/service.pid<span class="si">)</span><span class="s2">"</span>
+</code></pre></div></div>
+
+<h3 id="3-一键启动所有服务脚本scriptsstart_allsh">3. 一键启动所有服务脚本（scripts/start_all.sh）</h3>
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">#!/bin/bash</span>
+<span class="nb">set</span> <span class="nt">-e</span>
+
+<span class="c"># 定义模型配置、端口、GPU 对应关系</span>
+<span class="nb">declare</span> <span class="nt">-a</span> <span class="nv">models</span><span class="o">=(</span>
+    <span class="s2">"model_7b_8000.yaml 8000 0"</span>
+    <span class="s2">"model_14b_8001.yaml 8001 1"</span>
+    <span class="s2">"model_70b_8002.yaml 8002 2,3"</span>
+<span class="o">)</span>
+
+<span class="c"># 遍历启动所有模型</span>
+<span class="k">for </span>model <span class="k">in</span> <span class="s2">"</span><span class="k">${</span><span class="nv">models</span><span class="p">[@]</span><span class="k">}</span><span class="s2">"</span><span class="p">;</span> <span class="k">do
+    </span><span class="nb">read </span>config port gpu <span class="o">&lt;&lt;&lt;</span> <span class="s2">"</span><span class="nv">$model</span><span class="s2">"</span>
+    <span class="nb">echo</span> <span class="s2">"=== Starting </span><span class="nv">$config</span><span class="s2"> on port </span><span class="nv">$port</span><span class="s2">, GPU: </span><span class="nv">$gpu</span><span class="s2"> ==="</span>
+    bash /path/to/vllm_script/scripts/start_single.sh <span class="s2">"/path/to/vllm_script/config/</span><span class="nv">$config</span><span class="s2">"</span> <span class="nv">$port</span> <span class="nv">$gpu</span>
+    <span class="nb">sleep </span>5  <span class="c"># 间隔启动，避免资源抢占</span>
+<span class="k">done
+
+</span><span class="nb">echo</span> <span class="s2">"All services started successfully!"</span>
+</code></pre></div></div>
+
+<h3 id="4-端口检查工具utilsport_checksh">4. 端口检查工具（utils/port_check.sh）</h3>
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">#!/bin/bash</span>
+<span class="nv">PORT</span><span class="o">=</span><span class="nv">$1</span>
+<span class="k">if </span>lsof <span class="nt">-i</span>:<span class="nv">$PORT</span> <span class="o">&gt;</span> /dev/null 2&gt;&amp;1<span class="p">;</span> <span class="k">then
+    </span><span class="nb">exit </span>1  <span class="c"># 端口被占用</span>
+<span class="k">else
+    </span><span class="nb">exit </span>0  <span class="c"># 端口可用</span>
+<span class="k">fi</span>
+</code></pre></div></div>
+
+<hr />
+
+<h2 id="️-多端口部署关键优化建议">⚙️ 多端口部署关键优化建议</h2>
+<h3 id="1-gpu-资源分配">1. GPU 资源分配</h3>
+<ul>
+  <li><strong>单卡多模型</strong>：通过 <code class="language-plaintext highlighter-rouge">gpu_memory_utilization</code> 控制显存占用，例如 24G 卡可部署 1 个 7B（0.5 显存）+ 1 个 14B（0.4 显存）</li>
+  <li><strong>多卡并行</strong>：大模型（70B+）使用 <code class="language-plaintext highlighter-rouge">tensor_parallel_size: 2/4</code> 多卡部署，提升推理速度</li>
+  <li><strong>GPU 隔离</strong>：通过 <code class="language-plaintext highlighter-rouge">CUDA_VISIBLE_DEVICES</code> 严格隔离不同模型的 GPU 资源，避免资源争抢</li>
+</ul>
+
+<h3 id="2-高可用保障">2. 高可用保障</h3>
+<ul>
+  <li><strong>进程守护</strong>：用 <code class="language-plaintext highlighter-rouge">nohup</code> + <code class="language-plaintext highlighter-rouge">systemd</code> 托管服务，服务器重启后自动恢复</li>
+  <li><strong>健康巡检</strong>：<code class="language-plaintext highlighter-rouge">health_check.sh</code> 定时调用 <code class="language-plaintext highlighter-rouge">/health</code> 接口，异常自动重启</li>
+  <li><strong>限流熔断</strong>：配置 <code class="language-plaintext highlighter-rouge">max_num_seqs</code> 限制并发请求，防止服务雪崩</li>
+</ul>
+
+<h3 id="3-运维便捷性">3. 运维便捷性</h3>
+<ul>
+  <li><strong>日志轮转</strong>：配置 <code class="language-plaintext highlighter-rouge">logrotate</code> 或 <code class="language-plaintext highlighter-rouge">log_rotate.py</code>，定期清理 7 天前的日志</li>
+  <li><strong>监控告警</strong>：对接 Prometheus + Grafana，监控 GPU 使用率、QPS、延迟等指标</li>
+  <li><strong>版本管理</strong>：<code class="language-plaintext highlighter-rouge">models/</code> 目录下按版本存放模型权重，支持快速切换模型版本</li>
+</ul>
+
+<hr />
+
+<h2 id="-部署步骤快速上手">📌 部署步骤（快速上手）</h2>
+<ol>
+  <li><strong>创建目录结构</strong>：按上述结构创建所有文件夹</li>
+  <li><strong>配置模型参数</strong>：在 <code class="language-plaintext highlighter-rouge">config/</code> 下编写每个模型的 YAML 配置</li>
+  <li><strong>修改脚本路径</strong>：将脚本中的 <code class="language-plaintext highlighter-rouge">/path/to/vllm_script</code> 替换为你的实际根目录</li>
+  <li><strong>添加执行权限</strong>：<code class="language-plaintext highlighter-rouge">chmod +x scripts/*.sh utils/*.sh</code></li>
+  <li><strong>启动服务</strong>：<code class="language-plaintext highlighter-rouge">bash scripts/start_all.sh</code></li>
+  <li><strong>验证服务</strong>：<code class="language-plaintext highlighter-rouge">curl http://localhost:8000/v1/chat/completions</code> 测试接口</li>
+</ol>
+
+<hr />
+
+<h2 id="-额外优化生产环境必看">💡 额外优化（生产环境必看）</h2>
+<ul>
+  <li><strong>API 鉴权</strong>：所有模型配置 <code class="language-plaintext highlighter-rouge">api_key</code>，防止未授权访问</li>
+  <li><strong>HTTPS 加密</strong>：用 Nginx 反向代理，配置 SSL 证书，加密传输</li>
+  <li><strong>负载均衡</strong>：多实例部署时，用 Nginx 做负载均衡，提升并发能力</li>
+  <li><strong>模型热更新</strong>：支持不中断服务的模型版本切换（vLLM 0.4+ 支持）</li>
+</ul>
+
+<hr />
+
+<h3 id="其他冷知识">其他冷知识</h3>
+<p>日志中，GLM-4-9B 虽然标称是 <strong>90亿参数（9B）</strong>，但在 vLLM 加载时却吃掉了大量的显存。通过日志中的关键数据（<code class="language-plaintext highlighter-rouge">Model loading took 17.56 GiB memory</code>）来拆解，为什么一个 9B 的模型会占用这么多空间。</p>
+
+<h4 id="1-权重本身的大小weights">1. 权重本身的大小（Weights）</h4>
+<p>这是最基础的占用。模型有 92.3 亿个参数，日志显示加载的精度是 <code class="language-plaintext highlighter-rouge">dtype=torch.bfloat16</code>。</p>
+
+<ul>
+  <li><strong>BF16/FP16 精度：</strong> 每个参数占用 <strong>2 字节（Bytes）</strong>。</li>
+  <li><strong>计算公式：</strong> $9.23 \times 10^9 \text{ params} \times 2 \text{ bytes/param} \approx 18.46 \times 10^9 \text{ bytes} \approx 17.19 \text{ GiB}$ 。</li>
+  <li><strong>日志对应：</strong> 日志显示 <code class="language-plaintext highlighter-rouge">Loading weights took... 17.56 GiB</code>。这非常吻合，多出来的部分是架构本身的开销和一些临时 Buffer。</li>
+</ul>
+
+<p><strong>结论：</strong> 仅仅是把模型挂载到显存里，就需要约 <strong>17.2 GiB</strong>。</p>
+
+<hr />
+
+<h4 id="2-vllm-的显存预分配机制kv-cache">2. vLLM 的显存预分配机制（KV Cache）</h4>
+<p>如果发现显存占用远超 17 GiB（比如达到了 24G 甚至更多），那是 <strong>vLLM</strong> 的特性导致的。</p>
+
+<p>vLLM 默认会执行 <strong>显存接管策略</strong>：</p>
+
+<ol>
+  <li><strong>加载权重：</strong> 消耗约 17.2 GiB。</li>
+  <li><strong>剩余显存：</strong> vLLM 会扫描显卡剩下的空间，并根据你的配置 <code class="language-plaintext highlighter-rouge">gpu_memory_utilization: 0.92</code>，强行占掉 92% 的总显存。</li>
+  <li><strong>KV Cache 池：</strong> 剩下的这些空间会被划分为一个个“Block”，用来存储对话过程中的中间变量（Key-Value Cache）。</li>
+</ol>
+
+<p><strong>日志证据：</strong></p>
+
+<p><code class="language-plaintext highlighter-rouge">Available KV cache memory: 22.64 GiB</code>，这意味着 vLLM 在加载完模型后，为了保证高并发推理，预留了巨大的空间来存 Token。</p>
+
+<hr />
+
+<h4 id="3-其他隐形开销">3. 其他“隐形”开销</h4>
+<p>日志里提到了几个现代推理框架的加速技术，它们也会吃掉一点显存：</p>
+
+<ul>
+  <li><strong>CUDA Graphs（显存图捕获）：</strong></li>
+</ul>
+
+<p><code class="language-plaintext highlighter-rouge">Estimated CUDA graph memory: 0.53 GiB total</code></p>
+
+<p>为了加速小 Batch 的推理，vLLM 会提前录制计算图，这通常需要几百 MB 到 1 GB。</p>
+
+<ul>
+  <li><strong>torch.compile（编译开销）：</strong></li>
+</ul>
+
+<p><code class="language-plaintext highlighter-rouge">Directly load the compiled graph(s)...</code></p>
+
+<p>虽然主要是 CPU 和时间开销，但在编译和运行 Kernel 时也会占用额外的显存 Buffer。</p>
+
+<hr />
+
+<h4 id="总结你的显存去哪了">总结：你的显存去哪了？</h4>
+
+<table>
+  <thead>
+    <tr>
+      <th style="text-align: left"><strong>组成部分</strong></th>
+      <th><strong>估计大小</strong></th>
+      <th><strong>说明</strong></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td style="text-align: left"><strong>模型静态权重</strong></td>
+      <td><strong>~17.2 GiB</strong></td>
+      <td>9.23B 参数 $\times$ BF16(2 Bytes)</td>
+    </tr>
+    <tr>
+      <td style="text-align: left"><strong>CUDA Graph / Overhead</strong></td>
+      <td><strong>~0.6 GiB</strong></td>
+      <td>预录制计算图，加速推理</td>
+    </tr>
+    <tr>
+      <td style="text-align: left"><strong>KV Cache (用户数据池)</strong></td>
+      <td><strong>显存剩余部分</strong></td>
+      <td>由 <code class="language-plaintext highlighter-rouge">gpu_memory_utilization</code>决定，越大支持的并发越高</td>
+    </tr>
+  </tbody>
+</table>
+
+<h4 id="小贴士如何让它变小">小贴士：如何让它变小？</h4>
+<p>如果你觉得占用太高，可以尝试：</p>
+
+<ol>
+  <li><strong>量化（Quantization）：</strong> 使用 AWQ 或 GPTQ 4bit 格式，权重大小会直接减半（从 17 GiB 降到约 6-8 GiB）。</li>
+  <li><strong>限制显存占用：</strong> 在启动命令中加入 <code class="language-plaintext highlighter-rouge">--gpu-memory-utilization 0.7</code>（手动限制 vLLM 只占 70% 显存）。</li>
+  <li><strong>缩短长度：</strong> 减小 <code class="language-plaintext highlighter-rouge">--max-model-len</code>，这会显著减少 KV Cache 的压力。</li>
+</ol>
+
+<h2 id="常见精度对比表">常见精度对比表</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th><strong>格式名称</strong></th>
+      <th><strong>每个参数占用空间</strong></th>
+      <th><strong>适用场景</strong></th>
+      <th><strong>特点</strong></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>FP32</strong> (单精度)</td>
+      <td>4 Bytes (32 bit)</td>
+      <td>模型训练 / 调试</td>
+      <td>精度最高，但显存占用是 BF16 的两倍，推理极慢。</td>
+    </tr>
+    <tr>
+      <td><strong>BF16 / FP16</strong></td>
+      <td>2 Bytes (16 bit)</td>
+      <td><strong>当前主流推理</strong></td>
+      <td>平衡了精度和速度，你的 GLM-4-9B 默认就在跑这个。</td>
+    </tr>
+    <tr>
+      <td><strong>INT8</strong></td>
+      <td>1 Byte (8 bit)</td>
+      <td>早期量化方案</td>
+      <td>显存减半，但精度有一定损失，现在逐渐被 4bit 取代。</td>
+    </tr>
+    <tr>
+      <td><strong>INT4 / FP4</strong></td>
+      <td>0.5 Byte (4 bit)</td>
+      <td><strong>消费级显卡首选</strong></td>
+      <td>显存占用仅为 BF16 的 1/4，9B 模型只需约 5-6G 显存。</td>
+    </tr>
+    <tr>
+      <td><strong>FP8</strong></td>
+      <td>1 Byte (8 bit)</td>
+      <td>H100 等新一代 GPU</td>
+      <td>兼顾 INT8 的速度和浮点数的动态范围，训练和推理都很强，能够比较好处理模型中那些突然变大的异常值</td>
+    </tr>
+  </tbody>
+</table>
+
+  </div>
+
+  
+  
+<script src="https://utteranc.es/client.js"
+        repo="ywpepper/ywpepper.github.io"
+        issue-term="issue-term"
+        label="comment"
+        theme="github-light"
+        crossorigin="anonymous"
+        async>
+</script>
+
+
+  
+</article>
+
+<div class="pagination">
+  
+    <span class="prev" >
+      <a href="http://localhost:4000../../../how_to_manageLLM/">
+        ← 上一篇
+      </a>
+    </span>
+  
+  
+    <span class="next" >
+      <a href="http://localhost:4000../../../interview_recommand/">
+        下一篇 →
+      </a>
+    </span>
+  
+</div>
+
+      </div>
+    </div>
+
+    
+
+  </body>
+
+  
+  <script>
+    document.getElementById("main").classList.add("withtoc");
+  </script>
+  
+
+  <div class="wrapper-footer-mobile">
+    <footer class="footer">
+      <!-- Refer to https://codepen.io/ruandre/pen/howFi -->
+<ul class="svg-icon">
+
+  
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</ul>
+
+
+
+<p>Copyright © 2025 ywpepper. All Rights Reserved.</p>
+
+    </footer>
+
+
+</html>

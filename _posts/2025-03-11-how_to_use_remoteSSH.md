@@ -1,14 +1,11 @@
 ---
-title: 'how_to_use_remoteSSH'
+title: '服务器-远程SSH配置与端口转发'
 lang: zh-CN
 date: 2025-03-11
 author: pepper
-tags: [service]
+tags: [ssh, server]
 pinned: false
 toc: true
-tags:
-   - ssh
-   - server
 ---
 
 这篇博客介绍了如何在Ubuntu系统和路由器的局域网连接中，配置路由器的端口转发服务，实现远程SSH访问。

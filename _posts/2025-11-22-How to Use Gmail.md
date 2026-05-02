@@ -1,9 +1,9 @@
 ---
 layout: post
-title: 'How_to_Use_Gmail'
+title: '工具-Gmail邮箱别名技巧'
 date: 2025-11-22
 author: pepper
-tags: [tool]
+tags: [gmail, tool]
 comments: true
 toc: true
 pinned: false

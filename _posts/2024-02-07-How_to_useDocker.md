@@ -1,13 +1,11 @@
 ---
-title: "How_to_useDocker"
+title: '服务器-Docker常用命令速查'
 lang: zh-CN
 date: 2024-02-07
 author: pepper
 toc: true
 pinned: false
-tags:
-  - Server
-  - Command
+tags: [docker, server]
 ---
 
 这篇笔记汇总了在 docker 下常用的快速命令。
