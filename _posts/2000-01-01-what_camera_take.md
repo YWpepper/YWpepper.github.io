@@ -1,7 +1,7 @@
 ---
 layout: post
 title: "what_camera_take"
-date: 2026-05-02
+date: 2000-01-01
 author: pepper
 tags: [camera]
 comments: true

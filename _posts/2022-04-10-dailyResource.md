@@ -11,6 +11,13 @@ tags:
 归纳分类整理
 <!-- more -->
 
+## 工具查询
 1. [Ubuntu 常见命令行](https://ywpepper.github.io/posts/2024/02/how_to_use_ubuntu/)
 2. [torch 版本安装](https://ywpepper.github.io/posts/2025/02/what_Torchversion_install/)
-3. [docker 使用命令](https://ywpepper.github.io/posts/2025/02/what_Dockerversion_install/)
+3. [docker 使用命令](https://ywpepper.github.io/How_to_useDocker/)
+4. [git 常见命令行](https://ywpepper.github.io/How_to_useGit/)
+  
+
+
+## 美好生活
+1. [摄影杂记](https://ywpepper.github.io/what_camera_take/)
