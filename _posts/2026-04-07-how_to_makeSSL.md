@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "how_to_makeSSL证书"
+title: "how_to_makeSSL"
 date: 2026-04-07
 author: pepper
 tags: [server]
