@@ -533,9 +533,9 @@ nav a {
 }
 
 .toc {
-  width: 255px;
+  width: 25%;
   height: 100%;
-  left: 25%;
+  left: 15%;
   position: fixed;
   z-index: 4;
   padding: 60px 20px 0 20px;
