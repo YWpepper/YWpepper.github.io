@@ -504,6 +504,28 @@ nav {
 }
 
 
+.back-to-home {
+  margin-bottom: 1em;
+}
+
+.btn-home {
+  display: inline-block;
+  padding: 8px 16px;
+  font-size: $small-font-size;
+  color: $link-color;
+  background-color: $background-color;
+  border: 1px solid $divider-color;
+  border-radius: 4px;
+  text-decoration: none;
+  transition: all 0.3s ease;
+
+  &:hover {
+    color: $link-lighten-color;
+    border-color: $link-lighten-color;
+    background-color: $link-bghv-color;
+  }
+}
+
 .post {
 
   h1 {
@@ -519,6 +541,7 @@ nav {
     font-size: 15px;
   }
 }
+
 
 .page {
 //  margin: 40px;
