@@ -88,7 +88,7 @@ utteranc:
   repo: ywpepper/ywpepper.github.io # Your github repo path, also see: https://utteranc.es
   issue-term: title
   label: comment
-  theme: github-dark
+  theme: github-light
   crossorigin: anonymous
 
 
