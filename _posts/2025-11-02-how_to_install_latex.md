@@ -273,8 +273,6 @@ x = \frac{-b \pm \sqrt{b^2 - 4ac}}{2a}
 ],
 ```
 
-
-
 ### 5 latex测试模板
 ```latex
 \documentclass{article} % 文档类别：文章
@@ -398,6 +396,62 @@ to your PATH for current and future sessions.
 
 Logfile: /usr/local/texlive/2025/install-tl.log
 ```
+
+### window本地使用wsl编译配置
+
+```json
+
+    "latex-workshop.latex.tools": [
+        {
+            "name": "xelatex",
+            "command": "wsl",
+            "args": [
+                "bash",
+                "-c",
+                "cd $(wslpath '%DIR%') && xelatex -synctex=1 -interaction=nonstopmode -file-line-error '%DOCFILE%.tex'"
+            ]
+        },
+        {
+            "name": "pdflatex",
+            "command": "wsl",
+            "args": [
+                "bash",
+                "-c",
+                "cd $(wslpath '%DIR%') && pdflatex -synctex=1 -interaction=nonstopmode -file-line-error '%DOCFILE%.tex'"
+            ]
+        },
+        {
+            "name": "bibtex",
+            "command": "wsl",
+            "args": [
+                "bash",
+                "-c",
+                "cd $(wslpath '%DIR%') && bibtex '%DOCFILE%'"
+            ]
+        }
+    ],
+    "latex-workshop.latex.recipes": [
+        {
+            "name": "XeLaTeX",
+            "tools": ["xelatex"]
+        },
+        {
+            "name": "XeLaTeX + BibTeX + XeLaTeX*2",
+            "tools": ["xelatex", "bibtex", "xelatex", "xelatex"]
+        },
+        {
+            "name": "PDFLaTeX",
+            "tools": ["pdflatex"]
+        },
+        {
+            "name": "PDFLaTeX + BibTeX + PDFLaTeX*2",
+            "tools": ["pdflatex", "bibtex", "pdflatex", "pdflatex"]
+        }
+    ],
+
+```
+
+
 
 
 
