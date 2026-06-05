@@ -54,7 +54,7 @@ pinned: false
 
 ### 1\. A 电脑（本地）配置
 
-首先修A电脑上的clash配置，修改其代理端口为`22545`,实现统一。然后，打开 A 本地的 `settings.json`（快捷键 `Ctrl+Shift+P` -\> `Open User Settings (JSON)`），利用 VS Code 的远程覆盖机制进行隔离：
+首先修A电脑上的clash配置，修改其代理端口为`22545`,实现统一。然后，打开 A 本地的 `settings.json`（快捷键 `Ctrl+Shift+P` -\> `Open User Settings (JSON)`），利用 VS Code 的远程覆盖机制`override`进行隔离：
 
 ```
 {
@@ -123,3 +123,9 @@ curl -I https://chatgpt.com
 如果返回 `HTTP/2 200`，说明 B 机器的网络链路已经完全正常。此时重启一下远程 VS Code 窗口，Codex 的登录和流式对话即可纵享丝滑。
 
 > **🎯 一句话总结**： 别盲目重装插件或折腾账号，Remote-SSH 场景下，**把 A 和 B 的代理端口隔离开**才是解题的核心。
+
+## 注意事项总结：
+
+1. override 模式
+2. 统一代理端口一致
+3. 配置ubuntu的系统配置，`#过滤本地回环与局域网，防止内部通信被误代理 export NO_PROXY=localhost,127.0.0.1,::1`
