@@ -320,7 +320,7 @@ img {
 //
 
 .wrapper-sidebar {
-  width: 25%;
+  width: 20%;
 	-webkit-background-size: cover;
 	background-size: cover;
 	background-color: $background-color;
@@ -430,7 +430,7 @@ nav {
 
 .wrapper-content {
   float: right;
-  width: 87%;
+  width: 82%;
 
   @include mobile {
     float: none;
