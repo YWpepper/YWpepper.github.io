@@ -98,9 +98,9 @@ nano ~/.bashrc
 
 ```
 # 代理配置
-export HTTP_PROXY = http://127.0.0.1:22545
-export HTTPS_PROXY = http://127.0.0.1:22545
-export ALL_PROXY = http://127.0.0.1:22545
+export http_proxy="http://127.0.0.1:22545"
+export https_proxy="http://127.0.0.1:22545"
+export all_proxy="http://127.0.0.1:22545"
 # 过滤本地回环与局域网，防止内部通信被误代理
 export NO_PROXY=localhost,127.0.0.1,::1
 
