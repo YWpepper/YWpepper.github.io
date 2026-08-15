@@ -13,12 +13,9 @@ pinned: false
 
 <!-- more -->
 
-# Mac M系列 ACE驱动安装问题笔记
-
-## 现状
+## 💡 现状
 
 - 无法使用mac原生态的 QuickTime Playerl 来录制本地的声音🔊？
-
 - 安装Movavi Screen Recorder/ AudioHijack / Loopback软件 软件后无法安装ACE音频内核扩展?
 
   ![image.png](https://virginia-pepper.oss-cn-guangzhou.aliyuncs.com/img/blog/202608151340206.png)
@@ -42,9 +39,7 @@ pinned: false
    ![image.png](https://virginia-pepper.oss-cn-guangzhou.aliyuncs.com/img/blog/202608151341248.png)
 
 3. 顶部菜单：实用工具 → **启动安全性实用工具**
-
 4. 选中系统磁盘(Macintosh HD) →【安全策略】
-
 5. 设置为**降低安全性**，勾选「允许用户管理内核扩展」，输入密码确认
 
    ![image.png](https://virginia-pepper.oss-cn-guangzhou.aliyuncs.com/img/blog/202608151341780.png)
@@ -56,7 +51,6 @@ pinned: false
    ```
 
 7. 输入`reboot`重启回到正常系统
-
 8. 回到桌面，重新触发ACE安装，在「安全性与隐私」允许该系统扩展，再次重启Mac。
 
    ![Snipaste_2026-08-15_12-55-19.png](https://virginia-pepper.oss-cn-guangzhou.aliyuncs.com/img/blog/202608151341802.png)
