@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "工具-照片备份操作指南（rsync）"
+title: "工具-Mac-M系列ACE驱动安装问题笔记"
 date: 2026-06-30
 author: pepper
 tags: [tool, mac, photo]
@@ -9,185 +9,95 @@ toc: true
 pinned: false
 ---
 
-这篇博客介绍了使用 rsync 命令进行照片备份的操作指南，包括日常备份、完整性校验、备份策略建议以及一键备份脚本。
+这篇博客介绍了在M系列Mac上安装ACE驱动时遇到的问题，以及两种解决方案：一种是修改安全策略以允许内核扩展，另一种是使用替代方案如OBS Studio来捕获音频而无需修改系统设置。
 
 <!-- more -->
-# 照片备份操作指南
 
-## 一、日常备份（推荐）
+# Mac M系列 ACE驱动安装问题笔记
 
-使用 `rsync` 命令，只同步新增/变化的文件，已有文件不会重复拷贝。
+## 现状
 
-```bash
-rsync -avh --progress \
-  --exclude='.DS_Store' \
-  --exclude='._*' \
-  --exclude='.fseventsd/' \
-  "/Volumes/源盘名称/照片/" \
-  "/Volumes/备份盘名称/备份目录/照片/"
-```
+- 无法使用mac原生态的 QuickTime Playerl 来录制本地的声音🔊？
 
-### 参数说明
+- 安装Movavi Screen Recorder/ AudioHijack / Loopback软件 软件后无法安装ACE音频内核扩展?
 
-| 参数           | 作用                                   |
-| -------------- | -------------------------------------- |
-| `-a`         | 归档模式（保留权限、时间戳、符号链接） |
-| `-v`         | 显示详细过程                           |
-| `-h`         | 人类可读的大小显示                     |
-| `--progress` | 显示实时传输进度                       |
-| `--exclude`  | 排除不需要的文件                       |
+  ![image.png](https://virginia-pepper.oss-cn-guangzhou.aliyuncs.com/img/blog/202608151340206.png)
 
-### 注意事项
+- M系列Mac点击【启用系统扩展】弹窗提示：**需要恢复模式修改安全设置**，普通系统设置无法直接开启。
 
-- 源路径末尾的 `/` 不能省，表示"复制目录里的内容"
-- 中途可以 `Ctrl+C` 中断，再次运行会从断点继续
-- 已存在且相同的文件会自动跳过，不会重复传输
+  ![image.png](https://virginia-pepper.oss-cn-guangzhou.aliyuncs.com/img/blog/202608151340813.png)
 
----
+> ⚠️「任何来源」选项仅控制普通App，**对内核扩展Kext无效**。
 
-## 二、验证备份完整性
+## 方案一：修改安全策略，正常使用ACE（需要进恢复模式）
 
-### 快速检查（文件存在性对比）
+### 进入恢复模式操作步骤
 
-只对比两边文件名，几秒钟出结果：
+1. 完全关机Mac
 
-```bash
-SRC="/Volumes/源盘名称/照片"
-DST="/Volumes/备份盘名称/备份目录/照片"
-TMP="/tmp/photo_check"
-mkdir -p "$TMP"
+   ![image.png](https://virginia-pepper.oss-cn-guangzhou.aliyuncs.com/img/blog/202608151340590.png)
 
-# 扫描两边文件列表
-find "$SRC" -type f ! -name '._*' ! -name '.DS_Store' ! -path '*/.fseventsd/*' | sed "s|^$SRC/||" | sort > "$TMP/src.txt"
-find "$DST" -type f ! -name '._*' ! -name '.DS_Store' ! -path '*/.fseventsd/*' | sed "s|^$DST/||" | sort > "$TMP/dst.txt"
+2. 长按电源键，直到出现「选项⚙️」，松开电源键 → 点击【选项】→【继续】进入恢复模式
 
-# 对比
-echo "源文件数: $(wc -l < $TMP/src.txt | tr -d ' ')"
-echo "备份文件数: $(wc -l < $TMP/dst.txt | tr -d ' ')"
-echo "缺失文件数: $(comm -23 $TMP/src.txt $TMP/dst.txt | wc -l | tr -d ' ')"
-echo "多余文件数: $(comm -13 $TMP/src.txt $TMP/dst.txt | wc -l | tr -d ' ')"
-```
+   ![image.png](https://virginia-pepper.oss-cn-guangzhou.aliyuncs.com/img/blog/202608151341248.png)
 
-如果缺失文件数 > 0，重新运行第一节的 rsync 命令即可补全。
+3. 顶部菜单：实用工具 → **启动安全性实用工具**
 
-### 深度校验（MD5 校验，可选）
+4. 选中系统磁盘(Macintosh HD) →【安全策略】
 
-对文件内容做 MD5 校验，确认没有损坏。**注意：速度慢，适合定期抽检，不建议每次都做。**
+5. 设置为**降低安全性**，勾选「允许用户管理内核扩展」，输入密码确认
 
-```bash
-# 对两边共有文件计算 MD5 并对比
-join -t'|' -1 2 -2 2 \
-  <(while IFS='|' read -r size path; do
-     md5 -q "$SRC/${path#./}" 2>/dev/null | tr -d '\n'
-     echo "|$path"
-   done < src_list.txt | sort -t'|' -k2) \
-  <(while IFS='|' read -r size path; do
-     md5 -q "$DST/${path#./}" 2>/dev/null | tr -d '\n'
-     echo "|$path"
-   done < dst_list.txt | sort -t'|' -k2) | \
-  awk -F'|' '{ if ($2 != $3) print "MD5不匹配: "$1 }'
-```
+   ![image.png](https://virginia-pepper.oss-cn-guangzhou.aliyuncs.com/img/blog/202608151341780.png)
 
----
+6. 顶部菜单打开【实用工具-终端】，输入放行开发者命令：
 
-## 三、备份策略建议
+   ```
+   spctl kext-consent add 7266XEXAPM
+   ```
 
-### 频率
+7. 输入`reboot`重启回到正常系统
 
-| 场景                         | 建议频率     |
-| ---------------------------- | ------------ |
-| 日常使用                     | 每周 1 次    |
-| 大量导入新照片后             | 当天立即备份 |
-| 重要活动照片（旅行、婚礼等） | 拍完立即备份 |
+8. 回到桌面，重新触发ACE安装，在「安全性与隐私」允许该系统扩展，再次重启Mac。
 
-### 3-2-1 原则（最佳实践）
+   ![Snipaste_2026-08-15_12-55-19.png](https://virginia-pepper.oss-cn-guangzhou.aliyuncs.com/img/blog/202608151341802.png)
 
-- **3** 份数据副本（原始 + 2 份备份）
-- **2** 种不同存储介质（硬盘 + U 盘 / 硬盘 + 云）
-- **1** 份异地存放（云端或其他地点）
+### ⚠️恢复模式&降低安全性风险说明
 
-建议：
-- 增加一份云端备份（如 iCloud、百度网盘、阿里云盘）
-- 或第三块物理硬盘放在不同地点
+1. **仅仅进入恢复模式，不修改任何选项，电脑完全无变化，不会删除任何文件**。不要执行抹掉磁盘、重装系统操作。
+2. 修改为【降低安全性】的实际影响
+   - ✅效果：可以加载ACE等第三方内核扩展
+   - ⚠️理论风险：系统允许加载内核级驱动，若安装来路不明驱动，恶意程序可获取系统最高权限。**只使用官网正版软件，日常几乎无实际风险**。
+   - FileVault磁盘加密不受影响，可以正常接收macOS系统更新。
+   - macOS大版本更新后，安全策略**可能被重置，ACE会失效，需要重新配置**。
+   - 开机进度条会短暂变长，属于正常现象。
+3. 可以随时复原：再次进入恢复模式，安全策略切回【完整安全性】，关闭内核扩展权限。
 
----
+## 方案二：不修改安全策略，替代方案（推荐，不用进恢复模式）
 
-## 四、常见问题
+> 不想改动系统安全策略，就放弃ACE驱动，更换音频捕获方案
 
-### Q: rsync 中断了怎么办？
+| 方案                      | 是否要恢复模式 | 能力                         | 成本       | 备注                                                 |
+| ------------------------- | -------------- | ---------------------------- | ---------- | ---------------------------------------------------- |
+| ACE(Loopback/AudioHijack) | ✅必须         | 可单独抓取某一个App声音      | 付费       | M芯片必须降低安全策略                                |
+| BlackHole虚拟声卡         | ❌否           | 抓取全部系统混音，不能分应用 | 免费开源   | AU插件，非内核扩展                                   |
+| OBS‑macOS音频捕获         | ❌否           | ✅支持单独捕获单个App声音    | 免费       | 使用苹果ScreenCaptureKit新接口，**零驱动，优先推荐** |
+| 硬件对录线                | ❌否           | 录制全部系统声音             | 需要买线材 | 音质损耗，占用耳机口                                 |
 
-A: 重新运行同样的命令即可，rsync 会自动从断点继续。
+### ✅首选替代：OBS Studio（最简）
 
-### Q: 怎么知道备份完了没？
+1. 下载新版OBS Studio(30版本以上)
+2. 来源→添加→**macOS音频捕获**
+3. 直接选择要录制的软件，即可捕获该程序内部声音，无需任何虚拟声卡与内核驱动。
 
-A: 运行完 rsync 后，再运行第二节的快速检查命令，缺失文件数为 0 就是完整的。
+### 选择建议
 
-### Q: 源目录删了文件，备份里还留着？
+1. 轻度录制声音：直接用OBS，不碰恢复模式，维持出厂完整安全防护。
+2. 重度需要音频路由、分软件音频处理：选择方案一，恢复模式修改安全策略，只安装官网来源软件。
+3. 后续不再使用ACE相关软件：记得切回完整安全性。
 
-A: 默认 rsync 只增不删。如果想让备份和源目录完全一致（源删了备份也删），加上 `--delete` 参数：
+### ⚠️ 退出恢复模式后 ACE 插件状态
 
-```bash
-rsync -avh --progress --delete \
-  --exclude='.DS_Store' \
-  --exclude='._*' \
-  "/Volumes/源盘名称/照片/" \
-  "/Volumes/备份盘名称/备份目录/照片/"
-```
+ACE 会失效的场景
 
-⚠️ 慎用 `--delete`，先确认源目录没问题再加。
-
-### Q: 硬盘名字变了怎么办？
-
-A: 修改命令里的路径即可。可以在 Finder 中右键硬盘 → 显示简介，查看或修改硬盘名称。
-
-### Q: 备份速度慢？
-
-A:
-
-- 用 USB 3.0/Type-C 接口
-- 第一次备份会慢（全量），之后很快（只传增量）
-- 大文件多的话耐心等待，正常现象
-
----
-
-## 五、一键脚本（可选）
-
-把下面的内容保存为 `backup_photos.sh`，修改前两行的路径为你自己的，以后双击或在终端运行 `bash backup_photos.sh` 即可。
-
-```bash
-#!/bin/bash
-SRC="/Volumes/源盘名称/照片"
-DST="/Volumes/备份盘名称/备份目录/照片"
-
-if [ ! -d "$SRC" ]; then
-  echo "❌ 源目录不存在: $SRC"
-  exit 1
-fi
-
-if [ ! -d "$DST" ]; then
-  echo "❌ 备份目录不存在: $DST"
-  exit 1
-fi
-
-echo "🚀 开始备份照片..."
-echo "源: $SRC"
-echo "目标: $DST"
-echo ""
-
-rsync -avh --progress \
-  --exclude='.DS_Store' \
-  --exclude='._*' \
-  --exclude='.fseventsd/' \
-  "$SRC/" "$DST/"
-
-if [ $? -eq 0 ]; then
-  echo ""
-  echo "✅ 备份完成！"
-else
-  echo ""
-  echo "❌ 备份过程中出现错误，请检查后重试"
-  exit 1
-fi
-```
-
-保存后执行 `chmod +x backup_photos.sh` 赋予执行权限。
+- 你手动二次进入恢复模式，把安全策略切回完整安全性。
+- **macOS 大版本系统升级（例如 Sonoma 升级 Sequoia）**：部分更新会重置安全策略，自动变回完整安全性，ACE 就不能用，需要再次进恢复模式重新设置降低安全性**Rogue Amoe...**

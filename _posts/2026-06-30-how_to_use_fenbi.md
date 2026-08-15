@@ -8,7 +8,6 @@ comments: true
 toc: true
 pinned: false
 ---
-
 这篇博客介绍了在 macOS 上通过 WebCatalog 安装并使用粉笔软件的方法。
 
 <!-- more -->
@@ -28,7 +27,6 @@ pinned: false
 
 1. 打开 WebCatalog。
 2. 在搜索框中输入“粉笔”或“Chalk”。
-   ![](https://virginia-pepper.oss-cn-guangzhou.aliyuncs.com/img/blog/202607251118340.png)
 3. 选择对应的粉笔应用并点击“Install”进行安装。
 4. 安装完成后，WebCatalog 会将粉笔作为一个独立应用添加到 Mac 中。
 
