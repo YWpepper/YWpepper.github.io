@@ -1,9 +1,9 @@
 ---
 layout: post
 title: "工具-Mac-M系列ACE驱动安装问题笔记"
-date: 2026-06-30
+date: 2026-08-15
 author: pepper
-tags: [tool, mac, photo]
+tags: [tool, mac]
 comments: true
 toc: true
 pinned: false
