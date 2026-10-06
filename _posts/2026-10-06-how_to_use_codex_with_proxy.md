@@ -10,7 +10,7 @@ toc: true
 pinned: false
 ---
 
-# 从 401 到跑通：记一次让 Codex 对接第三方中转的全过程
+记录从 401 到跑通：记一次让 Codex 对接第三方中转的全过程
 
 > 折腾了整整两天，踩遍了几类典型坑，最后通过本地协议代理彻底解决。这篇博客完整复盘整个过程，希望能帮到同样被 Codex 的 `wire_api = "responses"` 卡住的人。
 
@@ -132,7 +132,7 @@ brew install --cask cc-switch
 ```toml
 [model_providers.vapi]
 name = "VAPI"
-base_url = "[http://127.0.0.1:15721/v1](http://127.0.0.1:15721/v1)"
+base_url = "http://127.0.0.1:15721/v1"
 wire_api = "responses"          # 保留不动，Codex 硬性要求
 query_params = {}
 request_max_retries = 3
@@ -199,3 +199,8 @@ CC-Switch 的价值正在于此——它不只是个"中转"工具，更像一�
 
 中转2: https://doc.openlux.ai/
 
+
+
+ps： 博主的mac OS是12.10的就系统，甚至codex的版本是 26.715.72359，之前忘记是通过啥操作安转的了，不然总让我升级MacOS-13。
+
+<img src="https://virginia-pepper.oss-cn-guangzhou.aliyuncs.com/img/blog/202610062157949.png" alt="image-20261006215712836" style="zoom:50%;" />
